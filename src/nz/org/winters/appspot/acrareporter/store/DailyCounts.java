@@ -54,7 +54,7 @@ public class DailyCounts extends Counts
     today.set(Calendar.MILLISECOND, 0);
     
     
-    DailyCounts counts = ObjectifyService.ofy().load().type(DailyCounts.class).filter("Owner",owner).filter("Date", today.getTime()).first().get();
+    DailyCounts counts = ObjectifyService.ofy().load().type(DailyCounts.class).filter("Owner",owner).filter("date", today.getTime()).first().get();
     if(counts == null)
     {
       counts = new DailyCounts();
@@ -73,7 +73,8 @@ public class DailyCounts extends Counts
     yesterday.set(Calendar.MILLISECOND, 0);
 
     yesterday.add(Calendar.DAY_OF_MONTH,-1);
-    return ObjectifyService.ofy().load().type(DailyCounts.class).filter("Date", yesterday.getTime()).list();
+    Date yd =  yesterday.getTime();
+    return ObjectifyService.ofy().load().type(DailyCounts.class).filter("date",yd).list();
   }
   
   public void commit()
