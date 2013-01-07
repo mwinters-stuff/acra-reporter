@@ -1,0 +1,186 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:style>
+		
+	</ui:style>
+	<g:CaptionPanel captionText="Selected Error" ui:field="captionPanelCenter">
+		<g:DockLayoutPanel unit="PX" width="100%" height="100%">
+			<g:north size="92">
+				<g:FlowPanel width="100%" height="100%">
+					<g:HorizontalPanel>
+						<g:HorizontalPanel spacing="2">
+							<g:Label text="App Version Code:" width="170px" wordWrap="false"
+								horizontalAlignment="ALIGN_RIGHT" />
+							<g:Label text="" width="170px" wordWrap="false"
+								ui:field="textAppVersionCode" />
+						</g:HorizontalPanel>
+						<g:HorizontalPanel spacing="2">
+							<g:Label text="App Version Name:" width="170px" wordWrap="false"
+								horizontalAlignment="ALIGN_RIGHT" />
+							<g:Label text="" width="170px" wordWrap="false"
+								ui:field="textAppVersionName" />
+						</g:HorizontalPanel>
+					</g:HorizontalPanel>
+
+					<g:HorizontalPanel>
+						<g:HorizontalPanel spacing="2">
+							<g:Label text="Phone Model:" width="170px" wordWrap="false"
+								horizontalAlignment="ALIGN_RIGHT" />
+							<g:Label text="" width="170px" wordWrap="false" ui:field="textPhoneModel" />
+						</g:HorizontalPanel>
+						<g:HorizontalPanel spacing="2">
+							<g:Label text="Brand:" width="170px" wordWrap="false"
+								horizontalAlignment="ALIGN_RIGHT" />
+							<g:Label text="" width="170px" wordWrap="false" ui:field="textBrand" />
+						</g:HorizontalPanel>
+						<g:HorizontalPanel spacing="2">
+							<g:Label text="Product:" width="170px" wordWrap="false"
+								horizontalAlignment="ALIGN_RIGHT" />
+							<g:Label text="" width="170px" wordWrap="false" ui:field="textProduct" />
+						</g:HorizontalPanel>
+						<g:HorizontalPanel spacing="2">
+							<g:Label text="Android Version:" width="170px" wordWrap="false"
+								horizontalAlignment="ALIGN_RIGHT" />
+							<g:Label text="" width="170px" wordWrap="false"
+								ui:field="textAndroidVersion" />
+						</g:HorizontalPanel>
+					</g:HorizontalPanel>
+					<g:HorizontalPanel>
+						<g:HorizontalPanel spacing="2">
+							<g:Label text="Memory Total/Available:" width="170px"
+								wordWrap="false" horizontalAlignment="ALIGN_RIGHT" />
+							<g:Label text="" width="170px" wordWrap="false" ui:field="textMemory" />
+						</g:HorizontalPanel>
+						<g:HorizontalPanel spacing="2">
+							<g:Label text="App Start Date:" width="170px" wordWrap="false"
+								horizontalAlignment="ALIGN_RIGHT" />
+							<g:Label text="" width="170px" wordWrap="false"
+								ui:field="textUserAppStartDate" />
+						</g:HorizontalPanel>
+						<g:HorizontalPanel spacing="2">
+							<g:Label text="Crash Date:" width="170px" wordWrap="false"
+								horizontalAlignment="ALIGN_RIGHT" />
+							<g:Label text="" width="170px" wordWrap="false"
+								ui:field="textUserCrashDate" />
+						</g:HorizontalPanel>
+						<g:HorizontalPanel spacing="2">
+							<g:Label text="User E-Mail:" width="170px" wordWrap="false"
+								horizontalAlignment="ALIGN_RIGHT" />
+							<g:Label text="" width="170px" wordWrap="false" ui:field="textUserEMail" />
+						</g:HorizontalPanel>
+					</g:HorizontalPanel>
+					<g:HorizontalPanel verticalAlignment="ALIGN_MIDDLE"
+						spacing="4">
+						<g:Cell width="100">
+							<g:CheckBox text="Looked At" ui:field="checkLookedAt" />
+						</g:Cell>
+						<g:Cell width="100">
+							<g:CheckBox text="Fixed" ui:field="checkFixed" />
+						</g:Cell>
+						<g:Cell width="100">
+							<g:CheckBox text="E-mailed" ui:field="checkEMailed" />
+						</g:Cell>
+						<g:Button ui:field="buttonReportRetrace">Retrace</g:Button>
+						<g:Button ui:field="buttonReportEmail">E-Mail</g:Button>
+						<g:Button ui:field="buttonDeleteReport">Delete</g:Button>
+					</g:HorizontalPanel>
+				</g:FlowPanel>
+			</g:north>
+			<g:center>
+				<g:TabLayoutPanel barHeight="3" barUnit="EM"
+					ui:field="tabPanel" width="100%" height="99%">
+					<g:tab>
+						<g:header>Stack Trace</g:header>
+						<g:ScrollPanel>
+							<g:VerticalPanel width="100%">
+								<g:DisclosurePanel open="true" width="100%">
+									<g:header>Remapped stack trace</g:header>
+									<g:TextArea ui:field="textStackTrace" styleName="monospacetext"
+										width="98%" visibleLines="40" />
+								</g:DisclosurePanel>
+								<g:DisclosurePanel open="false" width="100%">
+									<g:header>Original Stack Strace</g:header>
+									<g:TextArea ui:field="textRawStackTrace" styleName="monospacetext"
+										width="98%" visibleLines="40" />
+								</g:DisclosurePanel>
+							</g:VerticalPanel>
+						</g:ScrollPanel>
+					</g:tab>
+					<g:tab>
+						<g:header>Device</g:header>
+						<g:ScrollPanel>
+							<g:VerticalPanel width="100%">
+								<g:DisclosurePanel open="true" width="100%">
+									<g:header>Display</g:header>
+									<g:SimplePanel ui:field="tabDisplay" />
+								</g:DisclosurePanel>
+								<g:DisclosurePanel open="false" width="100%">
+									<g:header>Initial Configuration</g:header>
+									<g:SimplePanel ui:field="tabInitialConfiguration" />
+								</g:DisclosurePanel>
+								<g:DisclosurePanel open="false" width="100%">
+									<g:header>Crash Configuration</g:header>
+									<g:SimplePanel ui:field="tabCrashConfiguration" />
+								</g:DisclosurePanel>
+								<g:DisclosurePanel open="false" width="100%">
+									<g:header>Build</g:header>
+									<g:SimplePanel ui:field="tabBuild" />
+								</g:DisclosurePanel>
+								<g:DisclosurePanel open="false" width="100%">
+									<g:header>Device Features</g:header>
+									<g:Tree ui:field="tabDeviceFeatures" styleName="monospacetext" />
+								</g:DisclosurePanel>
+								<g:DisclosurePanel open="false" width="100%">
+									<g:header>Environment</g:header>
+									<g:SimplePanel ui:field="tabEnvironment" />
+								</g:DisclosurePanel>
+							</g:VerticalPanel>
+						</g:ScrollPanel>
+
+					</g:tab>
+					<g:tab>
+						<g:header>Custom Data</g:header>
+						<g:TextArea ui:field="textCustomData" styleName="monospacetext" />
+					</g:tab>
+					<g:tab>
+						<g:header>User Comment</g:header>
+						<g:TextArea ui:field="tabUserComment" styleName="monospacetext" />
+					</g:tab>
+					<g:tab>
+						<g:header>Debug</g:header>
+						<g:ScrollPanel>
+							<g:VerticalPanel width="100%">
+								<g:DisclosurePanel open="true" width="100%">
+									<g:header>Logcat</g:header>
+									<g:TextArea ui:field="tabLogcat" styleName="monospacetext" width="98%" visibleLines="40" />
+								</g:DisclosurePanel>
+								<g:DisclosurePanel open="false" width="100%">
+									<g:header>Dump Sys Mem Info</g:header>
+									<g:TextArea ui:field="tabDumpSysMemInfo" styleName="monospacetext" width="98%" visibleLines="40"/>
+								</g:DisclosurePanel>
+							</g:VerticalPanel>
+						</g:ScrollPanel>
+					</g:tab>
+					<g:tab>
+						<g:header>Settings</g:header>
+						<g:ScrollPanel>
+							<g:VerticalPanel>
+								<g:DisclosurePanel open="true" ui:field="tabSharedPreferences">
+									<g:header>Shared Preferences</g:header>
+								</g:DisclosurePanel>
+								<g:DisclosurePanel open="false" ui:field="tabSettingsSystem">
+									<g:header>System Settings</g:header>
+								</g:DisclosurePanel>
+								<g:DisclosurePanel open="false" ui:field="tabSettingsSecure">
+									<g:header>Secure Settings</g:header>
+								</g:DisclosurePanel>
+							</g:VerticalPanel>
+						</g:ScrollPanel>
+					</g:tab>
+
+				</g:TabLayoutPanel>
+			</g:center>
+		</g:DockLayoutPanel>
+	</g:CaptionPanel>
+</ui:UiBinder> 

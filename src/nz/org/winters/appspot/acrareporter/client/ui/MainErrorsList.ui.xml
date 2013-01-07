@@ -1,0 +1,40 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:p1="urn:import:com.google.gwt.user.cellview.client">
+	<ui:style>
+
+	</ui:style>
+	<g:CaptionPanel captionText="Errors">
+		<g:VerticalPanel width="100%" height="100%">
+			<g:Cell width="100%" height="38" horizontalAlignment="ALIGN_CENTER">
+				<g:HorizontalPanel horizontalAlignment="ALIGN_CENTER"
+					verticalAlignment="ALIGN_MIDDLE" spacing="4" ui:field="checkMultiSelect">
+					<g:CheckBox text="Multi Select" ui:field="checkErrorsMultiSelect" />
+					<g:MenuBar>
+						<g:MenuItem text="Actions" ui:field="popupActions">
+							<g:MenuBar vertical="true">
+								<g:MenuItem text="E-Mail Selected" ui:field="miReportsEMailSelected" />
+								<g:MenuItemSeparator />
+								<g:MenuItem text="Selected Looked At" ui:field="miErrorsAllLookedAt" />
+								<g:MenuItem text="Selected Fixed" ui:field="miErrorsAllFixed" />
+								<g:MenuItem text="Selected E-Mailed" ui:field="miErrorsAllEMailed" />
+								<g:MenuItemSeparator />
+								<g:MenuItem text="Delete Selected" ui:field="miErrorsDeleteSelected" />
+							</g:MenuBar>
+						</g:MenuItem>
+						<g:MenuItem text="Reload" ui:field="miReload" />
+					</g:MenuBar>
+				</g:HorizontalPanel>
+			</g:Cell>
+			<g:Cell verticalAlignment="ALIGN_TOP" width="100%" height="100%">
+				<p1:DataGrid width="100%" height="100%" ui:field="dataGrid" />
+			</g:Cell>
+			<g:Cell verticalAlignment="ALIGN_BOTTOM" horizontalAlignment="ALIGN_CENTER"
+				height="31">
+				<p1:SimplePager ui:field="simplePager" />
+			</g:Cell>
+
+		</g:VerticalPanel>
+	</g:CaptionPanel>
+
+</ui:UiBinder> 

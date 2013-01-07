@@ -1,0 +1,84 @@
+package nz.org.winters.appspot.acrareporter.store;
+
+import nz.org.winters.appspot.acrareporter.server.ServerOnlyUtils;
+import nz.org.winters.appspot.acrareporter.shared.AppPackageShared;
+import nz.org.winters.appspot.acrareporter.shared.Counts;
+
+import com.googlecode.objectify.annotation.Entity;
+import com.googlecode.objectify.annotation.Id;
+import com.googlecode.objectify.annotation.Index;
+import com.googlecode.objectify.annotation.Serialize;
+import com.googlecode.objectify.annotation.Unindex;
+
+@Entity
+@Index
+public class AppPackage
+{
+
+  @Id
+  public Long   id;
+  @Index
+  public Long   Owner;
+  @Index
+  public String PACKAGE_NAME;
+  public String EMailAddress;
+  public String EMailSubject;
+  public String EMailTemplate;
+
+  public String AuthString;
+  public String AppName;
+
+  @Serialize
+  @Unindex
+  public Counts Totals = new Counts();
+
+  public AppPackage()
+  {
+  };
+
+  public AppPackage(String apppackage)
+  {
+    this.PACKAGE_NAME = apppackage;
+  }
+
+  public AppPackageShared toShared()
+  {
+    AppPackageShared shared = new AppPackageShared();
+    shared.id = id;
+    shared.PACKAGE_NAME = PACKAGE_NAME;
+
+    shared.EMailAddress = EMailAddress;
+    shared.EMailSubject = EMailSubject;
+    shared.EMailTemplate = EMailTemplate;
+    shared.AuthString = AuthString;
+    shared.AppName = AppName;
+    shared.Owner = Owner;
+    shared.AuthUsername = "";
+    shared.AuthPassword = "";
+    shared.Totals.copy(Totals);
+
+    String[] auths = ServerOnlyUtils.decodeAuthString(AuthString);
+    if (auths != null)
+    {
+      shared.AuthUsername = auths[0];
+      shared.AuthPassword = auths[1];
+    }
+
+    return shared;
+  }
+
+  public void fromShared(AppPackageShared shared)
+  {
+    EMailAddress = shared.EMailAddress;
+    EMailSubject = shared.EMailSubject;
+    EMailTemplate = shared.EMailTemplate;
+
+    AppName = shared.AppName;
+    // / Owner = shared.Owner;
+    PACKAGE_NAME = shared.PACKAGE_NAME;
+
+    shared.AuthString = ServerOnlyUtils.encodeAuthString(shared.AuthUsername,shared.AuthPassword);
+    AuthString = shared.AuthString;
+
+  }
+}

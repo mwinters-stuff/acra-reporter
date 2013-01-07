@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cronentries>
+  <cron>
+    <url>/cron/emailjob</url>
+    <description>Send daily total e-mails</description>
+    <schedule>every day 01:00</schedule>
+  </cron>
+
+</cronentries>
