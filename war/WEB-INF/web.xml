@@ -11,8 +11,7 @@
 	<!-- Servlets -->
 	<servlet>
 		<servlet-name>remoteServlet</servlet-name>
-		<servlet-class>nz.org.winters.appspot.acrareporter.server.RemoteDataServiceImpl
-		</servlet-class>
+		<servlet-class>nz.org.winters.appspot.acrareporter.server.RemoteDataServiceImpl</servlet-class>
 	</servlet>
 
 	<servlet-mapping>
@@ -27,8 +26,7 @@
 
 	<servlet>
 		<servlet-name>SystemServiceServlet</servlet-name>
-		<servlet-class>com.google.api.server.spi.SystemServiceServlet
-		</servlet-class>
+		<servlet-class>com.google.api.server.spi.SystemServiceServlet</servlet-class>
 		<init-param>
 			<param-name>services</param-name>
 			<param-value/>
@@ -42,8 +40,7 @@
 
 	<servlet>
 		<servlet-name>mappingfilehandler</servlet-name>
-		<servlet-class>nz.org.winters.appspot.acrareporter.server.MappingFileHandler
-		</servlet-class>
+		<servlet-class>nz.org.winters.appspot.acrareporter.server.MappingFileHandler</servlet-class>
 	</servlet>
 
 	<servlet-mapping>
@@ -53,8 +50,7 @@
 
 	<servlet>
 		<servlet-name>acrareporthandler</servlet-name>
-		<servlet-class>nz.org.winters.appspot.acrareporter.server.ACRAReportHandler
-		</servlet-class>
+		<servlet-class>nz.org.winters.appspot.acrareporter.server.ACRAReportHandler</servlet-class>
 	</servlet>
 
 	<servlet-mapping>
@@ -65,8 +61,7 @@
 
 	<servlet>
 		<servlet-name>loginService</servlet-name>
-		<servlet-class>nz.org.winters.appspot.acrareporter.server.LoginServiceImpl
-		</servlet-class>
+		<servlet-class>nz.org.winters.appspot.acrareporter.server.LoginServiceImpl</servlet-class>
 	</servlet>
 
 	<servlet-mapping>
@@ -76,12 +71,20 @@
 
 	<servlet>
 		<servlet-name>cronServlet</servlet-name>
-		<servlet-class>nz.org.winters.appspot.acrareporter.server.CronJobEMails
-		</servlet-class>
+		<servlet-class>nz.org.winters.appspot.acrareporter.server.CronJobEMails</servlet-class>
 	</servlet>
 
 	<servlet-mapping>
 		<servlet-name>cronServlet</servlet-name>
 		<url-pattern>/cron/emailjob</url-pattern>
 	</servlet-mapping>
+
+	<filter>
+		<filter-name>ObjectifyFilter</filter-name>
+		<filter-class>com.googlecode.objectify.ObjectifyFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>ObjectifyFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
 </web-app>
