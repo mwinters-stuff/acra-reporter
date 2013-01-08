@@ -492,7 +492,7 @@ public class ViewErrorReports implements EntryPoint, ChangeHandler
                                                        @Override
                                                        public void showACRAReport(BasicErrorInfoShared beio)
                                                        {
-                                                         mACRAREportView.showACRAReport(beio);
+                                                         mACRAREportView.showACRAReport(loginInfo, beio);
 
                                                        }
 

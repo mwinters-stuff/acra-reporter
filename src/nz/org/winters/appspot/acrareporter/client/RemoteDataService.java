@@ -69,4 +69,7 @@ public interface RemoteDataService extends RemoteService
   void deleteMappings(List<Long> ids) throws IllegalArgumentException;
   void editMappingVersion(Long id, String version) throws IllegalArgumentException;
 
+  void sendFixedEMail(LoginInfo user, List<String> reportIds, String bcc, String subject, String body) throws IllegalArgumentException;
+  
+  String findEMailAddresses(List<String> reportIds)  throws IllegalArgumentException;
 }

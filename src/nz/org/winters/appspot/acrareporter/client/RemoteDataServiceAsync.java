@@ -75,5 +75,9 @@ public interface RemoteDataServiceAsync
 
   void deleteReports(List<String> reportIds, AsyncCallback<Void> callback);
 
+  void sendFixedEMail(LoginInfo user, List<String> reportIds, String bcc, String subject, String body, AsyncCallback<Void> callback);
+
+  void findEMailAddresses(List<String> reportIds, AsyncCallback<String> callback);
+
 
 }

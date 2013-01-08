@@ -20,6 +20,7 @@ import nz.org.winters.appspot.acrareporter.client.ViewErrorReports;
 import nz.org.winters.appspot.acrareporter.client.ViewErrorReports.CallbackMainErrorReports;
 import nz.org.winters.appspot.acrareporter.shared.ACRALogShared;
 import nz.org.winters.appspot.acrareporter.shared.BasicErrorInfoShared;
+import nz.org.winters.appspot.acrareporter.shared.LoginInfo;
 import nz.org.winters.appspot.acrareporter.shared.Utils;
 
 import com.google.gwt.core.client.GWT;
@@ -125,6 +126,7 @@ public class ACRAReportView extends Composite
   NameValueList                         nvlSettingsSystem;
   NameValueList                         nvlSettingsSecure;
 
+  private LoginInfo mLoginInfo;
   private CallbackMainErrorReports      mCallbackMainErrorReports;
   private final RemoteDataServiceAsync  remoteService = GWT.create(RemoteDataService.class);
 
@@ -134,6 +136,7 @@ public class ACRAReportView extends Composite
   {
   }
 
+  
   public ACRAReportView(ViewErrorReports.CallbackMainErrorReports callback)
   {
     mCallbackMainErrorReports = callback;
@@ -187,8 +190,11 @@ public class ACRAReportView extends Composite
 
   private BasicErrorInfoShared mSelectedBasicErrorInfo;
 
+  private ACRALogShared mACRALog;
+
   private void populateValues(ACRALogShared result)
   {
+    mACRALog = result;
     BasicErrorInfoShared beio = mSelectedBasicErrorInfo;
     if (result == null)
     {
@@ -477,10 +483,25 @@ public class ACRAReportView extends Composite
   @UiHandler("buttonReportEmail")
   void onButtonReportEmailClick(ClickEvent event)
   {
+    EMailTemplateSend.doDialog(mLoginInfo, mACRALog, remoteService, new EMailTemplateSend.DialogCallback()
+    {
+      
+      @Override
+      public void result(boolean ok)
+      {
+        if(ok)
+        {
+          mSelectedBasicErrorInfo.emailed = true;
+          populateValues(mACRALog);
+        }
+        
+      }
+    });
   }
 
-  public void showACRAReport(BasicErrorInfoShared beio)
+  public void showACRAReport(LoginInfo loginInfo, BasicErrorInfoShared beio)
   {
+    mLoginInfo = loginInfo;
     mSelectedBasicErrorInfo = beio;
     captionPanelCenter.setCaptionText("Report: " + beio.REPORT_ID + " - Loading...");
     clearData();

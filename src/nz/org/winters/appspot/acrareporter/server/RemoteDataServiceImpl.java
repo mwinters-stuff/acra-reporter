@@ -65,29 +65,6 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
 
   private static final Logger log = Logger.getLogger(RemoteDataServiceImpl.class.getName());
 
-  public String greetServer(String input) throws IllegalArgumentException
-  {
-    // // Verify that the input is valid.
-    // if (!FieldVerifier.isValidName(input))
-    // {
-    // // If the input is not valid, throw an IllegalArgumentException back to
-    // // the client.
-    // throw new
-    // IllegalArgumentException("Name must be at least 4 characters long");
-    // }
-    //
-    // String serverInfo = getServletContext().getServerInfo();
-    // String userAgent = getThreadLocalRequest().getHeader("User-Agent");
-    //
-    // // Escape data from the client to avoid cross-site script
-    // vulnerabilities.
-    // input = escapeHtml(input);
-    // userAgent = escapeHtml(userAgent);
-
-    return "";// "Hello, " + input + "!<br><br>I am running " + serverInfo +
-              // ".<br><br>It looks like you are using:<br>" + userAgent;
-  }
-
   /**
    * Escape an html string. Escaping data received from the client helps to
    * prevent cross-site script vulnerabilities.
@@ -573,6 +550,70 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
   public List<AppPackage> getPackages(Long owner)
   {
     return ObjectifyService.ofy().load().type(AppPackage.class).filter("Owner", owner).list();
+  }
+
+  @Override
+  public void sendFixedEMail(LoginInfo loginInfo, List<String> reportIds, String bcc, String subject, String body) throws IllegalArgumentException
+  {
+    
+    AppUser appUser = getAppUser(loginInfo);
+    
+    String[] bccs = bcc.split("\n");
+    
+    try
+    {
+      
+      Properties props = new Properties();
+      Session session = Session.getInstance(props, null);
+      Message msg = new MimeMessage(session);
+      msg.setReplyTo(new InternetAddress[] { new InternetAddress(appUser.EMailAddress, appUser.FirstName + " " + appUser.LastName) });
+      msg.setFrom(new InternetAddress("acra@wintersacrareporter.appspotmail.com", "ACRA Reporter"));
+      
+      for(String recipient: bccs)
+      {
+        msg.addRecipient(Message.RecipientType.BCC, new InternetAddress(recipient));
+      }
+      
+      msg.setSubject(subject);
+      msg.setText(body);
+
+      Transport.send(msg);
+    } catch (Exception e)
+    {
+      log.warning("Exception " + e.getMessage());
+      throw new IllegalArgumentException(e.toString());
+    }
+
+    markReportsEMailed(reportIds, true);
+    
+  }
+
+  @Override
+  public String findEMailAddresses(List<String> reportIds) throws IllegalArgumentException
+  {
+    List<ACRALog> logs = ObjectifyService.ofy().load().type(ACRALog.class).filter("REPORT_ID in", reportIds).list();
+    String result = "";
+    
+    for(ACRALog log: logs)
+    {
+      if(!Utils.isEmpty(log.USER_EMAIL))
+      {
+        result = result + log.USER_EMAIL + "\n";
+      }else if(!Utils.isEmpty(log.USER_COMMENT))
+      {
+        String[] commentLines = log.USER_COMMENT.split("\n");
+        for(String line: commentLines)
+        {
+          if(line.contains("@"))
+          {
+            result = result + line + "\n";
+            break;
+          }
+        }
+      }
+    }
+    
+    return result;
   }
 
 }
