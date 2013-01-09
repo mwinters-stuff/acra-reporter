@@ -85,7 +85,8 @@ public class CronJobEMails extends HttpServlet
           msg.setSubject("ACRA Reports Summary for - " + count.date.toString());
 
           String bodyText = "Overall: \r\n" + "      Reports: " + count.Reports + "\r\n" + "        Fixed: " + count.Fixed + "\r\n" + "    Looked At: " + count.LookedAt + "\r\n" + "      Deleted: " + count.Deleted + "\r\n\r\n" + "Package Totals\r\n"
-              + "Package                              Reports   Fixed     Looked At  Deleted\r\n" + "-------------------------------------------------- --------- --------- ---------  ---------\r\n";
+              + "Package                                              Reports     Fixed Looked At    Deleted\r\n" + 
+                "-------------------------------------------------- --------- --------- ---------  ---------\r\n";
 
           StringBuilder sb = new StringBuilder();
           Formatter formatter = new Formatter(sb, Locale.US);
