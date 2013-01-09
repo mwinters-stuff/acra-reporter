@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import nz.org.winters.appspot.acrareporter.server.jgoogleanalytics.FocusPoint;
 import nz.org.winters.appspot.acrareporter.server.jgoogleanalytics.JGoogleAnalyticsTracker;
+import nz.org.winters.appspot.acrareporter.shared.Configuration;
 import nz.org.winters.appspot.acrareporter.shared.Utils;
 import nz.org.winters.appspot.acrareporter.store.ACRALog;
 import nz.org.winters.appspot.acrareporter.store.AppPackage;
@@ -180,8 +181,11 @@ public class ACRAReportHandler extends HttpServlet
             JGoogleAnalyticsTracker tracker = new JGoogleAnalyticsTracker("ACRA Reporter", "0.1", appUser.AnalyticsTrackingId);
             tracker.trackSynchronously(focusVer);
           }
-          JGoogleAnalyticsTracker tracker = new JGoogleAnalyticsTracker("ACRA Reporter", "0.1", "UA-37231399-1");
-          tracker.trackSynchronously(focusVer);
+          if(Configuration.gaTrackingID != null)
+          {
+            JGoogleAnalyticsTracker tracker = new JGoogleAnalyticsTracker("ACRA Reporter", "0.1", Configuration.gaTrackingID);
+            tracker.trackSynchronously(focusVer);
+          }
         }
 
         response.getWriter().println("OK");

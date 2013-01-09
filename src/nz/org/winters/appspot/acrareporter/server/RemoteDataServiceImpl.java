@@ -26,9 +26,7 @@ import javax.mail.Message;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
 
 import nz.org.winters.appspot.acrareporter.client.RemoteDataService;
 import nz.org.winters.appspot.acrareporter.server.jgoogleanalytics.FocusPoint;
@@ -37,6 +35,7 @@ import nz.org.winters.appspot.acrareporter.shared.ACRALogShared;
 import nz.org.winters.appspot.acrareporter.shared.AppPackageShared;
 import nz.org.winters.appspot.acrareporter.shared.AppUserShared;
 import nz.org.winters.appspot.acrareporter.shared.BasicErrorInfoShared;
+import nz.org.winters.appspot.acrareporter.shared.Configuration;
 import nz.org.winters.appspot.acrareporter.shared.LoginInfo;
 import nz.org.winters.appspot.acrareporter.shared.MappingFileShared;
 import nz.org.winters.appspot.acrareporter.shared.Utils;
@@ -65,22 +64,7 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
 
   private static final Logger log = Logger.getLogger(RemoteDataServiceImpl.class.getName());
 
-  /**
-   * Escape an html string. Escaping data received from the client helps to
-   * prevent cross-site script vulnerabilities.
-   * 
-   * @param html
-   *          the html string to escape
-   * @return the escaped string
-   */
-  private String escapeHtml(String html)
-  {
-    if (html == null)
-    {
-      return null;
-    }
-    return html.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
-  }
+
 
   @Override
   public String retrace(String mapping, String error) throws IllegalArgumentException
@@ -412,8 +396,8 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
       Session session = Session.getInstance(props, null);
       Message msg = new MimeMessage(session);
       msg.setReplyTo(new InternetAddress[] { new InternetAddress(ap.EMailAddress, ap.FirstName + " " + ap.LastName) });
-      msg.setFrom(new InternetAddress("acra@wintersacrareporter.appspotmail.com", "ACRA Reporter"));
-      msg.addRecipient(Message.RecipientType.TO, new InternetAddress("acra@winters.org.nz", "ACRA Reporter"));
+      msg.setFrom(new InternetAddress(Configuration.defaultSenderEMailAddress, Configuration.defaultSenderName));
+      msg.addRecipient(Message.RecipientType.TO, new InternetAddress(Configuration.sendNewUsersEMailAddress));
       msg.setSubject("New User Signed Up - " + ap.EMailAddress);
       msg.setText("First Name: " + ap.FirstName + "\r\n" + "Last Name: " + ap.LastName + "\r\n" + "City: " + ap.City + "\r\n" + "Country: " + ap.Country + "\r\n");
 
@@ -425,12 +409,12 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
     }
 
     // analytics.
-    if (SystemProperty.environment.value() == SystemProperty.Environment.Value.Production)
+    if (Configuration.gaTrackingID != null && SystemProperty.environment.value() == SystemProperty.Environment.Value.Production)
     {
       // The app is running on App Engine...
       FocusPoint focusApp = new FocusPoint("Admin");
       FocusPoint focusPoint = new FocusPoint("UserAdded", focusApp);
-      JGoogleAnalyticsTracker tracker = new JGoogleAnalyticsTracker("ACRA Reporter", "0.1", "UA-37231399-1");
+      JGoogleAnalyticsTracker tracker = new JGoogleAnalyticsTracker("ACRA Reporter", "0.1", Configuration.gaTrackingID);
       tracker.trackSynchronously(focusPoint);
     }
   }
@@ -567,7 +551,7 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
       Session session = Session.getInstance(props, null);
       Message msg = new MimeMessage(session);
       msg.setReplyTo(new InternetAddress[] { new InternetAddress(appUser.EMailAddress, appUser.FirstName + " " + appUser.LastName) });
-      msg.setFrom(new InternetAddress("acra@wintersacrareporter.appspotmail.com", "ACRA Reporter"));
+      msg.setFrom(new InternetAddress(Configuration.defaultSenderEMailAddress, Configuration.defaultSenderName));
       
       for(String recipient: bccs)
       {
@@ -596,20 +580,10 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
     
     for(ACRALog log: logs)
     {
-      if(!Utils.isEmpty(log.USER_EMAIL))
+      String email = Utils.findEMail(log.USER_EMAIL, log.USER_COMMENT);
+      if(!Utils.isEmpty(email))
       {
-        result = result + log.USER_EMAIL + "\n";
-      }else if(!Utils.isEmpty(log.USER_COMMENT))
-      {
-        String[] commentLines = log.USER_COMMENT.split("\n");
-        for(String line: commentLines)
-        {
-          if(line.contains("@"))
-          {
-            result = result + line + "\n";
-            break;
-          }
-        }
+        result = result + email + "\n";
       }
     }
     

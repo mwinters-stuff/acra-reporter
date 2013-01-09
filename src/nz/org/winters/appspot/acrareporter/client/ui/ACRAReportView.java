@@ -483,7 +483,7 @@ public class ACRAReportView extends Composite
   @UiHandler("buttonReportEmail")
   void onButtonReportEmailClick(ClickEvent event)
   {
-    EMailTemplateSend.doDialog(mLoginInfo, mACRALog, remoteService, new EMailTemplateSend.DialogCallback()
+    EMailTemplateSend.doDialog(mLoginInfo, mCallbackMainErrorReports.getAppPackage() , mACRALog, remoteService, new EMailTemplateSend.DialogCallback()
     {
       
       @Override

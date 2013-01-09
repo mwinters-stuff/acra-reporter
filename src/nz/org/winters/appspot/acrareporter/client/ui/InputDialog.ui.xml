@@ -2,7 +2,7 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:style>
-		
+
 	</ui:style>
 	<g:VerticalPanel>
 		<g:Cell width="100%">
@@ -15,10 +15,9 @@
 		</g:Cell>
 		<g:Cell horizontalAlignment="ALIGN_CENTER">
 			<g:HorizontalPanel spacing="4" horizontalAlignment="ALIGN_CENTER">
-				<g:Cell width="">
-					<g:Button ui:field="buttonOK" width="80">OK</g:Button>
-				</g:Cell>
-				<g:Button width="80" ui:field="buttonCancel">Cancel</g:Button>
+				<g:Button ui:field="buttonOK" width="80px">OK</g:Button>
+				<g:Label width="20px" />
+				<g:Button width="80px" ui:field="buttonCancel">Cancel</g:Button>
 			</g:HorizontalPanel>
 		</g:Cell>
 

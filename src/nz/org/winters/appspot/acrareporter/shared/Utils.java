@@ -20,10 +20,38 @@ package nz.org.winters.appspot.acrareporter.shared;
 public class Utils
 {
  
+  private String escapeHtml(String html)
+  {
+    if (html == null)
+    {
+      return null;
+    }
+    return html.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+  }
   
   public static boolean isEmpty(String in)
   {
     return in == null || in.isEmpty();
   }
   
+  
+  public static String findEMail(String email, String comment)
+  {
+    
+    if(!Utils.isEmpty(email))
+    {
+      return email;
+    }else if(!Utils.isEmpty(comment))
+    {
+      String[] commentLines = comment.split("\n");
+      for(String line: commentLines)
+      {
+        if(line.contains("@"))
+        {
+          return line;
+        }
+      }
+    }
+    return "";
+  }
 }

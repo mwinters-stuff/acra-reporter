@@ -15,7 +15,6 @@ package nz.org.winters.appspot.acrareporter.server;
  * limitations under the License.
 */
 import java.io.IOException;
-import java.util.Enumeration;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -26,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import nz.org.winters.appspot.acrareporter.server.jgoogleanalytics.FocusPoint;
 import nz.org.winters.appspot.acrareporter.server.jgoogleanalytics.JGoogleAnalyticsTracker;
+import nz.org.winters.appspot.acrareporter.shared.Configuration;
 import nz.org.winters.appspot.acrareporter.shared.Utils;
 import nz.org.winters.appspot.acrareporter.store.AppPackage;
 import nz.org.winters.appspot.acrareporter.store.AppUser;
@@ -68,7 +68,13 @@ public class MappingFileHandler extends HttpServlet
   public static String convertStreamToString(java.io.InputStream is)
   {
     java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
-    return s.hasNext() ? s.next() : "";
+    try
+    {
+      return s.hasNext() ? s.next() : "";
+    }finally
+    {
+      s.close();
+    }
   }
 
   @Override
@@ -163,8 +169,11 @@ public class MappingFileHandler extends HttpServlet
           JGoogleAnalyticsTracker tracker = new JGoogleAnalyticsTracker("ACRA Reporter", "0.1", appUser.AnalyticsTrackingId);
           tracker.trackSynchronously(focusVer);
         }
-        JGoogleAnalyticsTracker tracker = new JGoogleAnalyticsTracker("ACRA Reporter", "0.1", "UA-37231399-1");
-        tracker.trackSynchronously(focusVer);
+        if(Configuration.gaTrackingID != null)
+        {
+          JGoogleAnalyticsTracker tracker = new JGoogleAnalyticsTracker("ACRA Reporter", "0.1", Configuration.gaTrackingID);
+          tracker.trackSynchronously(focusVer);
+        }
       }
       response.getWriter().println("OK");
 

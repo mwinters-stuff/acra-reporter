@@ -315,7 +315,28 @@ public class MainErrorsList extends Composite implements Handler
       @Override
       public void execute()
       {
-        // TODO Auto-generated method stub
+        final Set<BasicErrorInfoShared> selected = multipleSelectionModel.getSelectedSet();
+        Iterator<BasicErrorInfoShared> iter = selected.iterator();
+        ArrayList<String> reportIds = new ArrayList<String>();
+        while (iter.hasNext())
+        {
+          reportIds.add(iter.next().REPORT_ID);
+        }
+        
+        EMailTemplateSend.doDialog(mCallbackMainErrorReports.getLoginInfo(), mCallbackMainErrorReports.getAppPackage(), reportIds, remoteService, new EMailTemplateSend.DialogCallback()
+        {
+          
+          @Override
+          public void result(boolean ok)
+          {
+            if(ok)
+            {
+              refreshList();
+            }
+            
+          }
+        });
+
 
       }
     });

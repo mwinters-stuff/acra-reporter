@@ -14,7 +14,7 @@
 		</g:north>
 		<g:south size="2.5">
 			<g:HorizontalPanel spacing="4" horizontalAlignment="ALIGN_CENTER">
-				<g:Button ui:field="buttonClose" width="80">Close</g:Button>
+				<g:Button ui:field="buttonClose" width="80px">Close</g:Button>
 			</g:HorizontalPanel>
 		</g:south>
 		<g:center>

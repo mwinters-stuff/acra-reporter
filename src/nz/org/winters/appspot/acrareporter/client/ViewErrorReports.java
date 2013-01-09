@@ -26,6 +26,7 @@ import nz.org.winters.appspot.acrareporter.client.ui.MappingUpload;
 import nz.org.winters.appspot.acrareporter.client.ui.PackageEdit;
 import nz.org.winters.appspot.acrareporter.client.ui.SignUp;
 import nz.org.winters.appspot.acrareporter.client.ui.UserEdit;
+import nz.org.winters.appspot.acrareporter.shared.Configuration;
 import nz.org.winters.appspot.acrareporter.shared.AppPackageShared;
 import nz.org.winters.appspot.acrareporter.shared.BasicErrorInfoShared;
 import nz.org.winters.appspot.acrareporter.shared.LoginInfo;
@@ -45,7 +46,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.MenuItem;
@@ -66,6 +66,10 @@ public class ViewErrorReports implements EntryPoint, ChangeHandler
     void showACRAReport(BasicErrorInfoShared beio);
 
     void showPackage(String PACKAGE_NAME);
+    
+    AppPackageShared getAppPackage();
+
+    LoginInfo getLoginInfo();
 
   }
 
@@ -115,7 +119,7 @@ public class ViewErrorReports implements EntryPoint, ChangeHandler
 
   private LoginInfo                    loginInfo     = null;
   private ACRAReportView               mACRAREportView;
-  private boolean                      mSignup;
+//  private boolean                      mSignup;
 
   // private VerticalPanel loginPanel = new VerticalPanel();
   // private Label loginLabel = new Label(
@@ -130,6 +134,8 @@ public class ViewErrorReports implements EntryPoint, ChangeHandler
     Window.enableScrolling(false);
     Window.setMargin("0px");
 
+    // this little trick ensures that when using the debug instance locally that the
+    // login redirects work correctly..
     String baseUrl = GWT.getHostPageBaseURL();
     if (!GWT.isProdMode())
     {
@@ -150,17 +156,21 @@ public class ViewErrorReports implements EntryPoint, ChangeHandler
         // GWT.log("login url = " + loginInfo.getLoginUrl());
         if (loginInfo.isLoggedIn())
         {
-          Storage stockStore = Storage.getLocalStorageIfSupported();
-          if (stockStore != null)
+          boolean signup = false;
+          if(Configuration.appUserMode == Configuration.UserMode.umMultipleSeperate)
           {
-            if (stockStore.getItem("signup") != null)
+            Storage stockStore = Storage.getLocalStorageIfSupported();
+            if (stockStore != null)
             {
-              mSignup = stockStore.getItem("signup").equals(Boolean.toString(true));
-              stockStore.removeItem("signup");
+              if (stockStore.getItem("signup") != null)
+              {
+                signup = stockStore.getItem("signup").equals(Boolean.toString(true));
+                stockStore.removeItem("signup");
+              }
             }
           }
 
-          if (mSignup)
+          if (signup)
           {
             loadSignup();
           } else if (loginInfo.getAppUserShared() != null)
@@ -171,9 +181,12 @@ public class ViewErrorReports implements EntryPoint, ChangeHandler
             Window.alert("Not a valid user");
             Window.Location.replace(loginInfo.getLogoutUrl());
           }
-        } else
+        } else if(Configuration.appUserMode ==  Configuration.UserMode.umMultipleSeperate)
         {
           loadFrontPage();
+        }else
+        {
+          loadLogin(false);
         }
       }
 
@@ -207,7 +220,7 @@ public class ViewErrorReports implements EntryPoint, ChangeHandler
       @Override
       public void buttonWiki()
       {
-        Window.Location.replace("http://www.winters.org.nz/acra-reporter");
+        Window.Location.replace(Configuration.wikiURL);
       }
 
       @Override
@@ -502,6 +515,19 @@ public class ViewErrorReports implements EntryPoint, ChangeHandler
                                                          mMainErrorsList.setAppPackage(PACKAGE_NAME);
 
                                                        }
+
+                                                      @Override
+                                                      public AppPackageShared getAppPackage()
+                                                      {
+                                                        return listAppPackages.get(appsCombo.getSelectedIndex());
+                                                      }
+
+                                                      @Override
+                                                      public LoginInfo getLoginInfo()
+                                                      {
+                                                        // TODO Auto-generated method stub
+                                                        return loginInfo;
+                                                      }
                                                      };
 
   @UiHandler("buttonLogout")

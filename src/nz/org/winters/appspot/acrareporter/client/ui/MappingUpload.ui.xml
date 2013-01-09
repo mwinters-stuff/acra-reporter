@@ -2,44 +2,48 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:style>
-		
+
 	</ui:style>
-	<g:FormPanel 
-		ui:field="form" action="/mappingfile">
-		<g:VerticalPanel >
+	<g:FormPanel ui:field="form" action="/mappingfile">
+		<g:VerticalPanel>
 			<g:Cell width="100%">
 				<g:Grid cellSpacing="4">
-				<g:row>
-					<g:customCell>
-						<g:Label text="Package:" horizontalAlignment="ALIGN_RIGHT" />
-					</g:customCell>
-					<g:customCell>
-						<g:TextBox ui:field="textPackage" visibleLength="50"  name="package" />
-					</g:customCell>
-				</g:row>
-				<g:row>
-					<g:customCell>
-						<g:Label text="Version:" horizontalAlignment="ALIGN_RIGHT" />
-					</g:customCell>
-					<g:customCell>
-						<g:TextBox ui:field="textVersion" visibleLength="50" name="version" />
-					</g:customCell>
-				</g:row>
-				<g:row>
-					<g:customCell>
-						<g:Label text="File:" horizontalAlignment="ALIGN_RIGHT" />
-					</g:customCell>
-					<g:customCell>
-						<g:FileUpload ui:field="fileUpload"/>
-					</g:customCell>
-				</g:row>
-			</g:Grid>
+					<g:row>
+						<g:customCell>
+							<g:Label text="Package:" horizontalAlignment="ALIGN_RIGHT" />
+						</g:customCell>
+						<g:customCell>
+							<g:TextBox ui:field="textPackage" visibleLength="50"
+								name="package" />
+						</g:customCell>
+					</g:row>
+					<g:row>
+						<g:customCell>
+							<g:Label text="Version:" horizontalAlignment="ALIGN_RIGHT" />
+						</g:customCell>
+						<g:customCell>
+							<g:TextBox ui:field="textVersion" visibleLength="50"
+								name="version" />
+						</g:customCell>
+					</g:row>
+					<g:row>
+						<g:customCell>
+							<g:Label text="File:" horizontalAlignment="ALIGN_RIGHT" />
+						</g:customCell>
+						<g:customCell>
+							<g:FileUpload ui:field="fileUpload" />
+						</g:customCell>
+					</g:row>
+				</g:Grid>
 			</g:Cell>
 			<g:Cell width="100%" horizontalAlignment="ALIGN_CENTER">
-				<g:HorizontalPanel horizontalAlignment="ALIGN_CENTER" spacing="4">
-				<g:Button ui:field="buttonOK" width="80">Submit</g:Button>
-				<g:Button ui:field="buttonCancel" width="80">Cancel</g:Button>
-			</g:HorizontalPanel>
+				<g:HorizontalPanel horizontalAlignment="ALIGN_CENTER"
+					spacing="4">
+					<g:Button ui:field="buttonOK" width="80px">Submit</g:Button>
+					<g:Label width="20px" />
+
+					<g:Button ui:field="buttonCancel" width="80px">Cancel</g:Button>
+				</g:HorizontalPanel>
 			</g:Cell>
 
 		</g:VerticalPanel>

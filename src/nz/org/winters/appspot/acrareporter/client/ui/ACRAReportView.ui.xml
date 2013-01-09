@@ -4,9 +4,9 @@
 	<ui:style>
 		
 	</ui:style>
-	<g:CaptionPanel captionText="Selected Error" ui:field="captionPanelCenter">
+	<g:CaptionPanel captionText="Selected Error" ui:field="captionPanelCenter" >
 		<g:DockLayoutPanel unit="PX" width="100%" height="100%">
-			<g:north size="92">
+			<g:north size="106">
 				<g:FlowPanel width="100%" height="100%">
 					<g:HorizontalPanel>
 						<g:HorizontalPanel spacing="2">
@@ -81,9 +81,9 @@
 						<g:Cell width="100">
 							<g:CheckBox text="E-mailed" ui:field="checkEMailed" />
 						</g:Cell>
-						<g:Button ui:field="buttonReportRetrace">Retrace</g:Button>
-						<g:Button ui:field="buttonReportEmail">E-Mail</g:Button>
-						<g:Button ui:field="buttonDeleteReport">Delete</g:Button>
+						<g:Button ui:field="buttonReportRetrace" width="70px">Retrace</g:Button>
+						<g:Button ui:field="buttonReportEmail" width="70px">E-Mail</g:Button>
+						<g:Button ui:field="buttonDeleteReport" width="70px">Delete</g:Button>
 					</g:HorizontalPanel>
 				</g:FlowPanel>
 			</g:north>
