@@ -25,7 +25,6 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 // have no need to pass 1mb+ over to the client.
 public class MappingFileShared implements Serializable, IsSerializable
 {
-
   /**
    * 
    */
@@ -40,5 +39,9 @@ public class MappingFileShared implements Serializable, IsSerializable
   public String version;
   public Date uploadDate;
   
-
+  @Override
+  public String toString()
+  {
+    return "MappingFileShared [id=" + id + ", Owner=" + Owner + ", apppackage=" + apppackage + ", version=" + version + ", uploadDate=" + uploadDate + "]";
+  }
 }

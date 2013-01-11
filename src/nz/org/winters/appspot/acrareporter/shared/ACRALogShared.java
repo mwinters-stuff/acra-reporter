@@ -66,5 +66,11 @@ public class ACRALogShared implements Serializable, IsSerializable
   public String SETTINGS_SYSTEM ;
   public String SETTINGS_SECURE  ;
   public String MAPPED_STACK_TRACE ;
+
+  @Override
+  public String toString()
+  {
+    return "ACRALogShared [id=" + id + ", Owner=" + Owner + ", Timestamp=" + Timestamp + ", REPORT_ID=" + REPORT_ID + ", APP_VERSION_NAME=" + APP_VERSION_NAME + ", PACKAGE_NAME=" + PACKAGE_NAME + "]";
+  }
   
 }

@@ -81,11 +81,8 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
 
     List<MappingFile> list = ObjectifyService.ofy().load().type(MappingFile.class).filter("Owner", appUser.id).list();
 
-    Iterator<MappingFile> iter = list.iterator();
-    while (iter.hasNext())
+    for(MappingFile file: list)
     {
-      MappingFile file = iter.next();
-
       values.put(file.getId(), file.getApppackage() + " - " + file.getVersion());
     }
 
@@ -109,17 +106,14 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
   public List<AppPackageShared> getPackages(LoginInfo loginInfo) throws IllegalArgumentException
   {
     AppUser appUser = getAppUser(loginInfo);
-
-    List<AppPackage> list = ObjectifyService.ofy().load().type(AppPackage.class).filter("Owner", appUser.id).order("PACKAGE_NAME").list();
+    long ownerId = getOwnerId(appUser);
+    
+    List<AppPackage> list = ObjectifyService.ofy().load().type(AppPackage.class).filter("Owner", ownerId).order("PACKAGE_NAME").list();
     // AppPackageShared[] result = new AppPackageShared[list.size()];
     ArrayList<AppPackageShared> result = new ArrayList<AppPackageShared>();
 
-    // int i = 0;
-    Iterator<AppPackage> iter = list.iterator();
-    while (iter.hasNext())
+    for(AppPackage app: list)
     {
-      AppPackage app = iter.next();
-      // result[i++] = app.toShared();
       result.add(app.toShared());
     }
     return result;
@@ -131,10 +125,8 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
     List<BasicErrorInfo> list = ObjectifyService.ofy().load().type(BasicErrorInfo.class).filter("PACKAGE_NAME", apppackage).list();// .order("Timestamp desc").list();
     ArrayList<BasicErrorInfoShared> result = new ArrayList<BasicErrorInfoShared>();
 
-    Iterator<BasicErrorInfo> iter = list.iterator();
-    while (iter.hasNext())
+    for(BasicErrorInfo beo: list)
     {
-      BasicErrorInfo beo = iter.next();
       result.add(beo.toShared());
     }
     return result;
@@ -171,7 +163,7 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
 
     ap.Totals.incDeleted();
     user.Totals.incDeleted();
-    DailyCounts counts = DailyCounts.getToday(bei.Owner);
+    DailyCounts counts = DailyCounts.getToday(getOwnerId(user));
     counts.incDeleted();
     counts.commit();
 
@@ -202,7 +194,7 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
         ObjectifyService.ofy().save().entity(bei);
         AppUser user = getAppUser(bei.Owner);
         AppPackage ap = getAppPackage(bei.PACKAGE_NAME);
-        DailyCounts counts = DailyCounts.getToday(bei.Owner);
+        DailyCounts counts = DailyCounts.getToday(getOwnerId(user));
         if (state)
         {
           ap.Totals.incLookedAt();
@@ -234,7 +226,7 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
         ObjectifyService.ofy().save().entity(bei);
         AppUser user = getAppUser(bei.Owner);
         AppPackage ap = getAppPackage(bei.PACKAGE_NAME);
-        DailyCounts counts = DailyCounts.getToday(bei.Owner);
+        DailyCounts counts = DailyCounts.getToday(getOwnerId(user));
         if (state)
         {
           ap.Totals.incFixed();
@@ -350,7 +342,7 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
   {
     AppPackage app = new AppPackage();
     app.fromShared(appPackageShared);
-    app.Owner = getAppUser(loginInfo).id;
+    app.Owner = getOwnerId(getAppUser(loginInfo));
     ObjectifyService.ofy().save().entity(app);
 
   }
@@ -426,13 +418,9 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
 
     List<MappingFile> list = ObjectifyService.ofy().load().type(MappingFile.class).filter("apppackage", PACKAGE_NAME).order("version").list();
 
-    // int i = 0;
-    Iterator<MappingFile> iter = list.iterator();
-    while (iter.hasNext())
+    for(MappingFile map: list)
     {
-      MappingFile app = iter.next();
-      // result[i++] = app.toShared();
-      result.add(app.toShared());
+      result.add(map.toShared());
     }
     return result;
   }
@@ -531,10 +519,7 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
     return ObjectifyService.ofy().load().type(AppUser.class).id(id).get();
   }
 
-  public List<AppPackage> getPackages(Long owner)
-  {
-    return ObjectifyService.ofy().load().type(AppPackage.class).filter("Owner", owner).list();
-  }
+
 
   @Override
   public void sendFixedEMail(LoginInfo loginInfo, List<String> reportIds, String bcc, String subject, String body) throws IllegalArgumentException
@@ -590,4 +575,53 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
     return result;
   }
 
+  @Override
+  public void addAppUser(AppUserShared appUserShared) throws IllegalArgumentException
+  {
+    AppUser appUser = ObjectifyService.ofy().load().type(AppUser.class).filter("EMailAddress", appUserShared.EMailAddress).first().get();
+    if (appUser != null)
+    {
+      throw new IllegalArgumentException(appUserShared.EMailAddress + " is already a user!");
+    }
+
+    AppUser ap = new AppUser();
+
+    ap.fromShared(appUserShared);
+
+    ap.isUser = true;
+    ap.isSubscriptionPaid = true;
+
+    ObjectifyService.ofy().save().entity(ap);
+
+    // analytics.
+    if (Configuration.gaTrackingID != null && SystemProperty.environment.value() == SystemProperty.Environment.Value.Production)
+    {
+      // The app is running on App Engine...
+      FocusPoint focusApp = new FocusPoint("Admin");
+      FocusPoint focusPoint = new FocusPoint("UserAdded", focusApp);
+      JGoogleAnalyticsTracker tracker = new JGoogleAnalyticsTracker("ACRA Reporter", "0.1", Configuration.gaTrackingID);
+      tracker.trackSynchronously(focusPoint);
+    }
+    
+  }
+  
+  public long getOwnerId(AppUser appUser)
+  {
+    if(Configuration.appUserMode == Configuration.UserMode.umMultipleSameApps)
+    {
+      return appUser.adminAppUserId != null && appUser.adminAppUserId > 0 ? appUser.adminAppUserId : appUser.id; 
+        
+    }
+    return appUser.id;
+  }
+
+  public long getOwnerId(AppUserShared appUser)
+  {
+    if(Configuration.appUserMode == Configuration.UserMode.umMultipleSameApps)
+    {
+      return  appUser.adminAppUserId != null && appUser.adminAppUserId > 0 ? appUser.adminAppUserId : appUser.id; 
+        
+    }
+    return appUser.id;
+  }
 }

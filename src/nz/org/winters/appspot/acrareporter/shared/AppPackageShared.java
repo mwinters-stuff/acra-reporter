@@ -48,5 +48,12 @@ public class AppPackageShared implements Serializable
     this.PACKAGE_NAME = apppackage;
   }
 
+  @Override
+  public String toString()
+  {
+    return "AppPackageShared [id=" + id + ", PACKAGE_NAME=" + PACKAGE_NAME + ", EMailAddress=" + EMailAddress + ", EMailSubject=" + EMailSubject + ", EMailTemplate=" + EMailTemplate + ", AuthString=" + AuthString + ", AuthUsername=" + AuthUsername + ", AuthPassword=" + AuthPassword + ", AppName="
+        + AppName + ", Owner=" + Owner + ", Totals=" + Totals.toString() + "]";
+  }
+
  
 }

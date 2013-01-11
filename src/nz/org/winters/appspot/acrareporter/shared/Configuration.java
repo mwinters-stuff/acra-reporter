@@ -24,6 +24,7 @@ public class Configuration
   // umMultipleSameApps - administrator can add users, they see the same as the admin..
   
   public enum UserMode {umMultipleSeperate,umSingle,umMultipleSameApps}
+  //public static final UserMode appUserMode = UserMode.umMultipleSameApps;
   public static final UserMode appUserMode = UserMode.umMultipleSeperate;
   //public static final UserMode appUserMode = UserMode.umSingle;
   

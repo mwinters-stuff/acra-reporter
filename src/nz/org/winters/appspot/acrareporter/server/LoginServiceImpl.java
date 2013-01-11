@@ -50,9 +50,14 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
 
     if (user != null)
     {
+      loginInfo.setEmailAddress(user.getEmail());
+      loginInfo.setNickname(user.getNickname());
+      
       if (userService.isUserLoggedIn())
       { // && userService.isUserAdmin()
+        loginInfo.setUserAdmin(userService.isUserAdmin());
         AppUser appUser = ObjectifyService.ofy().load().type(AppUser.class).filter("EMailAddress", user.getEmail()).first().get();
+        loginInfo.setAppUserShared(appUser == null ? null : appUser.toShared());
 
         if (Configuration.appUserMode == Configuration.UserMode.umSingle)
         {
@@ -61,16 +66,16 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
             if (appUser == null)
             {
               appUser = ObjectifyService.ofy().load().type(AppUser.class).first().get();
-              if(appUser != null)
+              if (appUser != null)
               {
-                if(!appUser.EMailAddress.equals(user.getEmail()))
+                if (!appUser.EMailAddress.equals(user.getEmail()))
                 {
                   // not the administator.
                   loginInfo.setLoggedIn(false);
                   return loginInfo;
                 }
               }
-              
+
               appUser = new AppUser();
               appUser.EMailAddress = user.getEmail();
               appUser.FirstName = user.getNickname();
@@ -82,7 +87,7 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
               appUser.isUser = true;
               ObjectifyService.ofy().save().entity(appUser);
               loginInfo.setLoggedIn(true);
-            }else
+            } else
             {
               loginInfo.setLoggedIn(true);
             }
@@ -92,14 +97,35 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
             loginInfo.setLoggedIn(false);
             return loginInfo;
           }
-        }else
+        } else if (Configuration.appUserMode == Configuration.UserMode.umMultipleSameApps)
+        {
+          if (userService.isUserAdmin())
+          {
+            if (appUser == null)
+            {
+              appUser = new AppUser();
+              appUser.EMailAddress = user.getEmail();
+              appUser.FirstName = user.getNickname();
+              appUser.LastName = "UNKNOWN";
+              appUser.City = "";
+              appUser.Country = "";
+              appUser.isSubscriptionPaid = true;
+              appUser.isSuperDude = true;
+              appUser.isUser = true;
+              ObjectifyService.ofy().save().entity(appUser);
+            }
+            loginInfo.setAppUserShared(appUser.toShared());
+            loginInfo.setLoggedIn(true);
+          } else
+          {
+            loginInfo.setLoggedIn(appUser != null);
+            return loginInfo;
+          }
+        } else
         {
           loginInfo.setLoggedIn(true);
         }
 
-        loginInfo.setAppUserShared(appUser == null ? null : appUser.toShared());
-        loginInfo.setEmailAddress(user.getEmail());
-        loginInfo.setNickname(user.getNickname());
 
       }
     } else

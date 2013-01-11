@@ -1,4 +1,5 @@
 package nz.org.winters.appspot.acrareporter.server;
+
 /*
  * Copyright 2013 Mathew Winters
 
@@ -6,14 +7,14 @@ package nz.org.winters.appspot.acrareporter.server;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+ http://www.apache.org/licenses/LICENSE-2.0
 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 import java.io.IOException;
 import java.util.Date;
 import java.util.logging.Logger;
@@ -100,22 +101,19 @@ public class ACRAReportHandler extends HttpServlet
           return;
         }
 
-        if(acraLog.APP_VERSION_CODE != 4960 && acraLog.APP_VERSION_CODE != 4965) // for 2 apps already running no authentication.
+        String auth = request.getHeader("Authorization");
+        if (Utils.isEmpty(auth))
         {
-          String auth = request.getHeader("Authorization");
-          if (Utils.isEmpty(auth))
-          {
-            response.getWriter().println("FAIL AUTH");
-            log.severe("Authentication Failed " + acraLog.PACKAGE_NAME);
-            return;
-          }
-          auth = auth.replace("Basic ", "").trim();
-          if (!auth.equals(appPackage.AuthString))
-          {
-            response.getWriter().println("FAIL AUTH");
-            log.severe("Authentication Failed " + acraLog.PACKAGE_NAME);
-            return;
-          }
+          response.getWriter().println("FAIL AUTH");
+          log.severe("Authentication Failed " + acraLog.PACKAGE_NAME);
+          return;
+        }
+        auth = auth.replace("Basic ", "").trim();
+        if (!auth.equals(appPackage.AuthString))
+        {
+          response.getWriter().println("FAIL AUTH");
+          log.severe("Authentication Failed " + acraLog.PACKAGE_NAME);
+          return;
         }
 
         // get user for package.
@@ -181,7 +179,7 @@ public class ACRAReportHandler extends HttpServlet
             JGoogleAnalyticsTracker tracker = new JGoogleAnalyticsTracker("ACRA Reporter", "0.1", appUser.AnalyticsTrackingId);
             tracker.trackSynchronously(focusVer);
           }
-          if(Configuration.gaTrackingID != null)
+          if (Configuration.gaTrackingID != null)
           {
             JGoogleAnalyticsTracker tracker = new JGoogleAnalyticsTracker("ACRA Reporter", "0.1", Configuration.gaTrackingID);
             tracker.trackSynchronously(focusVer);

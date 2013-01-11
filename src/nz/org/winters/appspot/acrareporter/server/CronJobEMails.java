@@ -32,6 +32,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.googlecode.objectify.ObjectifyService;
+
 import nz.org.winters.appspot.acrareporter.shared.Configuration;
 import nz.org.winters.appspot.acrareporter.store.AppPackage;
 import nz.org.winters.appspot.acrareporter.store.AppUser;
@@ -53,7 +55,11 @@ public class CronJobEMails extends HttpServlet
 
   // private static final Logger log =
   // Logger.getLogger(CronJobEMails.class.getName());
-
+  public List<AppPackage> getPackages(Long owner)
+  {
+    return ObjectifyService.ofy().load().type(AppPackage.class).filter("Owner", owner).list();
+  }
+  
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException
   {
     resp.setContentType("text/plain");
@@ -94,7 +100,7 @@ public class CronJobEMails extends HttpServlet
           {
 
             // get each package and list totals.
-            List<AppPackage> apppackages = remote.getPackages(count.Owner);
+            List<AppPackage> apppackages = getPackages(count.Owner);
             for (AppPackage apppackage : apppackages)
             {
               formatter.format("%-50s %9d %9d %9d %9d\r\n", apppackage.PACKAGE_NAME, apppackage.Totals.Reports, apppackage.Totals.Fixed, apppackage.Totals.LookedAt, apppackage.Totals.Deleted);

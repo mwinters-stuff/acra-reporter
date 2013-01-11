@@ -161,4 +161,11 @@ public class ACRALog
     }
   }
 
+  @Override
+  public String toString()
+  {
+    return "ACRALog [id=" + id + ", Owner=" + Owner + ", Timestamp=" + Timestamp + ", REPORT_ID=" + REPORT_ID + ", APP_VERSION_NAME=" + APP_VERSION_NAME + ", PACKAGE_NAME=" + PACKAGE_NAME + "]";
+  }
+
+  
 }

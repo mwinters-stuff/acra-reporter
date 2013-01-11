@@ -108,4 +108,11 @@ public class BasicErrorInfo
       this.Owner = 12038L;
     }
   }
+
+  @Override
+  public String toString()
+  {
+    return "BasicErrorInfo [id=" + id + ", Owner=" + Owner + ", Timestamp=" + Timestamp + ", APP_VERSION_NAME=" + APP_VERSION_NAME + ", PACKAGE_NAME=" + PACKAGE_NAME + ", REPORT_ID=" + REPORT_ID + ", ANDROID_VERSION=" + ANDROID_VERSION + ", USER_CRASH_DATE=" + USER_CRASH_DATE + ", lookedAt="
+        + lookedAt + ", fixed=" + fixed + ", emailed=" + emailed + "]";
+  }
 }

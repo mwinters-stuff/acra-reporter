@@ -16,12 +16,14 @@ package nz.org.winters.appspot.acrareporter.client.ui;
 */
 import nz.org.winters.appspot.acrareporter.client.RemoteDataServiceAsync;
 import nz.org.winters.appspot.acrareporter.shared.AppUserShared;
+import nz.org.winters.appspot.acrareporter.shared.Utils;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
@@ -88,9 +90,79 @@ public class UserEdit extends Composite
 
   }
 
+  public UserEdit(DialogCallback callback)
+  {
+    this.callback = callback;
+    this.appUserShared = new AppUserShared();
+    initWidget(uiBinder.createAndBindUi(this));
+
+    textEMailAddress.setText("");
+    textEMailAddress.setReadOnly(false);
+
+    textFirstName.setText("");
+    textLastName.setText("");
+    textCity.setText("");
+    textCountry.setText("");
+
+    textAuthUsername.setText("");
+    textAuthPassword.setText("");
+    textAuthUsername.setReadOnly(true);
+    textAuthPassword.setReadOnly(true);
+
+    textTrackingID.setText("");
+    textTrackingID.setReadOnly(true);
+  }  
   @UiHandler("buttonOK")
   void onButtonOKClick(ClickEvent event)
   {
+    if(Utils.isEmpty(textEMailAddress.getText()) && !textEMailAddress.isReadOnly())
+    {
+      Window.alert("Please enter email address!");
+      textEMailAddress.setFocus(true);
+      return;
+    }
+    
+    if(Utils.isEmpty(textFirstName.getText()))
+    {
+      Window.alert("Please enter first name!");
+      textFirstName.setFocus(true);
+      return;
+    }
+    if(Utils.isEmpty(textLastName.getText()))
+    {
+      Window.alert("Please enter last name!");
+      textLastName.setFocus(true);
+
+      return;
+    }
+    
+    if(Utils.isEmpty(textCity.getText()))
+    {
+      Window.alert("Please enter town / city!");
+      return;
+    }
+
+    if(Utils.isEmpty(textCountry.getText()))
+    {
+      Window.alert("Please enter Country!");
+      return;
+    }
+    
+    if(Utils.isEmpty(textAuthUsername.getText()) && !textAuthUsername.isReadOnly())
+    {
+      Window.alert("Please enter Authentication Username!");
+      textAuthUsername.setFocus(true);
+      return;
+    }
+
+    if(Utils.isEmpty(textAuthPassword.getText()) && !textAuthPassword.isReadOnly())
+    {
+      Window.alert("Please enter Authentication Password!");
+      textAuthPassword.setFocus(true);
+      return;
+    }    
+    
+    appUserShared.EMailAddress = textEMailAddress.getText();
     appUserShared.FirstName = textFirstName.getText();
     appUserShared.LastName = textLastName.getText();
     appUserShared.City = textCity.getText();
@@ -156,4 +228,51 @@ public class UserEdit extends Composite
 
   }
 
+  public static void doAddDialog(final AppUserShared adminAppUserShared, final RemoteDataServiceAsync remoteService)
+  {
+    final DialogBox dialogBox = new DialogBox();
+    dialogBox.setText("Add New User");
+
+    // Create a table to layout the content
+    UserEdit pet = new UserEdit(new UserEdit.DialogCallback()
+    {
+
+      @Override
+      public void result(boolean ok, AppUserShared appUserShared)
+      {
+        if (ok)
+        {
+          appUserShared.adminAppUserId = adminAppUserShared.id;
+          
+          remoteService.addAppUser(appUserShared, new AsyncCallback<Void>()
+          {
+
+            @Override
+            public void onFailure(Throwable caught)
+            {
+
+            }
+
+            @Override
+            public void onSuccess(Void result)
+            {
+              dialogBox.hide();
+
+            }
+
+          });
+        } else
+        {
+          dialogBox.hide();
+        }
+
+      }
+    });
+
+    pet.setWidth("100%");
+    dialogBox.setWidget(pet);
+    dialogBox.center();
+    dialogBox.show();
+
+  }
 }

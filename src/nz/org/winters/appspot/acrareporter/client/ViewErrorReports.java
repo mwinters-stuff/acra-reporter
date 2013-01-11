@@ -86,7 +86,11 @@ public class ViewErrorReports implements EntryPoint, ChangeHandler
   @UiField
   MenuItem                                miPackageAdd;
   @UiField
+  MenuItem                                miUserAdd;
+  @UiField
   MenuItem                                miUserEdit;
+  @UiField
+  MenuItem                                miUserDelete;
   @UiField
   DockLayoutPanel                         dockLayoutPanel;
 
@@ -126,6 +130,16 @@ public class ViewErrorReports implements EntryPoint, ChangeHandler
   // "Please sign in to your Google Account to access the Console.");
   // private Anchor sigCnInLink = new Anchor("Sign In");
 
+  String getBaseURL()
+  {
+    String baseUrl = GWT.getHostPageBaseURL();
+    if (!GWT.isProdMode())
+    {
+      baseUrl = "http://127.0.0.1:8888/ACRAReporter.html?gwt.codesvr=127.0.0.1:9997";
+    }
+    return baseUrl;
+  }
+  
   public void onModuleLoad()
   {
     DOM.removeChild(RootPanel.getBodyElement(), DOM.getElementById("loading"));
@@ -136,11 +150,7 @@ public class ViewErrorReports implements EntryPoint, ChangeHandler
 
     // this little trick ensures that when using the debug instance locally that the
     // login redirects work correctly..
-    String baseUrl = GWT.getHostPageBaseURL();
-    if (!GWT.isProdMode())
-    {
-      baseUrl = "http://127.0.0.1:8888/ACRAReporter.html?gwt.codesvr=127.0.0.1:9997";
-    }
+    String baseUrl = getBaseURL();
 
     loginService.login(baseUrl, new AsyncCallback<LoginInfo>()
     {
@@ -202,7 +212,7 @@ public class ViewErrorReports implements EntryPoint, ChangeHandler
       @Override
       public void finished()
       {
-        Window.Location.replace("/");
+        Window.Location.replace(getBaseURL());
       }
     }));
   }
@@ -444,6 +454,19 @@ public class ViewErrorReports implements EntryPoint, ChangeHandler
       }
     });
 
+    miUserAdd.setScheduledCommand(new Command()
+    {
+
+      @Override
+      public void execute()
+      {
+        UserEdit.doAddDialog(loginInfo.getAppUserShared(), remoteService);
+      }
+
+    });
+    
+    miUserAdd.setVisible(loginInfo.isUserAdmin() && Configuration.appUserMode == Configuration.UserMode.umMultipleSameApps);
+
     miUserEdit.setScheduledCommand(new Command()
     {
 
@@ -451,6 +474,18 @@ public class ViewErrorReports implements EntryPoint, ChangeHandler
       public void execute()
       {
         UserEdit.doEditDialog(loginInfo.getAppUserShared(), remoteService);
+      }
+
+    });
+    
+    miUserDelete.setVisible(loginInfo.isUserAdmin() && (Configuration.appUserMode == Configuration.UserMode.umMultipleSameApps || Configuration.appUserMode == Configuration.UserMode.umMultipleSeperate));
+    miUserDelete.setScheduledCommand(new Command()
+    {
+
+      @Override
+      public void execute()
+      {
+       // UserEdit.doEditDialog(loginInfo.getAppUserShared(), remoteService);
       }
 
     });

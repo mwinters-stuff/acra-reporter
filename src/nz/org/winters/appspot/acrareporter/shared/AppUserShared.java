@@ -43,6 +43,7 @@ public class AppUserShared  implements Serializable
   public String AuthUsername;
   public String AuthPassword;
   
+  public Long adminAppUserId;
   
   public AppUserShared()
   {

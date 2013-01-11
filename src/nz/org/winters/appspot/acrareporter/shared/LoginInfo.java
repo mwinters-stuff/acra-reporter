@@ -28,6 +28,7 @@ public class LoginInfo implements Serializable {
 	  private String logoutUrl;
 	  private String emailAddress;
 	  private String nickname;
+	  private boolean useradmin;
 	  
 	  private AppUserShared appUserShared;
 
@@ -39,7 +40,15 @@ public class LoginInfo implements Serializable {
 	    this.loggedIn = loggedIn;
 	  }
 
-	  public String getLoginUrl() {
+    public boolean isUserAdmin() {
+      return useradmin;
+    }
+
+    public void setUserAdmin(boolean admin) {
+      this.useradmin = admin;
+    }
+
+    public String getLoginUrl() {
 	    return loginUrl;
 	  }
 
@@ -79,5 +88,11 @@ public class LoginInfo implements Serializable {
     public void setAppUserShared(AppUserShared appUserShared)
     {
       this.appUserShared = appUserShared;
+    }
+
+    @Override
+    public String toString()
+    {
+      return "LoginInfo [loggedIn=" + loggedIn + ", loginUrl=" + loginUrl + ", logoutUrl=" + logoutUrl + ", emailAddress=" + emailAddress + ", nickname=" + nickname + ", useradmin=" + useradmin + ", appUserShared=" + appUserShared + "]";
     }
 }

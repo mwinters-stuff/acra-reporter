@@ -35,6 +35,7 @@ public class AppPackage
   public Long   id;
   @Index
   public Long   Owner;
+
   @Index
   public String PACKAGE_NAME;
   public String EMailAddress;
@@ -97,4 +98,11 @@ public class AppPackage
     AuthString = shared.AuthString;
 
   }
+  
+  @Override
+  public String toString()
+  {
+    return "AppPackage [id=" + id + ", Owner=" + Owner + ", PACKAGE_NAME=" + PACKAGE_NAME + ", EMailAddress=" + EMailAddress + ", EMailSubject=" + EMailSubject + ", EMailTemplate=" + EMailTemplate + ", AuthString=" + AuthString + ", AppName=" + AppName + ", Totals=" + Totals.toString() + "]";
+  }
+  
 }

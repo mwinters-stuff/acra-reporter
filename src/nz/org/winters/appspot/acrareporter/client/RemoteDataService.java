@@ -61,6 +61,7 @@ public interface RemoteDataService extends RemoteService
 
   void writeAppUserShared(AppUserShared appUserShared) throws IllegalArgumentException;
   void addAppUserShared(LoginInfo user, AppUserShared appUserShared) throws IllegalArgumentException;
+  void addAppUser(AppUserShared appUserShared) throws IllegalArgumentException;
   
   List<MappingFileShared> getMappingFiles(String PACKAGE_NAME) throws IllegalArgumentException;
   

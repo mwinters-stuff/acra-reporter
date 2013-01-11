@@ -96,6 +96,12 @@ public class Counts implements Serializable, IsSerializable
   {
     return "Reports: " + Reports + ", Fixed: " + Fixed + ", Looked At: " + LookedAt + ", Deleted: " + Deleted;
   }
+
+  @Override
+  public String toString()
+  {
+    return "Counts [Reports=" + Reports + ", Fixed=" + Fixed + ", LookedAt=" + LookedAt + ", Deleted=" + Deleted + "]";
+  }
         
   
 

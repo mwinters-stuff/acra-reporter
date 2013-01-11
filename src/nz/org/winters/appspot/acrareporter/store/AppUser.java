@@ -45,6 +45,8 @@ public class AppUser
   public boolean isUser = true;
   public boolean isSubscriptionPaid = false;
   
+  public Long adminAppUserId;
+  
   @Serialize
   @Unindex
   public Counts Totals = new Counts();
@@ -68,6 +70,7 @@ public class AppUser
     shared.isUser = isUser;
     shared.isSuperDude = isSuperDude;
     shared.AuthString = AuthString;
+    shared.adminAppUserId = adminAppUserId;
     
     String[] auths = ServerOnlyUtils.decodeAuthString(AuthString);
     if (auths != null)
@@ -97,5 +100,13 @@ public class AppUser
     isSuperDude = shared.isSuperDude;
     shared.AuthString = ServerOnlyUtils.encodeAuthString(shared.AuthUsername, shared.AuthPassword);
     AuthString = shared.AuthString;
+    adminAppUserId = shared.adminAppUserId;
+  }
+
+  @Override
+  public String toString()
+  {
+    return "AppUser [id=" + id + ", EMailAddress=" + EMailAddress + ", FirstName=" + FirstName + ", LastName=" + LastName + ", City=" + City + ", Country=" + Country + ", AnalyticsTrackingId=" + AnalyticsTrackingId + ", AuthString=" + AuthString + ", isSuperDude=" + isSuperDude + ", isUser="
+        + isUser + ", isSubscriptionPaid=" + isSubscriptionPaid + ", adminAppUserId=" + adminAppUserId + ", Totals=" + Totals + "]";
   }
 }

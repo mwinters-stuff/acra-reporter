@@ -101,5 +101,11 @@ public class DailyCounts extends Counts
   {
     Deleted = Deleted + count;
   }
+
+  @Override
+  public String toString()
+  {
+    return "DailyCounts [id=" + id + ", Owner=" + Owner + ", PACKAGE_NAME=" + PACKAGE_NAME + ", date=" + date + ", Reports=" + Reports + ", Fixed=" + Fixed + ", LookedAt=" + LookedAt + ", Deleted=" + Deleted + "]";
+  }
   
 }

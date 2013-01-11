@@ -79,5 +79,7 @@ public interface RemoteDataServiceAsync
 
   void findEMailAddresses(List<String> reportIds, AsyncCallback<String> callback);
 
+  void addAppUser(AppUserShared appUserShared, AsyncCallback<Void> callback);
+
 
 }

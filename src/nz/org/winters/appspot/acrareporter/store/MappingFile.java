@@ -113,5 +113,11 @@ public class MappingFile
   {
     version = shared.version;
   }
+
+  @Override
+  public String toString()
+  {
+    return "MappingFile [id=" + id + ", Owner=" + Owner + ", apppackage=" + apppackage + ", version=" + version + ", uploadDate=" + uploadDate + "]";
+  }
   
 }
