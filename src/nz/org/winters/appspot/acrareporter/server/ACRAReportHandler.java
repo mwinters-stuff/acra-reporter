@@ -241,6 +241,15 @@ public class ACRAReportHandler extends HttpServlet
     log.SHARED_PREFERENCES = request.getParameter("SHARED_PREFERENCES");
     log.SETTINGS_SYSTEM = request.getParameter("SETTINGS_SYSTEM");
     log.SETTINGS_SECURE = request.getParameter("SETTINGS_SECURE");
+    log.APPLICATION_LOG   = request.getParameter("APPLICATION_LOG");
+    log.DEVICE_ID         = request.getParameter("DEVICE_ID");
+    log.DROPBOX           = request.getParameter("DROPBOX");
+    log.EVENTSLOG         = request.getParameter("EVENTSLOG");
+    log.MEDIA_CODEC_LIST  = request.getParameter("MEDIA_CODEC_LIST");
+    log.RADIOLOG          = request.getParameter("RADIOLOG");
+    log.SETTINGS_GLOBAL   = request.getParameter("SETTINGS_GLOBAL");
+    log.THREAD_DETAILS    = request.getParameter("THREAD_DETAILS");
+    log.USER_IP           = request.getParameter("USER_IP");
     return log;
   }
 

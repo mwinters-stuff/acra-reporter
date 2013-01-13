@@ -17,6 +17,8 @@ package nz.org.winters.appspot.acrareporter.client.ui;
 import java.util.ArrayList;
 import java.util.Comparator;
 
+import nz.org.winters.appspot.acrareporter.shared.Utils;
+
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
@@ -157,6 +159,8 @@ public class NameValueList extends Composite
   public void setData(String data)
   {
     // TODO Auto-generated method stub
+    if(Utils.isEmpty(data))
+      return;
     ArrayList<NameValueInfo> nvList = new ArrayList<NameValueInfo>();
     
     String[] lines = data.split("\n");

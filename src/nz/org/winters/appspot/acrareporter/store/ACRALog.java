@@ -110,6 +110,39 @@ public class ACRALog
   @Serialize(zip = true)
   public String MAPPED_STACK_TRACE;
 
+  @Unindex
+  @Serialize(zip = true)
+  public String APPLICATION_LOG;
+  
+  public String DEVICE_ID;
+
+  @Unindex
+  @Serialize(zip = true)
+  public String DROPBOX;
+
+  @Unindex
+  @Serialize(zip = true)
+  public String EVENTSLOG;
+
+  @Unindex
+  @Serialize(zip = true)
+  public String MEDIA_CODEC_LIST;
+
+  @Unindex
+  @Serialize(zip = true)
+  public String RADIOLOG;
+
+  @Unindex
+  @Serialize(zip = true)
+  public String SETTINGS_GLOBAL;
+
+  @Unindex
+  @Serialize(zip = true)
+  public String THREAD_DETAILS;
+
+  @Unindex
+  public String USER_IP;
+
   public ACRALogShared toShared()
   {
     ACRALogShared shared = new ACRALogShared();
@@ -148,7 +181,16 @@ public class ACRALog
     shared.SETTINGS_SECURE = SETTINGS_SECURE;
     shared.MAPPED_STACK_TRACE = MAPPED_STACK_TRACE;
     shared.Owner = Owner;
-
+    
+    shared.APPLICATION_LOG = APPLICATION_LOG;
+    shared.DEVICE_ID = DEVICE_ID;
+    shared.DROPBOX = DROPBOX;
+    shared.EVENTSLOG = EVENTSLOG;
+    shared.MEDIA_CODEC_LIST = MEDIA_CODEC_LIST;
+    shared.RADIOLOG = RADIOLOG;
+    shared.SETTINGS_GLOBAL = SETTINGS_GLOBAL;
+    shared.THREAD_DETAILS = THREAD_DETAILS;
+    shared.USER_IP = USER_IP;
     return shared;
   }
 

@@ -67,7 +67,15 @@ public class ACRAReportView extends Composite
   @UiField
   TextArea                              tabDumpSysMemInfo;
   @UiField
+  TextArea                              tabLogApplication;
+  @UiField
   TextArea                              tabLogcat;
+  @UiField
+  TextArea                              tabLogEvents;
+  @UiField
+  TextArea                              tabLogRadio;
+  @UiField
+  TextArea                              tabLogDropbox;
   @UiField
   Tree                                  tabDeviceFeatures;
   @UiField
@@ -78,6 +86,8 @@ public class ACRAReportView extends Composite
   DisclosurePanel                       tabSettingsSystem;
   @UiField
   DisclosurePanel                       tabSettingsSecure;
+  @UiField
+  DisclosurePanel                       tabSettingsGlobal;
   @UiField
   TabLayoutPanel                        tabPanel;
   // @UiField(provided=true)
@@ -102,6 +112,10 @@ public class ACRAReportView extends Composite
   Label                                 textUserAppStartDate;
   @UiField
   Label                                 textUserCrashDate;
+  @UiField
+  Label                                 textDeviceID;
+  @UiField
+  Label                                 textUserIP;
   @UiField
   Label                                 textUserEMail;
   @UiField
@@ -129,6 +143,8 @@ public class ACRAReportView extends Composite
   private LoginInfo mLoginInfo;
   private CallbackMainErrorReports      mCallbackMainErrorReports;
   private final RemoteDataServiceAsync  remoteService = GWT.create(RemoteDataService.class);
+
+  private NameValueList nvlSettingsGlobal;
 
   private static ACRAReportViewUiBinder uiBinder      = GWT.create(ACRAReportViewUiBinder.class);
 
@@ -167,6 +183,8 @@ public class ACRAReportView extends Composite
     nvlSettingsSecure = new NameValueList();
     tabSettingsSecure.add(nvlSettingsSecure);
 
+    nvlSettingsGlobal = new NameValueList();
+    tabSettingsGlobal.add(nvlSettingsGlobal);
   }
 
   AsyncCallback<ACRALogShared> mGetACRALogCallback = new AsyncCallback<ACRALogShared>()
@@ -219,7 +237,11 @@ public class ACRAReportView extends Composite
     nvlDisplay.setData(result.DISPLAY);
     tabUserComment.setText(result.USER_COMMENT);
     tabDumpSysMemInfo.setText(result.DUMPSYS_MEMINFO);
+    tabLogApplication.setText(result.APPLICATION_LOG);
     tabLogcat.setText(result.LOGCAT);
+    tabLogEvents.setText(result.EVENTSLOG);
+    tabLogRadio.setText(result.RADIOLOG);
+    tabLogDropbox.setText(result.DROPBOX);
 
     loadDeviceFeaturesTree(tabDeviceFeatures, result.DEVICE_FEATURES);
 
@@ -227,6 +249,7 @@ public class ACRAReportView extends Composite
     nvlSharedPreferences.setData(result.SHARED_PREFERENCES);
     nvlSettingsSystem.setData(result.SETTINGS_SYSTEM);
     nvlSettingsSecure.setData(result.SETTINGS_SECURE);
+    nvlSettingsGlobal.setData(result.SETTINGS_GLOBAL);
 
     textAppVersionCode.setText(Integer.toString(result.APP_VERSION_CODE));
     textAppVersionName.setText(result.APP_VERSION_NAME);
@@ -240,7 +263,10 @@ public class ACRAReportView extends Composite
     textMemory.setText(result.TOTAL_MEM_SIZE + "/" + result.AVAILABLE_MEM_SIZE);
     textUserAppStartDate.setText(result.USER_APP_START_DATE);
     textUserCrashDate.setText(result.USER_CRASH_DATE);
+    textDeviceID.setText(result.DEVICE_ID);
+    textUserIP.setText(result.USER_IP);
     textUserEMail.setText(result.USER_EMAIL);
+    
 
     checkFixed.setValue(beio.fixed);
     checkLookedAt.setValue(beio.lookedAt);
@@ -311,12 +337,17 @@ public class ACRAReportView extends Composite
     nvlDisplay.clearData();
     tabUserComment.setText("");
     tabDumpSysMemInfo.setText("");
+    tabLogApplication.setText("");
     tabLogcat.setText("");
+    tabLogEvents.setText("");
+    tabLogRadio.setText("");
+    tabLogDropbox.setText("");
     tabDeviceFeatures.clear();
     nvlEnvironment.clearData();
     nvlSharedPreferences.clearData();
     nvlSettingsSystem.clearData();
     nvlSettingsSecure.clearData();
+    nvlSettingsGlobal.clearData();
     textAppVersionCode.setText("");
     textAppVersionName.setText("");
     textAppVersionCode.setText("");
@@ -328,6 +359,9 @@ public class ACRAReportView extends Composite
     textMemory.setText("");
     textUserAppStartDate.setText("");
     textUserCrashDate.setText("");
+    textDeviceID.setText("");
+    textUserIP.setText("");
+
     textUserEMail.setText("");
     checkFixed.setValue(false);
     checkLookedAt.setValue(false);

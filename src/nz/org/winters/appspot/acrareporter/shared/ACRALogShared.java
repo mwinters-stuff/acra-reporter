@@ -66,6 +66,17 @@ public class ACRALogShared implements Serializable, IsSerializable
   public String SETTINGS_SYSTEM ;
   public String SETTINGS_SECURE  ;
   public String MAPPED_STACK_TRACE ;
+  public String APPLICATION_LOG;
+  public String DEVICE_ID;
+  public String DROPBOX;
+  public String EVENTSLOG;
+  public String MEDIA_CODEC_LIST;
+  public String RADIOLOG;
+  public String SETTINGS_GLOBAL;
+  public String THREAD_DETAILS;
+  public String USER_IP;
+
+
 
   @Override
   public String toString()
