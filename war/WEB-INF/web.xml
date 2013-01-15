@@ -79,6 +79,17 @@
 		<url-pattern>/cron/emailjob</url-pattern>
 	</servlet-mapping>
 
+	<servlet>
+		<servlet-name>recalctotalsServlet</servlet-name>
+		<servlet-class>nz.org.winters.appspot.acrareporter.server.RecalcTotals</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>recalctotalsServlet</servlet-name>
+		<url-pattern>/cron/recalctotals</url-pattern>
+	</servlet-mapping>
+	
+		
 	<filter>
 		<filter-name>ObjectifyFilter</filter-name>
 		<filter-class>com.googlecode.objectify.ObjectifyFilter</filter-class>
