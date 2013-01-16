@@ -12,5 +12,11 @@
 		<property name="version" direction="asc" />
 	</datastore-index>
 
+	<datastore-index kind="BasicErrorInfo" ancestor="false"
+		source="manual">
+		<property name="PACKAGE_NAME" direction="asc" />
+		<property name="Timestamp" direction="asc" />
+	</datastore-index>
+
 
 </datastore-indexes>

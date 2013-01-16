@@ -20,6 +20,7 @@ import nz.org.winters.appspot.acrareporter.server.ServerOnlyUtils;
 import nz.org.winters.appspot.acrareporter.shared.AppPackageShared;
 import nz.org.winters.appspot.acrareporter.shared.Counts;
 
+import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
@@ -104,5 +105,9 @@ public class AppPackage
   {
     return "AppPackage [id=" + id + ", Owner=" + Owner + ", PACKAGE_NAME=" + PACKAGE_NAME + ", EMailAddress=" + EMailAddress + ", EMailSubject=" + EMailSubject + ", EMailTemplate=" + EMailTemplate + ", AuthString=" + AuthString + ", AppName=" + AppName + ", Totals=" + Totals.toString() + "]";
   }
-  
+  public void save()
+  {
+    ObjectifyService.ofy().save().entity(this);
+  }
+
 }

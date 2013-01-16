@@ -20,6 +20,7 @@ import java.util.Date;
 
 import nz.org.winters.appspot.acrareporter.shared.ACRALogShared;
 
+import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
@@ -194,14 +195,7 @@ public class ACRALog
     return shared;
   }
 
-  @OnLoad
-  void onLoad()
-  {
-    if (this.Owner == null)
-    {
-      this.Owner = 12038L;
-    }
-  }
+ 
 
   @Override
   public String toString()
@@ -209,5 +203,9 @@ public class ACRALog
     return "ACRALog [id=" + id + ", Owner=" + Owner + ", Timestamp=" + Timestamp + ", REPORT_ID=" + REPORT_ID + ", APP_VERSION_NAME=" + APP_VERSION_NAME + ", PACKAGE_NAME=" + PACKAGE_NAME + "]";
   }
 
-  
+  public void save()
+  {
+    ObjectifyService.ofy().save().entity(this);
+  }
+
 }

@@ -165,7 +165,7 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
     user.Totals.incDeleted();
     DailyCounts counts = DailyCounts.getToday(getOwnerId(user));
     counts.incDeleted();
-    counts.commit();
+    counts.save();
 
     if (bei.lookedAt)
     {
@@ -178,8 +178,8 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
       user.Totals.decFixed();
     }
 
-    ObjectifyService.ofy().save().entity(ap);
-    ObjectifyService.ofy().save().entity(user);
+    ap.save();
+    user.save();
   }
 
   @Override
@@ -191,24 +191,28 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
       if (bei.lookedAt != state)
       {
         bei.lookedAt = state;
-        ObjectifyService.ofy().save().entity(bei);
+        bei.save();
         AppUser user = getAppUser(bei.Owner);
         AppPackage ap = getAppPackage(bei.PACKAGE_NAME);
-        DailyCounts counts = DailyCounts.getToday(getOwnerId(user));
+        DailyCounts userCounts = DailyCounts.getToday(getOwnerId(user));
+        DailyCounts packageCounts = DailyCounts.getToday(bei.PACKAGE_NAME);
         if (state)
         {
           ap.Totals.incLookedAt();
           user.Totals.incLookedAt();
-          counts.incLookedAt();
+          userCounts.incLookedAt();
+          packageCounts.incLookedAt();
         } else
         {
           ap.Totals.decLookedAt();
           user.Totals.decLookedAt();
-          counts.decLookedAt();
+          userCounts.decLookedAt();
+          packageCounts.decLookedAt();
         }
-        ObjectifyService.ofy().save().entity(ap);
-        ObjectifyService.ofy().save().entity(user);
-        counts.commit();
+        ap.save();
+        user.save();
+        userCounts.save();
+        packageCounts.save();
       }
     }
 
@@ -223,24 +227,47 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
       if (bei.fixed != state)
       {
         bei.fixed = state;
-        ObjectifyService.ofy().save().entity(bei);
         AppUser user = getAppUser(bei.Owner);
         AppPackage ap = getAppPackage(bei.PACKAGE_NAME);
-        DailyCounts counts = DailyCounts.getToday(getOwnerId(user));
+        DailyCounts userCounts = DailyCounts.getToday(getOwnerId(user));
+        DailyCounts packageCounts = DailyCounts.getToday(bei.PACKAGE_NAME);
         if (state)
         {
           ap.Totals.incFixed();
           user.Totals.incFixed();
-          counts.incFixed();
+          userCounts.incFixed();
+          packageCounts.incFixed();
         } else
         {
           ap.Totals.decFixed();
           user.Totals.decFixed();
-          counts.decFixed();
+          userCounts.decFixed();
+          packageCounts.decFixed();
+
         }
-        ObjectifyService.ofy().save().entity(ap);
-        ObjectifyService.ofy().save().entity(user);
-        counts.commit();
+        
+        if(state && !bei.lookedAt)
+        {
+        	bei.lookedAt = true;
+            ap.Totals.incLookedAt();
+            user.Totals.incLookedAt();
+            userCounts.incLookedAt();
+            packageCounts.incLookedAt();
+        }else if(!state && bei.lookedAt)
+        {
+        	bei.lookedAt = false;
+            ap.Totals.decLookedAt();
+            user.Totals.decLookedAt();
+            userCounts.decLookedAt();
+            packageCounts.decLookedAt();
+        }
+
+        bei.save();
+        ap.save();
+        user.save();
+        userCounts.save();
+        packageCounts.save();
+
       }
     }
 
@@ -258,7 +285,7 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
       if (mapping != null)
       {
         acraLog.MAPPED_STACK_TRACE = StringReTrace.doReTrace(mapping.mapping, acraLog.STACK_TRACE);
-        ObjectifyService.ofy().save().entity(acraLog);
+        acraLog.save();
       } else
       {
         throw new IllegalArgumentException("No Maching Mapping");
@@ -277,7 +304,7 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
     if (bei != null)
     {
       bei.emailed = state;
-      ObjectifyService.ofy().save().entity(bei);
+      bei.save();
 
     }
 
@@ -332,7 +359,7 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
     if (app != null)
     {
       app.fromShared(appPackageShared);
-      ObjectifyService.ofy().save().entity(app);
+      app.save();
     }
 
   }
@@ -343,7 +370,7 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
     AppPackage app = new AppPackage();
     app.fromShared(appPackageShared);
     app.Owner = getOwnerId(getAppUser(loginInfo));
-    ObjectifyService.ofy().save().entity(app);
+    app.save();
 
   }
 
@@ -359,7 +386,7 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
     if (appUser != null)
     {
       appUser.fromShared(appUserShared);
-      ObjectifyService.ofy().save().entity(appUser);
+      appUser.save();
     }
 
   }
@@ -380,7 +407,7 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
     ap.isUser = true;
     ap.isSubscriptionPaid = true;
 
-    ObjectifyService.ofy().save().entity(ap);
+    ap.save();
 
     try
     {
@@ -436,7 +463,7 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
   {
     MappingFile mf = ObjectifyService.ofy().load().type(MappingFile.class).id(id).get();
     mf.setVersion(version);
-    ObjectifyService.ofy().save().entity(mf);
+    mf.save();
 
   }
 
@@ -483,31 +510,26 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
       appPackage.Totals.Fixed = appPackage.Totals.Fixed + fixed;
       appPackage.Totals.LookedAt = appPackage.Totals.LookedAt + fixed;
 
-      ObjectifyService.ofy().save().entity(appPackage);
+      appPackage.save();
 
       appUser.Totals.Deleted = appUser.Totals.Deleted + reportIds.size();
       appUser.Totals.Reports = appUser.Totals.Deleted - reportIds.size();
       appUser.Totals.Fixed = appUser.Totals.Fixed + fixed;
       appUser.Totals.LookedAt = appUser.Totals.LookedAt + fixed;
 
-      ObjectifyService.ofy().save().entity(appUser);
-      DailyCounts counts = DailyCounts.getToday(owner);
+      appUser.save();
+      DailyCounts userCounts = DailyCounts.getToday(owner);
+      DailyCounts packageCounts = DailyCounts.getToday(appPackage.PACKAGE_NAME);
 
-      counts.incDeletedToday(reportIds.size());
-      counts.commit();
+      userCounts.incDeletedToday(reportIds.size());
+      packageCounts.incDeletedToday(reportIds.size());
+
+      userCounts.save();
+      packageCounts.save();
 
     }
 
   }
-
-  // // incremenet counters.
-  // appUser.Totals.incReports();
-  // ObjectifyService.ofy().save().entity(appUser);
-  //
-  // appPackage.Totals.incReports();
-  // ObjectifyService.ofy().save().entity(appPackage);
-  //
-  // DailyCounts.incReportToday();
 
   public AppPackage getAppPackage(String packageName)
   {
@@ -591,7 +613,7 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
     ap.isUser = true;
     ap.isSubscriptionPaid = true;
 
-    ObjectifyService.ofy().save().entity(ap);
+    ap.save();
 
     // analytics.
     if (Configuration.gaTrackingID != null && SystemProperty.environment.value() == SystemProperty.Environment.Value.Production)

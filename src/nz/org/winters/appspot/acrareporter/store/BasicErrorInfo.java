@@ -24,6 +24,7 @@ import java.util.Date;
 
 import nz.org.winters.appspot.acrareporter.shared.BasicErrorInfoShared;
 
+import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
@@ -100,14 +101,6 @@ public class BasicErrorInfo
     return shared;
   }
 
-  @OnLoad
-  void onLoad()
-  {
-    if (this.Owner == null)
-    {
-      this.Owner = 12038L;
-    }
-  }
 
   @Override
   public String toString()
@@ -115,4 +108,9 @@ public class BasicErrorInfo
     return "BasicErrorInfo [id=" + id + ", Owner=" + Owner + ", Timestamp=" + Timestamp + ", APP_VERSION_NAME=" + APP_VERSION_NAME + ", PACKAGE_NAME=" + PACKAGE_NAME + ", REPORT_ID=" + REPORT_ID + ", ANDROID_VERSION=" + ANDROID_VERSION + ", USER_CRASH_DATE=" + USER_CRASH_DATE + ", lookedAt="
         + lookedAt + ", fixed=" + fixed + ", emailed=" + emailed + "]";
   }
+  public void save()
+  {
+    ObjectifyService.ofy().save().entity(this);
+  }
+
 }

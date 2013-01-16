@@ -85,7 +85,7 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
               appUser.isSubscriptionPaid = true;
               appUser.isSuperDude = true;
               appUser.isUser = true;
-              ObjectifyService.ofy().save().entity(appUser);
+              appUser.save();
               loginInfo.setLoggedIn(true);
             } else
             {
@@ -112,7 +112,7 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
               appUser.isSubscriptionPaid = true;
               appUser.isSuperDude = true;
               appUser.isUser = true;
-              ObjectifyService.ofy().save().entity(appUser);
+              appUser.save();
             }
             loginInfo.setAppUserShared(appUser.toShared());
             loginInfo.setLoggedIn(true);

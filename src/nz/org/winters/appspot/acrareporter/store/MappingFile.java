@@ -21,6 +21,7 @@ import java.util.Date;
 
 import nz.org.winters.appspot.acrareporter.shared.MappingFileShared;
 
+import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
@@ -118,6 +119,10 @@ public class MappingFile
   public String toString()
   {
     return "MappingFile [id=" + id + ", Owner=" + Owner + ", apppackage=" + apppackage + ", version=" + version + ", uploadDate=" + uploadDate + "]";
+  }
+  public void save()
+  {
+    ObjectifyService.ofy().save().entity(this);
   }
   
 }

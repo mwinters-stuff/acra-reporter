@@ -21,6 +21,7 @@ import nz.org.winters.appspot.acrareporter.server.ServerOnlyUtils;
 import nz.org.winters.appspot.acrareporter.shared.AppUserShared;
 import nz.org.winters.appspot.acrareporter.shared.Counts;
 
+import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
@@ -109,4 +110,9 @@ public class AppUser
     return "AppUser [id=" + id + ", EMailAddress=" + EMailAddress + ", FirstName=" + FirstName + ", LastName=" + LastName + ", City=" + City + ", Country=" + Country + ", AnalyticsTrackingId=" + AnalyticsTrackingId + ", AuthString=" + AuthString + ", isSuperDude=" + isSuperDude + ", isUser="
         + isUser + ", isSubscriptionPaid=" + isSubscriptionPaid + ", adminAppUserId=" + adminAppUserId + ", Totals=" + Totals + "]";
   }
+  public void save()
+  {
+    ObjectifyService.ofy().save().entity(this);
+  }
+
 }

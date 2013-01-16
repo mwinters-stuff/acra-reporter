@@ -1,6 +1,7 @@
 package nz.org.winters.appspot.acrareporter.server;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServlet;
@@ -11,6 +12,7 @@ import nz.org.winters.appspot.acrareporter.shared.Utils;
 import nz.org.winters.appspot.acrareporter.store.AppPackage;
 import nz.org.winters.appspot.acrareporter.store.AppUser;
 import nz.org.winters.appspot.acrareporter.store.BasicErrorInfo;
+import nz.org.winters.appspot.acrareporter.store.DailyCounts;
 import nz.org.winters.appspot.acrareporter.store.RegisterDataStores;
 
 import com.googlecode.objectify.ObjectifyService;
@@ -29,7 +31,7 @@ public class RecalcTotals extends HttpServlet {
 			throws IOException {
 		resp.setContentType("text/plain");
 
-		
+	
 		try {
 			String useremail = req.getParameter("user");
 			if(Utils.isEmpty(useremail))
@@ -47,6 +49,10 @@ public class RecalcTotals extends HttpServlet {
 			
 			user.Totals.clear();
 			
+			List<DailyCounts> dc = ObjectifyService.ofy().load().type(DailyCounts.class).filter("Owner", user.id).list();
+			ObjectifyService.ofy().delete().entities(dc);
+			dc.clear();
+			
 			resp.getWriter().println("User: "+ user.Totals.toString());
 			
 			List<AppPackage> appPackages = ObjectifyService.ofy().load().type(AppPackage.class).filter("Owner", user.id).list();
@@ -55,29 +61,75 @@ public class RecalcTotals extends HttpServlet {
 			{
 				resp.getWriter().println("Package: " + appPackage.PACKAGE_NAME + " = " + appPackage.Totals.toString());
 				appPackage.Totals.clear();
+
+				dc = ObjectifyService.ofy().load().type(DailyCounts.class).filter("PACKAGE_NAME", appPackage.PACKAGE_NAME).list();
+				ObjectifyService.ofy().delete().entities(dc);
+				dc.clear();
+        
+				DailyCounts packageDaily = null;
+        DailyCounts userDaily = null;
 				
-				List<BasicErrorInfo> basicErrorInfos = ObjectifyService.ofy().load().type(BasicErrorInfo.class).filter("PACKAGE_NAME", appPackage.PACKAGE_NAME).list();
+				List<BasicErrorInfo> basicErrorInfos = ObjectifyService.ofy().load().type(BasicErrorInfo.class).filter("PACKAGE_NAME", appPackage.PACKAGE_NAME).order("Timestamp").list();
 				for(BasicErrorInfo basicErrorInfo: basicErrorInfos)
 				{
+				  DailyCounts.getDate(user.id, basicErrorInfo.Timestamp);
+					if(userDaily == null || packageDaily == null || !packageDaily.date.equals(DailyCounts.removeTimeFromDate(basicErrorInfo.Timestamp)) || !userDaily.date.equals(DailyCounts.removeTimeFromDate(basicErrorInfo.Timestamp)))
+					{
+					  if(userDaily != null)
+					  {
+					    userDaily.save();
+					  }
+					  if(packageDaily != null)
+					  {
+					    packageDaily.save();
+					  }
+	          userDaily = DailyCounts.getDate(user.id, basicErrorInfo.Timestamp);
+	          packageDaily = DailyCounts.getDate(basicErrorInfo.PACKAGE_NAME, basicErrorInfo.Timestamp);
+					  
+					}
+					  
+					  
+					
+					userDaily.incReports();
+					packageDaily.incReports();
+					
 					user.Totals.incReports();
 					appPackage.Totals.incReports();
 					
 					if(basicErrorInfo.fixed)
 					{
+						userDaily.incFixed();
+						packageDaily.incFixed();
 						user.Totals.incFixed();
 						appPackage.Totals.incFixed();
 					}
+					if(basicErrorInfo.fixed && !basicErrorInfo.lookedAt)
+					{
+						basicErrorInfo.lookedAt = true;
+						basicErrorInfo.save();
+					}
 					if(basicErrorInfo.lookedAt)
 					{
+						userDaily.incLookedAt();
+						packageDaily.incLookedAt();
 						user.Totals.incLookedAt();
 						appPackage.Totals.incLookedAt();
 					}
 				}
+        if(userDaily != null)
+        {
+          userDaily.save();
+        }
+        if(packageDaily != null)
+        {
+          packageDaily.save();
+        }
+				
 				resp.getWriter().println("Package: " + appPackage.PACKAGE_NAME + " = " + appPackage.Totals.toString());
 				
 			}
 			ObjectifyService.ofy().save().entities(appPackages);
-			ObjectifyService.ofy().save().entity(user);
+			user.save();
 			resp.getWriter().println("User: "+ user.Totals.toString());
 
 		} catch (Exception e) {

@@ -156,7 +156,7 @@ public class MappingFileHandler extends HttpServlet
       MappingFile mapping = new MappingFile(appUser, apppackage, version);
       mapping.add(data);
 
-      ObjectifyService.ofy().save().entity(mapping);
+      mapping.save();
 
       if (SystemProperty.environment.value() == SystemProperty.Environment.Value.Production)
       {

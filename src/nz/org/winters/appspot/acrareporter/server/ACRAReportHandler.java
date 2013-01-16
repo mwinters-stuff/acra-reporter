@@ -145,7 +145,7 @@ public class ACRAReportHandler extends HttpServlet
         basicInfo.USER_CRASH_DATE = acraLog.USER_CRASH_DATE;
         basicInfo.Timestamp = acraLog.Timestamp;
 
-        ObjectifyService.ofy().save().entity(basicInfo);
+        basicInfo.save();
 
         // find mapping.
         MappingFile mapping = ObjectifyService.ofy().load().type(MappingFile.class).filter("apppackage", acraLog.PACKAGE_NAME).filter("version", acraLog.APP_VERSION_NAME).first().get();
@@ -154,18 +154,22 @@ public class ACRAReportHandler extends HttpServlet
           acraLog.MAPPED_STACK_TRACE = StringReTrace.doReTrace(mapping.mapping, acraLog.STACK_TRACE);
         }
 
-        ObjectifyService.ofy().save().entity(acraLog);
+        acraLog.save();
 
         // incremenet counters.
         appUser.Totals.incReports();
-        ObjectifyService.ofy().save().entity(appUser);
+        appUser.save();
 
         appPackage.Totals.incReports();
-        ObjectifyService.ofy().save().entity(appPackage);
+        appPackage.save();
 
         DailyCounts counts = DailyCounts.getToday(appUser.id);
         counts.incReports();
-        counts.commit();
+        counts.save();
+
+        counts = DailyCounts.getToday(acraLog.PACKAGE_NAME);
+        counts.incReports();
+        counts.save();
 
         // analytics.
         if (SystemProperty.environment.value() == SystemProperty.Environment.Value.Production)
