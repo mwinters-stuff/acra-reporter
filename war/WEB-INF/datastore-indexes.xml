@@ -18,5 +18,9 @@
 		<property name="Timestamp" direction="asc" />
 	</datastore-index>
 
-
+    <datastore-index kind="DailyCounts" ancestor="false">
+        <property name="Owner" direction="asc"/>
+        <property name="date" direction="asc"/>
+        <property name="PACKAGE_NAME" direction="asc"/>
+    </datastore-index>
 </datastore-indexes>
