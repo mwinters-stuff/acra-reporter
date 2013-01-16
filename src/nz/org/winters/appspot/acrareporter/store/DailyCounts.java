@@ -58,16 +58,16 @@ public class DailyCounts extends Counts
 
   }
 
-  public static DailyCounts getDate(Long owner, Date date)
+  public static DailyCounts getDate(Long owner, Date datein)
   {
-    date = removeTimeFromDate(date);
+    datein = removeTimeFromDate(datein);
 
-    DailyCounts counts = ObjectifyService.ofy().load().type(DailyCounts.class).filter("Owner", owner).filter("date", date).first().get();
+    DailyCounts counts = ObjectifyService.ofy().load().type(DailyCounts.class).filter("Owner", owner).filter("date", datein).first().get();
     if (counts == null)
     {
       counts = new DailyCounts();
       counts.Owner = owner;
-      counts.date = date;
+      counts.date = datein;
     }
     return counts;
   }
@@ -78,59 +78,43 @@ public class DailyCounts extends Counts
 
   }
 
-  // want to remove any time zone informaiton,  just get day month year utc.
-  public static Date removeTimeFromDate(Date date) 
+  // want to remove any time zone informaiton, just get day month year utc.
+  public static Date removeTimeFromDate(Date datein)
   {
-    if(date == null)
+    if (datein == null)
     {
-      date = new Date();
+      datein = new Date();
     }
     DateFormat dfm = DateFormat.getDateInstance(DateFormat.SHORT);
-    String df = dfm.format(date);
+    String df = dfm.format(datein);
     Date newdate;
     try
     {
       newdate = dfm.parse(df);
     } catch (ParseException e)
     {
-      
-      newdate = date;
+
+      newdate = datein;
     }
-    
-//    Calendar today = GregorianCalendar.getInstance();
-//    if (date != null)
-//    {
-//      Calendar input = GregorianCalendar.getInstance();
-//      input.setTime(date);
-//      
-//      today.set(Calendar.YEAR,input.get(Calendar.YEAR));
-//      today.set(Calendar.MONTH,input.get(Calendar.MONTH));
-//      today.set(Calendar.DAY_OF_MONTH,input.get(Calendar.DAY_OF_MONTH));
-//    }      
-//     
-//    today.set(Calendar.HOUR, 0);
-//    today.set(Calendar.MINUTE, 0);
-//    today.set(Calendar.SECOND, 0);
-//    today.set(Calendar.MILLISECOND, 0);
-    return newdate;//today.getTime();
+    return newdate;
   }
-  
-  public static DailyCounts getDate(String package_name, Date date)
+
+  public static DailyCounts getDate(String package_name, Date datein)
   {
-      
-    date = removeTimeFromDate(date);
-    
-    DailyCounts counts = ObjectifyService.ofy().load().type(DailyCounts.class).filter("PACKAGE_NAME", package_name).filter("date", date).first().get();
+
+    datein = removeTimeFromDate(datein);
+
+    DailyCounts counts = ObjectifyService.ofy().load().type(DailyCounts.class).filter("PACKAGE_NAME", package_name).filter("date", datein).first().get();
     if (counts == null)
     {
       counts = new DailyCounts();
       counts.PACKAGE_NAME = package_name;
-      counts.date = date;
+      counts.date = datein;
     }
     return counts;
   }
 
-  public static List<DailyCounts> getAllYesterday()
+  public static List<DailyCounts> getAllUsersDaysBack(int daysBack)
   {
     Calendar yesterday = GregorianCalendar.getInstance();
     yesterday.set(Calendar.HOUR, 0);
@@ -138,9 +122,32 @@ public class DailyCounts extends Counts
     yesterday.set(Calendar.SECOND, 0);
     yesterday.set(Calendar.MILLISECOND, 0);
 
-    yesterday.add(Calendar.DAY_OF_MONTH, -1);
-    Date yd = yesterday.getTime();
-    return ObjectifyService.ofy().load().type(DailyCounts.class).filter("date", yd).list();
+    yesterday.add(Calendar.DAY_OF_MONTH, -daysBack);
+    Date yd = removeTimeFromDate(yesterday.getTime());
+    return ObjectifyService.ofy().load().type(DailyCounts.class).filter("PACKAGE_NAME", null).filter("date", yd).list();
+  }
+
+  public static List<DailyCounts> getAllUsersYesterday()
+  {
+    return getAllUsersDaysBack(1);
+  }
+
+  public static List<DailyCounts> getAllUserPackagesYesterday(Long owner)
+  {
+    return getAllUserPackagesDaysBack(owner, 1);
+  }
+
+  public static List<DailyCounts> getAllUserPackagesDaysBack(Long owner, int daysBack)
+  {
+    Calendar yesterday = GregorianCalendar.getInstance();
+    yesterday.set(Calendar.HOUR, 0);
+    yesterday.set(Calendar.MINUTE, 0);
+    yesterday.set(Calendar.SECOND, 0);
+    yesterday.set(Calendar.MILLISECOND, 0);
+
+    yesterday.add(Calendar.DAY_OF_MONTH, -daysBack);
+    Date yd = removeTimeFromDate(yesterday.getTime());
+    return ObjectifyService.ofy().load().type(DailyCounts.class).filter("Owner", owner).filter("PACKAGE_NAME !=", null).filter("date", yd).list();
   }
 
   public void save()
@@ -168,6 +175,12 @@ public class DailyCounts extends Counts
     Deleted = Deleted + count;
   }
 
+  public String dateString()
+  {
+    DateFormat dfm = DateFormat.getDateInstance(DateFormat.SHORT);
+    return dfm.format(date);
+  }
+  
   @Override
   public String toString()
   {

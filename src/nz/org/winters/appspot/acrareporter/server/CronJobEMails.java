@@ -35,6 +35,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.googlecode.objectify.ObjectifyService;
 
 import nz.org.winters.appspot.acrareporter.shared.Configuration;
+import nz.org.winters.appspot.acrareporter.shared.Utils;
 import nz.org.winters.appspot.acrareporter.store.AppPackage;
 import nz.org.winters.appspot.acrareporter.store.AppUser;
 import nz.org.winters.appspot.acrareporter.store.DailyCounts;
@@ -59,29 +60,36 @@ public class CronJobEMails extends HttpServlet
   {
     return ObjectifyService.ofy().load().type(AppPackage.class).filter("Owner", owner).list();
   }
-  
+
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException
   {
     resp.setContentType("text/plain");
 
     RemoteDataServiceImpl remote = new RemoteDataServiceImpl();
 
-    // get todays daily counts
-    List<DailyCounts> counts = DailyCounts.getAllYesterday();
 
-    //resp.getWriter().println("NUM DAILY COUNTS: " + counts.size());
+    int daysBack = 1;
+    if (!Utils.isEmpty(req.getParameter("daysback")))
+    {
+      daysBack = Integer.parseInt(req.getParameter("daysback"));
+    }
+
+    // resp.getWriter().println("NUM DAILY COUNTS: " + counts.size());
+    // get todays daily counts
+    List<DailyCounts> counts = DailyCounts.getAllUsersDaysBack(daysBack);
 
     for (DailyCounts count : counts)
     {
-     // resp.getWriter().println("COUNT: " + count.toString());
+      // resp.getWriter().println("COUNT: " + count.toString());
       AppUser user = remote.getAppUser(count.Owner);
-    //  resp.getWriter().println("USER: " + user.toString());
+      // resp.getWriter().println("USER: " + user.toString());
 
       if (user.isSubscriptionPaid)
       {
         try
         {
-          //resp.getWriter().println("SEND MESSAGE");
+          // resp.getWriter().println("SEND MESSAGE");
+          List<DailyCounts> packagesYesterday = DailyCounts.getAllUserPackagesDaysBack(user.id,daysBack);
 
           Properties props = new Properties();
           Session session = Session.getInstance(props, null);
@@ -90,14 +98,28 @@ public class CronJobEMails extends HttpServlet
           msg.addRecipient(Message.RecipientType.TO, new InternetAddress(user.EMailAddress, user.FirstName + " " + user.LastName));
           msg.setSubject("ACRA Reports Summary for - " + count.date.toString());
 
-          String bodyText = "Overall: \r\n" + "      Reports: " + count.Reports + "\r\n" + "        Fixed: " + count.Fixed + "\r\n" + "    Looked At: " + count.LookedAt + "\r\n" + "      Deleted: " + count.Deleted + "\r\n\r\n" + "Package Totals\r\n"
-              + "Package                                              Reports     Fixed Looked At    Deleted\r\n" + 
-                "-------------------------------------------------- --------- --------- ---------  ---------\r\n";
-
           StringBuilder sb = new StringBuilder();
           Formatter formatter = new Formatter(sb, Locale.US);
+          String bodyText;
           try
           {
+            sb.append("Overall for " + count.dateString() + ": \r\n" + "      Reports: " + count.Reports + "\r\n" + "        Fixed: " + count.Fixed + "\r\n" + "    Looked At: " + count.LookedAt + "\r\n" + "      Deleted: " + count.Deleted + "\r\n\r\n");
+
+            if(!packagesYesterday.isEmpty())
+            {
+              String datestr = packagesYesterday.get(0).dateString();
+              sb.append(datestr + " Package Totals\r\n" + "Package                                              Reports     Fixed Looked At    Deleted\r\n" + "-------------------------------------------------- --------- --------- ---------  ---------\r\n");
+  
+              for (DailyCounts dailyPackage : packagesYesterday)
+              {
+                formatter.format("%-50s %9d %9d %9d %9d\r\n", dailyPackage.PACKAGE_NAME, dailyPackage.Reports, dailyPackage.Fixed, dailyPackage.LookedAt, dailyPackage.Deleted);
+              }
+              // resp.getWriter().println("PACKAGE: " + sb.toString() );
+  
+              sb.append("\r\n\r\n");
+            }
+            
+            sb.append("Package Totals\r\n" + "Package                                              Reports     Fixed Looked At    Deleted\r\n" + "-------------------------------------------------- --------- --------- ---------  ---------\r\n");
 
             // get each package and list totals.
             List<AppPackage> apppackages = getPackages(count.Owner);
@@ -105,36 +127,35 @@ public class CronJobEMails extends HttpServlet
             {
               formatter.format("%-50s %9d %9d %9d %9d\r\n", apppackage.PACKAGE_NAME, apppackage.Totals.Reports, apppackage.Totals.Fixed, apppackage.Totals.LookedAt, apppackage.Totals.Deleted);
             }
-          //  resp.getWriter().println("PACKAGE: " + sb.toString() );
-            bodyText = bodyText + sb.toString();
+            // resp.getWriter().println("PACKAGE: " + sb.toString() );
+            bodyText = sb.toString();
           } finally
           {
             formatter.close();
           }
 
-          
-          
           MimeBodyPart messageBodyPart = new MimeBodyPart();
-          
+
           messageBodyPart.setContent("<pre>" + bodyText + "</pre>", "text/html");
 
           MimeMultipart multipart = new MimeMultipart();
 
           MimeBodyPart messageBodyPartText = new MimeBodyPart();
-          
+
           messageBodyPartText.setContent(bodyText, "text/plain");
-          
+
           multipart.addBodyPart(messageBodyPart);
           multipart.addBodyPart(messageBodyPartText);
           msg.setContent(multipart);
-          
-          
-          //msg.setText(bodyText);
+
+          resp.getWriter().println(bodyText);
+
+          // msg.setText(bodyText);
 
           Transport.send(msg);
         } catch (Exception e)
         {
-          resp.getWriter().println("ERROR: " + e.toString() );
+          resp.getWriter().println("ERROR: " + e.toString());
           e.printStackTrace();
           // log.warning("Exception " + e.getMessage());
         }
