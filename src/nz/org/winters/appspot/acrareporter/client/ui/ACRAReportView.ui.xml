@@ -6,7 +6,7 @@
 	</ui:style>
 	<g:CaptionPanel captionText="Selected Error" ui:field="captionPanelCenter">
 		<g:DockLayoutPanel unit="PX" width="100%" height="100%">
-			<g:north size="110">
+			<g:north size="126">
 				<g:FlowPanel width="100%" height="100%">
 					<g:HorizontalPanel>
 						<g:HorizontalPanel spacing="2">

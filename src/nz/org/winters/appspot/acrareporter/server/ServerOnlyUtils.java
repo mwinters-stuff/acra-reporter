@@ -1,4 +1,9 @@
 package nz.org.winters.appspot.acrareporter.server;
+import java.util.ArrayList;
+import java.util.List;
+
+import nz.org.winters.appspot.acrareporter.store.AppPackage;
+
 /*
  * Copyright 2013 Mathew Winters
 
@@ -15,6 +20,8 @@ package nz.org.winters.appspot.acrareporter.server;
  * limitations under the License.
 */
 import org.apache.commons.codec.binary.Base64;
+
+import com.googlecode.objectify.ObjectifyService;
 
 public class ServerOnlyUtils
 {
@@ -46,6 +53,17 @@ public class ServerOnlyUtils
   public static boolean isEmpty(String in)
   {
     return in == null || in.isEmpty();
+  }
+ 
+  public static List<String> getPackageNames(Long owner)
+  {
+    List<AppPackage> appPackages = ObjectifyService.ofy().load().type(AppPackage.class).filter("Owner", owner).list();
+    List<String> packageNames = new ArrayList<String>();
+    for(AppPackage appPackage: appPackages)
+    {
+      packageNames.add(appPackage.PACKAGE_NAME);
+    }
+    return packageNames;
   }
   
 }

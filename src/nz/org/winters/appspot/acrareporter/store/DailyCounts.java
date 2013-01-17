@@ -19,11 +19,13 @@ package nz.org.winters.appspot.acrareporter.store;
 // counters for daily reporting.
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
+import nz.org.winters.appspot.acrareporter.server.ServerOnlyUtils;
 import nz.org.winters.appspot.acrareporter.shared.Counts;
 
 import com.googlecode.objectify.ObjectifyService;
@@ -147,7 +149,11 @@ public class DailyCounts extends Counts
 
     yesterday.add(Calendar.DAY_OF_MONTH, -daysBack);
     Date yd = removeTimeFromDate(yesterday.getTime());
-    return ObjectifyService.ofy().load().type(DailyCounts.class).filter("Owner", owner).filter("PACKAGE_NAME !=", null).filter("date", yd).list();
+    
+    
+    List<String> packageNames = ServerOnlyUtils.getPackageNames(owner);
+    
+    return ObjectifyService.ofy().load().type(DailyCounts.class).filter("PACKAGE_NAME IN", packageNames).filter("date", yd).list();
   }
 
   public void save()

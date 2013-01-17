@@ -17,18 +17,17 @@ package nz.org.winters.appspot.acrareporter.client;
 import java.util.Iterator;
 import java.util.List;
 
-import nz.org.winters.appspot.acrareporter.client.ui.ACRAReportView;
 import nz.org.winters.appspot.acrareporter.client.ui.AppLoadingView;
+import nz.org.winters.appspot.acrareporter.client.ui.AppPackageView;
 import nz.org.winters.appspot.acrareporter.client.ui.FrontPage;
-import nz.org.winters.appspot.acrareporter.client.ui.MainErrorsList;
 import nz.org.winters.appspot.acrareporter.client.ui.MappingList;
 import nz.org.winters.appspot.acrareporter.client.ui.MappingUpload;
 import nz.org.winters.appspot.acrareporter.client.ui.PackageEdit;
 import nz.org.winters.appspot.acrareporter.client.ui.SignUp;
 import nz.org.winters.appspot.acrareporter.client.ui.UserEdit;
-import nz.org.winters.appspot.acrareporter.shared.Configuration;
 import nz.org.winters.appspot.acrareporter.shared.AppPackageShared;
 import nz.org.winters.appspot.acrareporter.shared.BasicErrorInfoShared;
+import nz.org.winters.appspot.acrareporter.shared.Configuration;
 import nz.org.winters.appspot.acrareporter.shared.LoginInfo;
 
 import com.google.gwt.core.client.EntryPoint;
@@ -98,9 +97,8 @@ public class ViewErrorReports implements EntryPoint, ChangeHandler
   Button                                  buttonLogout;
   @UiField Label textAppStats;
   @UiField Label textUserStats;
-
-  MainErrorsList                          mMainErrorsList;
-  protected BasicErrorInfoShared          mSelectedBasicErrorInfo;
+  
+  private AppPackageView mAppPackageView;
 
   interface ViewErrorReportsUiBinder extends UiBinder<Widget, ViewErrorReports>
   {
@@ -122,7 +120,7 @@ public class ViewErrorReports implements EntryPoint, ChangeHandler
   private List<AppPackageShared>       listAppPackages;
 
   private LoginInfo                    loginInfo     = null;
-  private ACRAReportView               mACRAREportView;
+
 //  private boolean                      mSignup;
 
   // private VerticalPanel loginPanel = new VerticalPanel();
@@ -283,10 +281,8 @@ public class ViewErrorReports implements EntryPoint, ChangeHandler
     RootLayoutPanel.get().clear();
     RootLayoutPanel.get().add(uiBinder.createAndBindUi(this));
 
-    mMainErrorsList = new MainErrorsList(mCallbackMainErrorReports);
-    mACRAREportView = new ACRAReportView(mCallbackMainErrorReports);
-    dockLayoutPanel.addWest(mMainErrorsList, 280);
-    dockLayoutPanel.add(mACRAREportView);
+    mAppPackageView = new AppPackageView(loginInfo, mCallbackMainErrorReports);
+    dockLayoutPanel.add(mAppPackageView);
 
     appsCombo.addChangeHandler(this);
     
@@ -295,7 +291,7 @@ public class ViewErrorReports implements EntryPoint, ChangeHandler
     textAppStats.setText("");
 
     setupMenus();
-    mACRAREportView.clearData();
+ 
 
     remoteService.getPackages(loginInfo, mGetPackages);
 
@@ -337,8 +333,8 @@ public class ViewErrorReports implements EntryPoint, ChangeHandler
                                                          {
                                                            appsCombo.setSelectedIndex(selectIndex);
                                                            String apppackage = listAppPackages.get(selectIndex).PACKAGE_NAME;
-                                                           mMainErrorsList.setAppPackage(apppackage);
-                                                           remoteService.getPackage(apppackage, new AsyncGetPackage());
+                                                           mAppPackageView.setAppPackage(apppackage);
+                                                         
                                                          } else
                                                          {
                                                            stopLoading();
@@ -494,15 +490,15 @@ public class ViewErrorReports implements EntryPoint, ChangeHandler
   @Override
   public void onChange(ChangeEvent event)
   {
-    mACRAREportView.clearData();
+    mAppPackageView.clearData();
     if (appsCombo.getSelectedIndex() >= 0)
     {
       startLoading();
       String apppackage = listAppPackages.get(appsCombo.getSelectedIndex()).PACKAGE_NAME;
 
-      mMainErrorsList.setAppPackage(apppackage);
+      mAppPackageView.setAppPackage(apppackage);
       
-      remoteService.getPackage(apppackage, new AsyncGetPackage());
+      
     }
 
   }
@@ -540,14 +536,14 @@ public class ViewErrorReports implements EntryPoint, ChangeHandler
                                                        @Override
                                                        public void showACRAReport(BasicErrorInfoShared beio)
                                                        {
-                                                         mACRAREportView.showACRAReport(loginInfo, beio);
+                                                         mAppPackageView.showACRAReport(beio);
 
                                                        }
 
                                                        @Override
                                                        public void showPackage(String PACKAGE_NAME)
                                                        {
-                                                         mMainErrorsList.setAppPackage(PACKAGE_NAME);
+                                                         mAppPackageView.setAppPackage(PACKAGE_NAME);
 
                                                        }
 
@@ -575,20 +571,6 @@ public class ViewErrorReports implements EntryPoint, ChangeHandler
   }
 
   
-  private final class AsyncGetPackage implements AsyncCallback<AppPackageShared>
-  {
-    @Override
-    public void onSuccess(AppPackageShared result)
-    {
-      textAppStats.setText("App Stats - " + result.Totals.toLabelString());
-    }
 
-    @Override
-    public void onFailure(Throwable caught)
-    {
-      textAppStats.setText("");
-      
-    }
-  }
   
 }
