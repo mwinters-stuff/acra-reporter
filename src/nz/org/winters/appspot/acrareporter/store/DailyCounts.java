@@ -19,7 +19,6 @@ package nz.org.winters.appspot.acrareporter.store;
 // counters for daily reporting.
 import java.text.DateFormat;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -27,6 +26,7 @@ import java.util.List;
 
 import nz.org.winters.appspot.acrareporter.server.ServerOnlyUtils;
 import nz.org.winters.appspot.acrareporter.shared.Counts;
+import nz.org.winters.appspot.acrareporter.shared.DailyCountsShared;
 
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.annotation.Entity;
@@ -193,4 +193,19 @@ public class DailyCounts extends Counts
     return "DailyCounts [id=" + id + ", Owner=" + Owner + ", PACKAGE_NAME=" + PACKAGE_NAME + ", date=" + date + ", Reports=" + Reports + ", Fixed=" + Fixed + ", LookedAt=" + LookedAt + ", Deleted=" + Deleted + "]";
   }
 
+  public DailyCountsShared toShared()
+  {
+    DailyCountsShared shared = new DailyCountsShared();
+    shared.id = id;
+    shared.date = date;
+    shared.dateString = dateString();
+    shared.Deleted = Deleted;
+    shared.Fixed = Fixed;
+    shared.LookedAt = LookedAt;
+    shared.Owner = Owner;
+    shared.PACKAGE_NAME = PACKAGE_NAME;
+    shared.Reports = Reports;
+    return shared;
+  }
+  
 }

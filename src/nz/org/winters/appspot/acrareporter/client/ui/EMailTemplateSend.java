@@ -59,7 +59,7 @@ public class EMailTemplateSend extends Composite
   private List<String> reportIds;
   private AppPackageShared appPackage;
   private LoginInfo loginInfo;
-  private AppLoadingView appLoadingView = new AppLoadingView();
+  
 
   interface EMailTemplateSendUiBinder extends UiBinder<Widget, EMailTemplateSend>
   {
@@ -78,7 +78,7 @@ public class EMailTemplateSend extends Composite
     textSubject.setText(appPackage.EMailSubject);
     textBody.setText(appPackage.EMailTemplate);
 
-    appLoadingView.startProcessing();
+    startLoading();
     remoteService.findEMailAddresses(reportIds, new AsyncCallback<String>()
     {
       
@@ -86,7 +86,7 @@ public class EMailTemplateSend extends Composite
       public void onSuccess(String result)
       {
         textEMailAddresses.setText(result);
-        appLoadingView.stopProcessing();
+        stopLoading();
         
       }
       
@@ -94,7 +94,7 @@ public class EMailTemplateSend extends Composite
       public void onFailure(Throwable caught)
       {
         Window.alert(caught.toString());
-        appLoadingView.stopProcessing();
+        stopLoading();
         
       }
     });
@@ -122,21 +122,21 @@ public class EMailTemplateSend extends Composite
   void onButtonOKClick(ClickEvent event)
   {
     // send the e-mail via server..
-    appLoadingView.startProcessing();
+    startLoading();
     remoteService.sendFixedEMail(loginInfo, reportIds, textEMailAddresses.getText(), textSubject.getText(), textBody.getText(), new AsyncCallback<Void>()
     {
       
       @Override
       public void onSuccess(Void result)
       {
-        appLoadingView.stopProcessing();
+        stopLoading();
         mCallback.result(true);
       }
       
       @Override
       public void onFailure(Throwable caught)
       {
-        appLoadingView.stopProcessing();
+        stopLoading();
         Window.alert(caught.toString());
       }
     });
@@ -207,4 +207,16 @@ public class EMailTemplateSend extends Composite
     dialogBox.show();
 
   }
+  
+  public void startLoading()
+  {
+    AppLoadingView.getInstance().start();
+    
+  }
+
+  public void stopLoading()
+  {
+    AppLoadingView.getInstance().stop();
+  }
+
 }

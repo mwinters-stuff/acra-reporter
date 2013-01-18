@@ -1,4 +1,5 @@
 package nz.org.winters.appspot.acrareporter.client.ui;
+
 /*
  * Copyright 2013 Mathew Winters
 
@@ -6,14 +7,14 @@ package nz.org.winters.appspot.acrareporter.client.ui;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+ http://www.apache.org/licenses/LICENSE-2.0
 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -23,7 +24,6 @@ import java.util.Set;
 import nz.org.winters.appspot.acrareporter.client.RemoteDataService;
 import nz.org.winters.appspot.acrareporter.client.RemoteDataServiceAsync;
 import nz.org.winters.appspot.acrareporter.client.ViewErrorReports;
-import nz.org.winters.appspot.acrareporter.client.ViewErrorReports.CallbackMainErrorReports;
 import nz.org.winters.appspot.acrareporter.client.ui.images.Resources;
 import nz.org.winters.appspot.acrareporter.shared.BasicErrorInfoShared;
 
@@ -75,7 +75,8 @@ public class MainErrorsList extends Composite implements Handler
     String cwDataGridColumnUserAndroidVersion();
 
   }
-  private CwConstants                                   constants    = (CwConstants) GWT.create(CwConstants.class);
+
+  private CwConstants                                   constants     = (CwConstants) GWT.create(CwConstants.class);
 
   public static final ProvidesKey<BasicErrorInfoShared> KEY_PROVIDER  = new ProvidesKey<BasicErrorInfoShared>()
                                                                       {
@@ -117,17 +118,17 @@ public class MainErrorsList extends Composite implements Handler
   private MultiSelectionModel<BasicErrorInfoShared>     multipleSelectionModel;
 
   private static MainErrorsListUiBinder                 uiBinder      = GWT.create(MainErrorsListUiBinder.class);
-  private ListProvider dataProvider = new ListProvider();
+  private ListProvider                                  dataProvider  = new ListProvider();
 
-  private CallbackMainErrorReports mCallbackMainErrorReports;
+  private CallbackMainErrorReports                      mCallbackMainErrorReports;
 
-  private String packageName;
+  private String                                        packageName;
 
   interface MainErrorsListUiBinder extends UiBinder<Widget, MainErrorsList>
   {
   }
 
-  public MainErrorsList(ViewErrorReports.CallbackMainErrorReports callback)
+  public MainErrorsList(CallbackMainErrorReports callback)
   {
     mCallbackMainErrorReports = callback;
     init();
@@ -164,33 +165,25 @@ public class MainErrorsList extends Composite implements Handler
     dataGrid.getColumnSortList().clear();
     dataGrid.getColumnSortList().push(dataGrid.getColumn(0));
     dataGrid.getColumnSortList().push(dataGrid.getColumn(0));
-    
+
     dataGrid.setLoadingIndicator(new Image(Resources.INSTANCE.loaderImage()));
-    
+
     singleSelectionModel.addSelectionChangeHandler(this);
     setupMenus();
-    
-    
 
   }
 
   void startLoading()
   {
-    if(mCallbackMainErrorReports != null)
-    {
-      mCallbackMainErrorReports.startLoading();
-    }
+
+    AppLoadingView.getInstance().start();
   }
-  
+
   void stopLoading()
   {
-    if(mCallbackMainErrorReports != null)
-    {
-      mCallbackMainErrorReports.stopLoading();
-    }
-    
+    AppLoadingView.getInstance().stop();
   }
-  
+
   private void setupMenus()
   {
     popupActions.setEnabled(false);
@@ -322,25 +315,24 @@ public class MainErrorsList extends Composite implements Handler
         {
           reportIds.add(iter.next().REPORT_ID);
         }
-        
+
         EMailTemplateSend.doDialog(mCallbackMainErrorReports.getLoginInfo(), mCallbackMainErrorReports.getAppPackage(), reportIds, remoteService, new EMailTemplateSend.DialogCallback()
         {
-          
+
           @Override
           public void result(boolean ok)
           {
-            if(ok)
+            if (ok)
             {
               refreshList();
             }
-            
+
           }
         });
 
-
       }
     });
-    
+
     miReload.setScheduledCommand(new Command()
     {
 
@@ -351,14 +343,14 @@ public class MainErrorsList extends Composite implements Handler
 
       }
     });
-    
+
     miErrorsDeleteSelected.setScheduledCommand(new Command()
     {
 
       @Override
       public void execute()
       {
-        if(multipleSelectionModel.getSelectedSet().isEmpty())
+        if (multipleSelectionModel.getSelectedSet().isEmpty())
           return;
         if (!Window.confirm("Are you sure you want to delete the selected error reports?"))
           return;
@@ -391,7 +383,7 @@ public class MainErrorsList extends Composite implements Handler
 
       }
     });
-    
+
   };
 
   @Override
@@ -409,7 +401,7 @@ public class MainErrorsList extends Composite implements Handler
     packageName = PACKAGE_NAME;
     refreshList();
   }
-  
+
   public void refreshList()
   {
     startLoading();
@@ -504,7 +496,6 @@ public class MainErrorsList extends Composite implements Handler
     dataGrid.addColumn(appVersionNameColumn, constants.cwDataGridColumnUserAppVersionName());
     dataGrid.setColumnWidth(appVersionNameColumn, 100, Unit.PX);
 
-
   }
 
   @UiHandler("checkErrorsMultiSelect")
@@ -521,7 +512,6 @@ public class MainErrorsList extends Composite implements Handler
       dataGrid.setSelectionModel(singleSelectionModel, DefaultSelectionEventManager.<BasicErrorInfoShared> createDefaultManager());
     }
   }
-    
 
   RowStyles<BasicErrorInfoShared> mGridRowStyles = new RowStyles<BasicErrorInfoShared>()
                                                  {
@@ -540,25 +530,23 @@ public class MainErrorsList extends Composite implements Handler
                                                      return "whiteback";
                                                    }
                                                  };
-                                                 
-                                                 
+
   class ListProvider extends ListDataProvider<BasicErrorInfoShared>
   {
     public void startLoading()
     {
-      super.updateRowCount(0,false);
+      super.updateRowCount(0, false);
     }
-    
+
     public void stopLoading(List<BasicErrorInfoShared> list)
     {
-      if(list != null)
+      if (list != null)
       {
         setList(list);
       }
       super.updateRowCount(getList().size(), true);
-      
+
     }
   }
-                                                 
-                                                 
+
 }

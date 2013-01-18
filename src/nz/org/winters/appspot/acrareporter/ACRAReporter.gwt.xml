@@ -20,6 +20,7 @@
 	<!-- Other module inherits -->
 
 	<!-- Specify the app entry point class. -->
+	<inherits name='com.google.gwt.visualization.Visualization'/>
 	<entry-point
 		class='nz.org.winters.appspot.acrareporter.client.ViewErrorReports' />
 

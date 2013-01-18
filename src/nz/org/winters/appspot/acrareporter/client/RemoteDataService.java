@@ -21,8 +21,10 @@ import nz.org.winters.appspot.acrareporter.shared.ACRALogShared;
 import nz.org.winters.appspot.acrareporter.shared.AppPackageShared;
 import nz.org.winters.appspot.acrareporter.shared.AppUserShared;
 import nz.org.winters.appspot.acrareporter.shared.BasicErrorInfoShared;
+import nz.org.winters.appspot.acrareporter.shared.DailyCountsShared;
 import nz.org.winters.appspot.acrareporter.shared.LoginInfo;
 import nz.org.winters.appspot.acrareporter.shared.MappingFileShared;
+import nz.org.winters.appspot.acrareporter.shared.PackageGraphData;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
@@ -73,4 +75,8 @@ public interface RemoteDataService extends RemoteService
   void sendFixedEMail(LoginInfo user, List<String> reportIds, String bcc, String subject, String body) throws IllegalArgumentException;
   
   String findEMailAddresses(List<String> reportIds)  throws IllegalArgumentException;
+  
+  List<PackageGraphData> getPackageGraphDataTotals(LoginInfo user) throws IllegalArgumentException;
+  List<DailyCountsShared> getLastMonthDailyCounts(LoginInfo user) throws IllegalArgumentException;
+  
 }

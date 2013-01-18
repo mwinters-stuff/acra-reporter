@@ -26,7 +26,18 @@ public final class AppLoadingView extends PopupPanel
 {
     private final FlowPanel container = new FlowPanel();
 
-    public AppLoadingView()
+    private static AppLoadingView mInstance = null;
+    
+    public static AppLoadingView getInstance()
+    {
+      if(mInstance == null)
+      {
+        mInstance = new AppLoadingView();
+      }
+      return mInstance;
+    }
+    
+    private AppLoadingView()
     {        
         final Image ajaxImage = new Image(Resources.INSTANCE.loaderImage());
         final Grid grid = new Grid(1, 2);  
@@ -43,13 +54,13 @@ public final class AppLoadingView extends PopupPanel
     }
 
     
-    public void stopProcessing()
+    public void stop()
     {
         hide();
     }
 
     
-    public void startProcessing()
+    public void start()
     {
         center();
         show();
@@ -58,6 +69,6 @@ public final class AppLoadingView extends PopupPanel
     
     public void showWidget()
     {
-        startProcessing();
+        start();
     }
 }

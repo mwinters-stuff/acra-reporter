@@ -16,8 +16,6 @@ package nz.org.winters.appspot.acrareporter.client.ui;
 */
 import nz.org.winters.appspot.acrareporter.client.RemoteDataService;
 import nz.org.winters.appspot.acrareporter.client.RemoteDataServiceAsync;
-import nz.org.winters.appspot.acrareporter.client.ViewErrorReports;
-import nz.org.winters.appspot.acrareporter.client.ViewErrorReports.CallbackMainErrorReports;
 import nz.org.winters.appspot.acrareporter.shared.ACRALogShared;
 import nz.org.winters.appspot.acrareporter.shared.BasicErrorInfoShared;
 import nz.org.winters.appspot.acrareporter.shared.LoginInfo;
@@ -153,7 +151,7 @@ public class ACRAReportView extends Composite
   }
 
   
-  public ACRAReportView(ViewErrorReports.CallbackMainErrorReports callback)
+  public ACRAReportView(CallbackMainErrorReports callback)
   {
     mCallbackMainErrorReports = callback;
 
@@ -201,7 +199,7 @@ public class ACRAReportView extends Composite
                                                      {
                                                        // TODO Auto-generated
                                                        // method stub
-                                                       mCallbackMainErrorReports.stopLoading();
+                                                       stopLoading();
                                                        clearData();
                                                      }
                                                    };
@@ -216,7 +214,7 @@ public class ACRAReportView extends Composite
     BasicErrorInfoShared beio = mSelectedBasicErrorInfo;
     if (result == null)
     {
-      mCallbackMainErrorReports.stopLoading();
+      stopLoading();
       captionPanelCenter.setCaptionText("Report: " + beio.REPORT_ID + " - Error Fetching");
       clearData();
       return;
@@ -278,7 +276,7 @@ public class ACRAReportView extends Composite
     buttonReportEmail.setEnabled(true);
     buttonReportRetrace.setEnabled(true);
 
-    mCallbackMainErrorReports.stopLoading();
+    stopLoading();
 
   }
 
@@ -383,7 +381,7 @@ public class ACRAReportView extends Composite
       return;
     }
 
-    mCallbackMainErrorReports.startLoading();
+    startLoading();
 
     final BasicErrorInfoShared beio = mSelectedBasicErrorInfo;
 
@@ -400,7 +398,7 @@ public class ACRAReportView extends Composite
       public void onFailure(Throwable caught)
       {
         // TODO Auto-generated method stub
-        mCallbackMainErrorReports.stopLoading();
+        stopLoading();
 
       }
     });
@@ -410,7 +408,7 @@ public class ACRAReportView extends Composite
   @UiHandler("checkLookedAt")
   void onCheckLookedAtClick(ClickEvent event)
   {
-    mCallbackMainErrorReports.startLoading();
+    startLoading();
     final BasicErrorInfoShared beio = mSelectedBasicErrorInfo;
 
     remoteService.markReportLookedAt(beio.REPORT_ID, checkLookedAt.getValue(), new AsyncCallback<Void>()
@@ -421,7 +419,7 @@ public class ACRAReportView extends Composite
       {
         // TODO Auto-generated method stub
         beio.lookedAt = true;
-        mCallbackMainErrorReports.stopLoading();
+        stopLoading();
 
       }
 
@@ -429,7 +427,7 @@ public class ACRAReportView extends Composite
       public void onFailure(Throwable caught)
       {
         // TODO Auto-generated method stub
-        mCallbackMainErrorReports.stopLoading();
+        stopLoading();
 
       }
     });
@@ -438,7 +436,7 @@ public class ACRAReportView extends Composite
   @UiHandler("checkFixed")
   void onCheckFixedClick(ClickEvent event)
   {
-    mCallbackMainErrorReports.startLoading();
+    startLoading();
 
     final BasicErrorInfoShared beio = mSelectedBasicErrorInfo;
 
@@ -449,7 +447,7 @@ public class ACRAReportView extends Composite
       public void onSuccess(Void result)
       {
         beio.fixed = true;
-        mCallbackMainErrorReports.stopLoading();
+        stopLoading();
 
       }
 
@@ -457,7 +455,7 @@ public class ACRAReportView extends Composite
       public void onFailure(Throwable caught)
       {
         // TODO Auto-generated method stub
-        mCallbackMainErrorReports.stopLoading();
+        stopLoading();
 
       }
     });
@@ -466,7 +464,7 @@ public class ACRAReportView extends Composite
   @UiHandler("checkEMailed")
   void onCheckEMailedClick(ClickEvent event)
   {
-    mCallbackMainErrorReports.startLoading();
+    startLoading();
     final BasicErrorInfoShared beio = mSelectedBasicErrorInfo;
 
     remoteService.markReportEMailed(beio.REPORT_ID, checkEMailed.getValue(), new AsyncCallback<Void>()
@@ -476,15 +474,14 @@ public class ACRAReportView extends Composite
       public void onSuccess(Void result)
       {
         beio.emailed = true;
-        mCallbackMainErrorReports.stopLoading();
-
+        stopLoading();
       }
 
       @Override
       public void onFailure(Throwable caught)
       {
         // TODO Auto-generated method stub
-        mCallbackMainErrorReports.stopLoading();
+        stopLoading();
 
       }
     });
@@ -493,7 +490,7 @@ public class ACRAReportView extends Composite
   @UiHandler("buttonReportRetrace")
   void onButtonReportRetraceClick(ClickEvent event)
   {
-    mCallbackMainErrorReports.startLoading();
+    startLoading();
     final BasicErrorInfoShared beio = mSelectedBasicErrorInfo;
 
     remoteService.retraceReport(beio.REPORT_ID, new AsyncCallback<Void>()
@@ -509,7 +506,7 @@ public class ACRAReportView extends Composite
       @Override
       public void onFailure(Throwable caught)
       {
-        mCallbackMainErrorReports.stopLoading();
+        stopLoading();
       }
     });
   }
@@ -542,4 +539,16 @@ public class ACRAReportView extends Composite
     remoteService.getACRALog(beio.REPORT_ID, mGetACRALogCallback);
 
   }
+  
+  public void startLoading()
+  {
+    AppLoadingView.getInstance().start();
+    
+  }
+
+  public void stopLoading()
+  {
+    AppLoadingView.getInstance().stop();
+  }
+
 }

@@ -15,6 +15,9 @@ package nz.org.winters.appspot.acrareporter.server;
  * limitations under the License.
 */
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -36,8 +39,11 @@ import nz.org.winters.appspot.acrareporter.shared.AppPackageShared;
 import nz.org.winters.appspot.acrareporter.shared.AppUserShared;
 import nz.org.winters.appspot.acrareporter.shared.BasicErrorInfoShared;
 import nz.org.winters.appspot.acrareporter.shared.Configuration;
+import nz.org.winters.appspot.acrareporter.shared.Counts;
+import nz.org.winters.appspot.acrareporter.shared.DailyCountsShared;
 import nz.org.winters.appspot.acrareporter.shared.LoginInfo;
 import nz.org.winters.appspot.acrareporter.shared.MappingFileShared;
+import nz.org.winters.appspot.acrareporter.shared.PackageGraphData;
 import nz.org.winters.appspot.acrareporter.shared.Utils;
 import nz.org.winters.appspot.acrareporter.store.ACRALog;
 import nz.org.winters.appspot.acrareporter.store.AppPackage;
@@ -49,6 +55,7 @@ import nz.org.winters.appspot.acrareporter.store.RegisterDataStores;
 
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import com.google.gwt.visualization.client.visualizations.corechart.PieChart;
 import com.googlecode.objectify.ObjectifyService;
 
 /**
@@ -646,4 +653,44 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
     }
     return appUser.id;
   }
+
+  @Override
+  public List<PackageGraphData> getPackageGraphDataTotals(LoginInfo user) throws IllegalArgumentException
+  {
+    List<PackageGraphData> result = new ArrayList<PackageGraphData>();
+    
+    List<AppPackageShared> appPackages = getPackages(user);
+    for(AppPackageShared appPackage: appPackages)
+    {
+      PackageGraphData data= new PackageGraphData(appPackage);
+      result.add(data);
+    }
+    return result;
+  }
+
+  @Override
+  public List<DailyCountsShared> getLastMonthDailyCounts(LoginInfo loginInfo) throws IllegalArgumentException
+  {
+    List<DailyCountsShared> result = new ArrayList<DailyCountsShared>();
+    AppUser user = getAppUser(loginInfo);
+    Calendar monthback = GregorianCalendar.getInstance();
+    monthback.set(Calendar.HOUR, 0);
+    monthback.set(Calendar.MINUTE, 0);
+    monthback.set(Calendar.SECOND, 0);
+    monthback.set(Calendar.MILLISECOND, 0);
+
+    monthback.add(Calendar.MONTH, -1);
+    Date monthbackdate = DailyCounts.removeTimeFromDate(monthback.getTime());
+    
+    List<DailyCounts> counts = ObjectifyService.ofy().load().type(DailyCounts.class).filter("Owner",user.id).filter("PACKAGE_NAME", null).filter("date >=", monthbackdate).list();
+    
+    for(DailyCounts count: counts)
+    {
+      result.add(count.toShared());
+    }
+    return result;
+  }
+  
+  
+  
 }

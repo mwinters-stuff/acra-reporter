@@ -2,7 +2,6 @@ package nz.org.winters.appspot.acrareporter.client.ui;
 
 import nz.org.winters.appspot.acrareporter.client.RemoteDataService;
 import nz.org.winters.appspot.acrareporter.client.RemoteDataServiceAsync;
-import nz.org.winters.appspot.acrareporter.client.ViewErrorReports;
 import nz.org.winters.appspot.acrareporter.shared.AppPackageShared;
 import nz.org.winters.appspot.acrareporter.shared.BasicErrorInfoShared;
 import nz.org.winters.appspot.acrareporter.shared.LoginInfo;
@@ -25,7 +24,7 @@ public class AppPackageView extends Composite
   private MainErrorsList                mMainErrorsList;
   private ACRAReportView                mACRAReportView;
 
-  private ViewErrorReports.CallbackMainErrorReports mCallbackMainErrorReports;
+  private CallbackMainErrorReports mCallbackMainErrorReports;
   
   protected BasicErrorInfoShared        mSelectedBasicErrorInfo;
   private AppPackageShared mAppPackage;
@@ -40,7 +39,7 @@ public class AppPackageView extends Composite
   {
   }
 
-  public AppPackageView(LoginInfo loginInfo, ViewErrorReports.CallbackMainErrorReports callbackMainErrorReports)
+  public AppPackageView(LoginInfo loginInfo, CallbackMainErrorReports callbackMainErrorReports)
   {
     mCallbackMainErrorReports = callbackMainErrorReports;
     mLoginInfo = loginInfo;
@@ -68,14 +67,14 @@ public class AppPackageView extends Composite
     {
       mAppPackage = result;
      // textAppStats.setText("App Stats - " + result.Totals.toLabelString());
-      mCallbackMainErrorReports.stopLoading();
+      stopLoading();
     }
 
     @Override
     public void onFailure(Throwable caught)
     {
      // textAppStats.setText("");
-      mCallbackMainErrorReports.stopLoading();
+      stopLoading();
     }
   }
 
@@ -91,4 +90,16 @@ public class AppPackageView extends Composite
     mACRAReportView.showACRAReport(mLoginInfo, beio);
     
   }
+  
+  public void startLoading()
+  {
+    AppLoadingView.getInstance().start();
+    
+  }
+
+  public void stopLoading()
+  {
+    AppLoadingView.getInstance().stop();
+  }
+
 }
