@@ -16,7 +16,7 @@ package nz.org.winters.appspot.acrareporter.client;
 */
 import nz.org.winters.appspot.acrareporter.client.ui.AppLoadingView;
 import nz.org.winters.appspot.acrareporter.client.ui.FrontPage;
-import nz.org.winters.appspot.acrareporter.client.ui.OldMainPage;
+import nz.org.winters.appspot.acrareporter.client.ui.Overview;
 import nz.org.winters.appspot.acrareporter.client.ui.SignUp;
 import nz.org.winters.appspot.acrareporter.shared.Configuration;
 import nz.org.winters.appspot.acrareporter.shared.LoginInfo;
@@ -224,8 +224,8 @@ public class ViewErrorReports implements EntryPoint
     RootLayoutPanel.get().clear();
     RootLayoutPanel.get().add(uiBinder.createAndBindUi(this));
 
-    panel.add(new OldMainPage(loginInfo));
-  //  panel.add(new Overview(loginInfo));
+  //  panel.add(new OldMainPage(loginInfo));
+    panel.add(new Overview(loginInfo));
   }
 
  

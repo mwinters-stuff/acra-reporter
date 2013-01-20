@@ -690,6 +690,29 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
     }
     return result;
   }
+
+  @Override
+  public List<DailyCountsShared> getPackageLastMonthDailyCounts(LoginInfo loginInfo, String PACKAGE_NAME) throws IllegalArgumentException
+  {
+    List<DailyCountsShared> result = new ArrayList<DailyCountsShared>();
+    AppUser user = getAppUser(loginInfo);
+    Calendar monthback = GregorianCalendar.getInstance();
+    monthback.set(Calendar.HOUR, 0);
+    monthback.set(Calendar.MINUTE, 0);
+    monthback.set(Calendar.SECOND, 0);
+    monthback.set(Calendar.MILLISECOND, 0);
+
+    monthback.add(Calendar.MONTH, -1);
+    Date monthbackdate = DailyCounts.removeTimeFromDate(monthback.getTime());
+    
+    List<DailyCounts> counts = ObjectifyService.ofy().load().type(DailyCounts.class).filter("PACKAGE_NAME", PACKAGE_NAME).filter("date >=", monthbackdate).list();
+    
+    for(DailyCounts count: counts)
+    {
+      result.add(count.toShared());
+    }
+    return result;
+  }
   
   
   

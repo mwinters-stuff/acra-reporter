@@ -87,5 +87,7 @@ public interface RemoteDataServiceAsync
 
   void getLastMonthDailyCounts(LoginInfo user, AsyncCallback<List<DailyCountsShared>> callback);
 
+  void getPackageLastMonthDailyCounts(LoginInfo user, String PACKAGE_NAME, AsyncCallback<List<DailyCountsShared>> callback);
+
 
 }

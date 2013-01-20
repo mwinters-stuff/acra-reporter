@@ -78,5 +78,6 @@ public interface RemoteDataService extends RemoteService
   
   List<PackageGraphData> getPackageGraphDataTotals(LoginInfo user) throws IllegalArgumentException;
   List<DailyCountsShared> getLastMonthDailyCounts(LoginInfo user) throws IllegalArgumentException;
+  List<DailyCountsShared> getPackageLastMonthDailyCounts(LoginInfo user, String PACKAGE_NAME) throws IllegalArgumentException;
   
 }
