@@ -8,29 +8,56 @@ import nz.org.winters.appspot.acrareporter.shared.DailyCountsShared;
 import nz.org.winters.appspot.acrareporter.shared.LoginInfo;
 import nz.org.winters.appspot.acrareporter.shared.PackageGraphData;
 
+import com.google.gwt.ajaxloader.client.Properties;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JsArray;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.AbstractDataTable;
 import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
 import com.google.gwt.visualization.client.DataTable;
+import com.google.gwt.visualization.client.Selection;
 import com.google.gwt.visualization.client.VisualizationUtils;
+import com.google.gwt.visualization.client.events.ReadyHandler;
+import com.google.gwt.visualization.client.events.SelectHandler;
+import com.google.gwt.visualization.client.formatters.DateFormat;
+import com.google.gwt.visualization.client.visualizations.Table;
 import com.google.gwt.visualization.client.visualizations.corechart.CoreChart;
 import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
 import com.google.gwt.visualization.client.visualizations.corechart.PieChart;
 import com.google.gwt.visualization.client.visualizations.corechart.PieChart.PieOptions;
 
-public class Overview extends Composite
+public class Overview extends Composite implements ChangeHandler
 {
 
   private static OverviewUiBinder      uiBinder      = GWT.create(OverviewUiBinder.class);
-  @UiField HorizontalPanel panel;
+  @UiField
+  HorizontalPanel                      topPanel;
+  @UiField
+  VerticalPanel                        mainPanel;
+  @UiField
+  HorizontalPanel                      midPanel;
+  @UiField
+  ListBox                              totalsDataSelection;
+  @UiField
+  SimplePanel                          pieHolder;
+  @UiField
+  HorizontalPanel                      bottomPanel;
 
   private final RemoteDataServiceAsync remoteService = GWT.create(RemoteDataService.class);
 
@@ -39,8 +66,17 @@ public class Overview extends Composite
   private DataTable                    mTotalGraphData;
   private PieChart                     mPackageTotalsGraph;
   private LineChart                    mTotalsMonthGraph;
+  private LineChart                    mPackageMonthGraph;
 
   private DataTable                    mTotalsMonthGraphData;
+  private DataTable                    mPackageMonthGraphData;
+  private Table                        mPackageTable;
+  private DataTable                    mPackageTableData;
+  private List<PackageGraphData>       mPackageGraphData;
+  private DateFormat                   mShortDateFormat;
+
+  private int                          browserWidth;
+  private int                          browserHeight;
 
   interface OverviewUiBinder extends UiBinder<Widget, Overview>
   {
@@ -51,33 +87,152 @@ public class Overview extends Composite
     this.loginInfo = loginInfo;
     initWidget(uiBinder.createAndBindUi(this));
 
+    browserWidth = 1200;
+    browserHeight = 540;
+    if (Window.getClientWidth() > browserWidth)
+    {
+      browserWidth = Window.getClientWidth() - 50;
+    }
+    if (Window.getClientHeight() > browserHeight)
+    {
+      browserHeight = Window.getClientHeight() - 50;
+    }
+
+    totalsDataSelection.setEnabled(false);
+
+    totalsDataSelection.addItem("Reports");
+    totalsDataSelection.addItem("Fixed");
+    totalsDataSelection.addItem("Looked At");
+    totalsDataSelection.addItem("Not Fixed");
+    totalsDataSelection.addItem("New");
+
+    totalsDataSelection.addChangeHandler(this);
+
     Runnable onLoadCallback = new Runnable()
     {
       public void run()
       {
-        //Panel panel = RootPanel.get();
+        DateFormat.Options dfo = DateFormat.Options.create();
+        dfo.setPattern(DateFormat.FormatType.SHORT);
+        mShortDateFormat = DateFormat.create(dfo);
+        // Panel panel = RootPanel.get();
 
-        // Create a pie chart visualization.
         mPackageTotalsGraph = new PieChart(createTotalReportTable(), createTotalReportOptions());
-        panel.add(mPackageTotalsGraph);
+        pieHolder.add(mPackageTotalsGraph);
+        mPackageTotalsGraph.addSelectHandler(mTotalsSelectHandler);
 
         mTotalsMonthGraph = new LineChart(createTotalsMonthTable(), createTotalsMonthOptions());
-        panel.add(mTotalsMonthGraph);
+        topPanel.add(mTotalsMonthGraph);
+
+        mPackageTable = new Table(createPackageTableTable(), createPackageTableOptions());
+        midPanel.add(mPackageTable);
+        mPackageTable.addSelectHandler(mPackageTableSelectHandler);
+
+        mPackageMonthGraph = new LineChart(createPackageMonthTable(), createPackageMonthOptions(null));
+        midPanel.add(mPackageMonthGraph);
+
+        mPackageTotalsGraph.addReadyHandler(new ReadyHandler()
+        {
+
+          @Override
+          public void onReady(ReadyEvent event)
+          {
+            totalsDataSelection.setEnabled(true);
+
+          }
+
+        });
+
+        updateTotalsGraph();
+        updateTotalsMonthGraph();
+
       }
 
     };
 
-    VisualizationUtils.loadVisualizationApi(onLoadCallback, CoreChart.PACKAGE);
+    VisualizationUtils.loadVisualizationApi(onLoadCallback, CoreChart.PACKAGE, Table.PACKAGE);
 
   }
 
+  // report pie chart
   private Options createTotalReportOptions()
   {
     PieOptions options = PieOptions.create();
-    options.setWidth(500);
-    options.setHeight(340);
+    options.setWidth((int) ((double) browserWidth * 0.4));
+    options.setHeight((int) ((double) browserHeight * 0.4));
     options.set3D(true);
-    options.setTitle("Total Reports per App");
+    options.setPieSliceText("value");
+    switch (totalsDataSelection.getSelectedIndex())
+    {
+      case 0: // reports
+        options.setTitle("Total Reports per App");
+        break;
+      case 1: // fixed
+        options.setTitle("Total Fixed per App");
+        break;
+      case 2: // looked at
+        options.setTitle("Total Looked At per App");
+        break;
+      case 3: // not fixed
+        options.setTitle("Total Not Fixed per App");
+        break;
+      case 4: // new
+        options.setTitle("Total New per App");
+        break;
+    }
+    Properties animation = Properties.create();
+    animation.set("duration", 1000.0);
+    animation.set("easing", "out");
+    options.set("animation", animation);
+
+    return options;
+  }
+
+  // month totals bar chart.
+
+  private Options createTotalsMonthOptions()
+  {
+    Options options = Options.create();
+    options.setWidth((int) ((double) browserWidth * 0.6));
+    options.setHeight((int) ((double) browserHeight * 0.4));
+
+    options.setTitle("Total reports per day");
+
+    return options;
+  }
+
+  // options for package table
+  private Table.Options createPackageTableOptions()
+  {
+    Table.Options options = Table.Options.create();
+    options.setWidth((int) ((double) browserWidth * 0.5) + "px");
+    options.setHeight("300px");
+    options.setSortAscending(false);
+    options.setSortColumn(1);
+    options.setAllowHtml(true);
+    return options;
+  }
+
+  // package month line chart options.
+  private Options createPackageMonthOptions(String appName)
+  {
+    Options options = Options.create();
+    options.setWidth((int) ((double) browserWidth * 0.5));
+    options.setHeight(300);
+    if (appName != null)
+    {
+
+      options.setTitle(appName + " - Month to today");
+    } else
+    {
+      options.setTitle("App Month");
+
+    }
+
+    Properties animation = Properties.create();
+    animation.set("duration", 1000.0);
+    animation.set("easing", "out");
+    options.set("animation", animation);
 
     return options;
   }
@@ -85,23 +240,13 @@ public class Overview extends Composite
   private AbstractDataTable createTotalReportTable()
   {
     mTotalGraphData = DataTable.create();
-    mTotalGraphData.addColumn(ColumnType.STRING, "Package");
+    mTotalGraphData.addColumn(ColumnType.STRING, "App");
     mTotalGraphData.addColumn(ColumnType.NUMBER, "Reports");
 
-    updateTotalsGraph();
     return mTotalGraphData;
   }
 
-  private Options createTotalsMonthOptions()
-  {
-    Options options = Options.create();
-    options.setWidth(700);
-    options.setHeight(340);
-
-    options.setTitle("Reports per day");
-
-    return options;
-  }
+  // month totals bar chart.
 
   private AbstractDataTable createTotalsMonthTable()
   {
@@ -110,8 +255,57 @@ public class Overview extends Composite
     mTotalsMonthGraphData.addColumn(ColumnType.NUMBER, "Reports");
     mTotalsMonthGraphData.addColumn(ColumnType.NUMBER, "Fixed");
 
-    updateTotalsMonthGraph();
     return mTotalsMonthGraphData;
+  }
+
+  private AbstractDataTable createPackageTableTable()
+  {
+    mPackageTableData = DataTable.create();
+    mPackageTableData.addColumn(ColumnType.STRING, "App");
+    mPackageTableData.addColumn(ColumnType.NUMBER, "New");
+    mPackageTableData.addColumn(ColumnType.NUMBER, "Not Fixed");
+    mPackageTableData.addColumn(ColumnType.NUMBER, "Looked At");
+    mPackageTableData.addColumn(ColumnType.NUMBER, "Fixed");
+    mPackageTableData.addColumn(ColumnType.NUMBER, "Reports");
+    mPackageTableData.addColumn(ColumnType.STRING, "Actions");
+    return mPackageTableData;
+  }
+
+  private AbstractDataTable createPackageMonthTable()
+  {
+    mPackageMonthGraphData = DataTable.create();
+    mPackageMonthGraphData.addColumn(ColumnType.DATE, "Date");
+
+    mPackageMonthGraphData.addColumn(ColumnType.NUMBER, "Reports");
+    mPackageMonthGraphData.addColumn(ColumnType.NUMBER, "Fixed");
+    mPackageMonthGraphData.addColumn(ColumnType.NUMBER, "Looked At");
+    mPackageMonthGraphData.addColumn(ColumnType.NUMBER, "Not Fixed");
+    mPackageMonthGraphData.addColumn(ColumnType.NUMBER, "New");
+    return mPackageMonthGraphData;
+  }
+
+  // month totals bar chart.
+
+  private void updateTotalsGraph()
+  {
+    remoteService.getPackageGraphDataTotals(loginInfo, new AsyncCallback<List<PackageGraphData>>()
+    {
+
+      @Override
+      public void onSuccess(List<PackageGraphData> result)
+      {
+        mPackageGraphData = result;
+        loadTotalsGraphData();
+      }
+
+      @Override
+      public void onFailure(Throwable caught)
+      {
+        Window.alert(caught.getMessage());
+
+      }
+    });
+
   }
 
   private void updateTotalsMonthGraph()
@@ -135,10 +329,13 @@ public class Overview extends Composite
         mTotalsMonthGraphData.addRows(result.size());
         for (int i = 0; i < result.size(); i++)
         {
-          mTotalsMonthGraphData.setValue(i, 0, result.get(i).date);
-          mTotalsMonthGraphData.setValue(i, 1, result.get(i).Reports);
-          mTotalsMonthGraphData.setValue(i, 2, result.get(i).Fixed);
+          DailyCountsShared data = result.get(i);
+          mTotalsMonthGraphData.setValue(i, 0, data.date);
+          mTotalsMonthGraphData.setValue(i, 1, data.Reports);
+          mTotalsMonthGraphData.setValue(i, 2, data.Fixed);
         }
+        mShortDateFormat.format(mTotalsMonthGraphData, 0);
+
         mTotalsMonthGraph.draw(mTotalsMonthGraphData, createTotalsMonthOptions());
 
       }
@@ -146,32 +343,196 @@ public class Overview extends Composite
 
   }
 
-  private void updateTotalsGraph()
+  private void updateAppMonthGraph(JsArray<Selection> tableselect)
   {
-    remoteService.getPackageGraphDataTotals(loginInfo, new AsyncCallback<List<PackageGraphData>>()
+    final JsArray<Selection> sel = tableselect;// mPackageTable.getSelections();
+
+    if (sel.length() == 0)
+      return;
+
+    String packageName = mPackageGraphData.get(sel.get(0).getRow()).PACKAGE_NAME;
+
+    remoteService.getPackageLastMonthDailyCounts(loginInfo, packageName, new AsyncCallback<List<DailyCountsShared>>()
     {
 
       @Override
-      public void onSuccess(List<PackageGraphData> result)
+      public void onSuccess(List<DailyCountsShared> result)
       {
-        mTotalGraphData.removeRows(0, mTotalGraphData.getNumberOfRows());
 
-        mTotalGraphData.addRows(result.size());
-        for (int i = 0; i < result.size(); i++)
+        mPackageMonthGraphData.removeRows(0, mPackageMonthGraphData.getNumberOfRows());
+        if (result.size() > 0)
         {
-          mTotalGraphData.setValue(i, 0, result.get(i).AppName);
-          mTotalGraphData.setValue(i, 1, result.get(i).counts.Reports);
+          mPackageMonthGraphData.addRows(result.size());
+          for (int i = 0; i < result.size(); i++)
+          {
+            DailyCountsShared data = result.get(i);
+            mPackageMonthGraphData.setValue(i, 0, data.date);
+            mPackageMonthGraphData.setValue(i, 1, data.Reports);
+            mPackageMonthGraphData.setValue(i, 2, data.Fixed);
+            mPackageMonthGraphData.setValue(i, 3, data.LookedAt);
+            mPackageMonthGraphData.setValue(i, 4, data.Reports - data.Fixed);
+            mPackageMonthGraphData.setValue(i, 5, data.Reports - data.LookedAt);
+          }
+          mShortDateFormat.format(mPackageMonthGraphData, 0);
+
         }
-        mPackageTotalsGraph.draw(mTotalGraphData, createTotalReportOptions());
+        mPackageMonthGraph.draw(mPackageMonthGraphData, createPackageMonthOptions(mPackageGraphData.get(sel.get(0).getRow()).AppName));
+
       }
 
       @Override
       public void onFailure(Throwable caught)
       {
         Window.alert(caught.getMessage());
-
       }
     });
+  }
+
+  SelectHandler mTotalsSelectHandler       = new SelectHandler()
+                                           {
+
+                                             @Override
+                                             public void onSelect(SelectEvent event)
+                                             {
+                                               JsArray<Selection> selected = mPackageTotalsGraph.getSelections();
+
+                                               mPackageTable.setSelections(selected);
+                                               updateAppMonthGraph(selected);
+                                             }
+
+                                           };
+
+  SelectHandler mPackageTableSelectHandler = new SelectHandler()
+                                           {
+
+                                             @Override
+                                             public void onSelect(SelectEvent event)
+                                             {
+                                               JsArray<Selection> selected = mPackageTable.getSelections();
+                                               Selection sel = selected.get(0);
+                                               if(sel != null)
+                                               {
+                                                 int row = sel.getRow();
+                                                 Selection news = Selection.createRowSelection(row);
+  
+                                                 JsArray<Selection> pieselect = Selection.createArray().cast();
+                                                 pieselect.push(news);
+                                                 mPackageTotalsGraph.setSelections(pieselect);
+                                                 updateAppMonthGraph(selected);
+                                               }
+                                             }
+
+                                           };
+
+  @Override
+  public void onChange(ChangeEvent event)
+  {
+    loadTotalsGraphData();
 
   }
+
+  void loadTotalsGraphData()
+  {
+    mTotalGraphData.removeRows(0, mTotalGraphData.getNumberOfRows());
+    mPackageTableData.removeRows(0, mPackageTableData.getNumberOfRows());
+
+    mTotalGraphData.addRows(mPackageGraphData.size());
+    mPackageTableData.addRows(mPackageGraphData.size());
+    int lastnewc = 0;
+    int selectRow = 0;
+
+    for (int i = 0; i < mPackageGraphData.size(); i++)
+    {
+      PackageGraphData data = mPackageGraphData.get(i);
+      mTotalGraphData.setValue(i, 0, data.AppName);
+
+      int newc = data.counts.Reports - data.counts.LookedAt;
+      switch (totalsDataSelection.getSelectedIndex())
+      {
+        case 0: // reports
+          mTotalGraphData.setValue(i, 1, data.counts.Reports);
+          break;
+        case 1: // fixed
+          mTotalGraphData.setValue(i, 1, data.counts.Fixed);
+          break;
+        case 2: // looked at
+          mTotalGraphData.setValue(i, 1, data.counts.LookedAt);
+          break;
+        case 3: // not fixed
+          mTotalGraphData.setValue(i, 1, data.counts.Reports - data.counts.Fixed);
+          break;
+        case 4: // new
+          mTotalGraphData.setValue(i, 1, newc);
+          break;
+      }
+
+      // mTotalGraphData.setProperty(i,0,"DATA", Long.toString(data.id));
+      if (newc > lastnewc)
+      {
+        lastnewc = newc;
+        selectRow = i;
+      }
+      mPackageTableData.setValue(i, 0, data.AppName);
+      mPackageTableData.setValue(i, 1, newc);
+      mPackageTableData.setValue(i, 2, data.counts.Reports - data.counts.Fixed);
+      mPackageTableData.setValue(i, 3, data.counts.LookedAt);
+      mPackageTableData.setValue(i, 4, data.counts.Fixed);
+      mPackageTableData.setValue(i, 5, data.counts.Reports);
+      // mPackageTableData.setProperty(i,0,"DATA", Long.toString(data.id));
+      final String packageName = data.PACKAGE_NAME;
+      HTMLPanel hp = new HTMLPanel("");
+      Button ed = new Button("Edit");
+      ed.setWidth("40px");
+      ed.addClickHandler(new ClickHandler()
+      {
+
+        @Override
+        public void onClick(ClickEvent event)
+        {
+          editPackage(packageName);
+        }
+
+      });
+      hp.add(ed);
+      Button bn = new Button("View");
+      hp.add(bn);
+      bn.setWidth("40px");
+      bn.addClickHandler(new ClickHandler()
+      {
+
+        @Override
+        public void onClick(ClickEvent event)
+        {
+          viewPackage(packageName);
+        }
+
+      });
+      String html = hp.getElement().getInnerHTML();
+
+      mPackageTableData.setValue(i, 6, html);
+    }
+    mPackageTotalsGraph.draw(mTotalGraphData, createTotalReportOptions());
+    mPackageTable.draw(mPackageTableData, createPackageTableOptions());
+    if (mPackageTable.getSelections().length() == 0)
+    {
+      Selection sel = Selection.createRowSelection(selectRow);
+      JsArray<Selection> tableselect = Selection.createArray().cast();
+      tableselect.push(sel);
+      mPackageTable.setSelections(tableselect);
+      // mPackageTotalsGraph.setSelections(tableselect);
+      updateAppMonthGraph(tableselect);
+    }
+
+  }
+
+  private void editPackage(String packageName)
+  {
+    Window.alert(packageName);
+  }
+
+  private void viewPackage(String packageName)
+  {
+    Window.alert(packageName);
+  }
+
 }
