@@ -17,6 +17,7 @@ package nz.org.winters.appspot.acrareporter.client.ui;
 import nz.org.winters.appspot.acrareporter.client.RemoteDataService;
 import nz.org.winters.appspot.acrareporter.client.RemoteDataServiceAsync;
 import nz.org.winters.appspot.acrareporter.shared.ACRALogShared;
+import nz.org.winters.appspot.acrareporter.shared.AppPackageShared;
 import nz.org.winters.appspot.acrareporter.shared.BasicErrorInfoShared;
 import nz.org.winters.appspot.acrareporter.shared.LoginInfo;
 import nz.org.winters.appspot.acrareporter.shared.Utils;
@@ -139,10 +140,12 @@ public class ACRAReportView extends Composite
   NameValueList                         nvlSettingsSecure;
 
   private LoginInfo mLoginInfo;
-  private CallbackMainErrorReports      mCallbackMainErrorReports;
+  private CallbackReloadPackageList      mCallbackReloadPackageList;
   private final RemoteDataServiceAsync  remoteService = GWT.create(RemoteDataService.class);
 
   private NameValueList nvlSettingsGlobal;
+
+  private AppPackageShared mAppPackageShared;
 
   private static ACRAReportViewUiBinder uiBinder      = GWT.create(ACRAReportViewUiBinder.class);
 
@@ -150,10 +153,17 @@ public class ACRAReportView extends Composite
   {
   }
 
-  
-  public ACRAReportView(CallbackMainErrorReports callback)
+  public interface CallbackReloadPackageList
   {
-    mCallbackMainErrorReports = callback;
+    public void reloadPackageList();
+  }
+  
+  public ACRAReportView(CallbackReloadPackageList callback, LoginInfo loginInfo, AppPackageShared appPackageShared)
+  {
+    mLoginInfo = loginInfo;
+
+    mCallbackReloadPackageList = callback;
+    mAppPackageShared= appPackageShared;
 
     initWidget(uiBinder.createAndBindUi(this));
 
@@ -391,7 +401,7 @@ public class ACRAReportView extends Composite
       @Override
       public void onSuccess(Void result)
       {
-        mCallbackMainErrorReports.showPackage(beio.PACKAGE_NAME);
+        mCallbackReloadPackageList.reloadPackageList();
       }
 
       @Override
@@ -514,7 +524,7 @@ public class ACRAReportView extends Composite
   @UiHandler("buttonReportEmail")
   void onButtonReportEmailClick(ClickEvent event)
   {
-    EMailTemplateSend.doDialog(mLoginInfo, mCallbackMainErrorReports.getAppPackage() , mACRALog, remoteService, new EMailTemplateSend.DialogCallback()
+    EMailTemplateSend.doDialog(mLoginInfo, mAppPackageShared , mACRALog, remoteService, new EMailTemplateSend.DialogCallback()
     {
       
       @Override
@@ -530,9 +540,8 @@ public class ACRAReportView extends Composite
     });
   }
 
-  public void showACRAReport(LoginInfo loginInfo, BasicErrorInfoShared beio)
+  public void showACRAReport(BasicErrorInfoShared beio)
   {
-    mLoginInfo = loginInfo;
     mSelectedBasicErrorInfo = beio;
     captionPanelCenter.setCaptionText("Report: " + beio.REPORT_ID + " - Loading...");
     clearData();

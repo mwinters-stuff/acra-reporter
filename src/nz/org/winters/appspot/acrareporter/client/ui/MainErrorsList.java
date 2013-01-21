@@ -23,9 +23,10 @@ import java.util.Set;
 
 import nz.org.winters.appspot.acrareporter.client.RemoteDataService;
 import nz.org.winters.appspot.acrareporter.client.RemoteDataServiceAsync;
-import nz.org.winters.appspot.acrareporter.client.ViewErrorReports;
 import nz.org.winters.appspot.acrareporter.client.ui.images.Resources;
+import nz.org.winters.appspot.acrareporter.shared.AppPackageShared;
 import nz.org.winters.appspot.acrareporter.shared.BasicErrorInfoShared;
+import nz.org.winters.appspot.acrareporter.shared.LoginInfo;
 
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
@@ -75,6 +76,10 @@ public class MainErrorsList extends Composite implements Handler
     String cwDataGridColumnUserAndroidVersion();
 
   }
+  
+  public interface CallbackShowReport{
+    public void showReport(BasicErrorInfoShared basicErrorInfo);
+  }
 
   private CwConstants                                   constants     = (CwConstants) GWT.create(CwConstants.class);
 
@@ -120,17 +125,23 @@ public class MainErrorsList extends Composite implements Handler
   private static MainErrorsListUiBinder                 uiBinder      = GWT.create(MainErrorsListUiBinder.class);
   private ListProvider                                  dataProvider  = new ListProvider();
 
-  private CallbackMainErrorReports                      mCallbackMainErrorReports;
+  private CallbackShowReport mCallbackShowReport ;
 
   private String                                        packageName;
+
+  private LoginInfo mLoginInfo;
+
+  private AppPackageShared mAppPackageShared;
 
   interface MainErrorsListUiBinder extends UiBinder<Widget, MainErrorsList>
   {
   }
 
-  public MainErrorsList(CallbackMainErrorReports callback)
+  public MainErrorsList(CallbackShowReport callback, LoginInfo loginInfo, AppPackageShared appPackageShared)
   {
-    mCallbackMainErrorReports = callback;
+    mLoginInfo = loginInfo;
+    mAppPackageShared = appPackageShared;
+    mCallbackShowReport = callback;
     init();
   }
 
@@ -316,7 +327,7 @@ public class MainErrorsList extends Composite implements Handler
           reportIds.add(iter.next().REPORT_ID);
         }
 
-        EMailTemplateSend.doDialog(mCallbackMainErrorReports.getLoginInfo(), mCallbackMainErrorReports.getAppPackage(), reportIds, remoteService, new EMailTemplateSend.DialogCallback()
+        EMailTemplateSend.doDialog(mLoginInfo, mAppPackageShared, reportIds, remoteService, new EMailTemplateSend.DialogCallback()
         {
 
           @Override
@@ -392,7 +403,7 @@ public class MainErrorsList extends Composite implements Handler
     startLoading();
 
     BasicErrorInfoShared beio = singleSelectionModel.getSelectedObject();
-    mCallbackMainErrorReports.showACRAReport(beio);
+    mCallbackShowReport.showReport(beio);
 
   }
 

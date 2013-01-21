@@ -70,7 +70,7 @@ public class OldMainPage extends Composite implements ChangeHandler
     mLoginInfo = loginInfo;
     initWidget(uiBinder.createAndBindUi(this));
 
-    mAppPackageView = new AppPackageView(loginInfo, mCallbackMainErrorReports);
+//    mAppPackageView = new AppPackageView(loginInfo, mCallbackMainErrorReports);
     dockLayoutPanel.add(mAppPackageView);
 
     appsCombo.addChangeHandler(this);
@@ -295,7 +295,7 @@ public class OldMainPage extends Composite implements ChangeHandler
     @Override
     public void showACRAReport(BasicErrorInfoShared beio)
     {
-      mAppPackageView.showACRAReport(beio);
+//      mAppPackageView.showACRAReport(beio);
 
     }
 

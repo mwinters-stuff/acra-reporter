@@ -2,6 +2,8 @@ package nz.org.winters.appspot.acrareporter.client.ui;
 
 import nz.org.winters.appspot.acrareporter.client.RemoteDataService;
 import nz.org.winters.appspot.acrareporter.client.RemoteDataServiceAsync;
+import nz.org.winters.appspot.acrareporter.client.ui.ACRAReportView.CallbackReloadPackageList;
+import nz.org.winters.appspot.acrareporter.client.ui.MainErrorsList.CallbackShowReport;
 import nz.org.winters.appspot.acrareporter.shared.AppPackageShared;
 import nz.org.winters.appspot.acrareporter.shared.BasicErrorInfoShared;
 import nz.org.winters.appspot.acrareporter.shared.LoginInfo;
@@ -14,7 +16,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class AppPackageView extends Composite
+public class AppPackageView extends Composite implements CallbackReloadPackageList, CallbackShowReport
 {
   private final RemoteDataServiceAsync  remoteService = GWT.create(RemoteDataService.class);
 
@@ -24,14 +26,15 @@ public class AppPackageView extends Composite
   private MainErrorsList                mMainErrorsList;
   private ACRAReportView                mACRAReportView;
 
-  private CallbackMainErrorReports mCallbackMainErrorReports;
   
   protected BasicErrorInfoShared        mSelectedBasicErrorInfo;
-  private AppPackageShared mAppPackage;
+//  private AppPackageShared mAppPackage;
 
   private String mPackageName;
 
   private LoginInfo mLoginInfo;
+
+  private AppPackageShared mAppPackageShared;
   
   private static AppPackageViewUiBinder uiBinder      = GWT.create(AppPackageViewUiBinder.class);
 
@@ -39,44 +42,47 @@ public class AppPackageView extends Composite
   {
   }
 
-  public AppPackageView(LoginInfo loginInfo, CallbackMainErrorReports callbackMainErrorReports)
+  public AppPackageView(LoginInfo loginInfo, AppPackageShared appPackageShared)
   {
-    mCallbackMainErrorReports = callbackMainErrorReports;
+    mAppPackageShared = appPackageShared;
     mLoginInfo = loginInfo;
     initWidget(uiBinder.createAndBindUi(this));
-    mMainErrorsList = new MainErrorsList(mCallbackMainErrorReports);
-    mACRAReportView = new ACRAReportView(mCallbackMainErrorReports);
+    
+    mACRAReportView = new ACRAReportView(this,loginInfo, appPackageShared);
+    mMainErrorsList = new MainErrorsList(this,loginInfo, appPackageShared);
+
     dockLayoutPanel.addWest(mMainErrorsList, 280);
     dockLayoutPanel.add(mACRAReportView);
     mACRAReportView.clearData();
+    setAppPackage(appPackageShared.PACKAGE_NAME);
   }
 
   public void setAppPackage(String PACKAGE_NAME)
   {
     mPackageName = PACKAGE_NAME;
     mMainErrorsList.setAppPackage(PACKAGE_NAME);
-    remoteService.getPackage(PACKAGE_NAME, new AsyncGetPackage());
+//    remoteService.getPackage(PACKAGE_NAME, new AsyncGetPackage());
     
   }
 
-  private final class AsyncGetPackage implements AsyncCallback<AppPackageShared>
-  {
-    
-    @Override
-    public void onSuccess(AppPackageShared result)
-    {
-      mAppPackage = result;
-     // textAppStats.setText("App Stats - " + result.Totals.toLabelString());
-      stopLoading();
-    }
-
-    @Override
-    public void onFailure(Throwable caught)
-    {
-     // textAppStats.setText("");
-      stopLoading();
-    }
-  }
+//  private final class AsyncGetPackage implements AsyncCallback<AppPackageShared>
+//  {
+//    
+//    @Override
+//    public void onSuccess(AppPackageShared result)
+//    {
+//      mAppPackage = result;
+//     // textAppStats.setText("App Stats - " + result.Totals.toLabelString());
+//      stopLoading();
+//    }
+//
+//    @Override
+//    public void onFailure(Throwable caught)
+//    {
+//     // textAppStats.setText("");
+//      stopLoading();
+//    }
+//  }
 
   public void clearData()
   {
@@ -84,12 +90,12 @@ public class AppPackageView extends Composite
     
   }
 
-  public void showACRAReport(BasicErrorInfoShared beio)
-  {
-    mSelectedBasicErrorInfo = beio;
-    mACRAReportView.showACRAReport(mLoginInfo, beio);
-    
-  }
+//  public void showACRAReport(BasicErrorInfoShared beio)
+//  {
+//    mSelectedBasicErrorInfo = beio;
+//    mACRAReportView.showACRAReport(mLoginInfo, beio);
+//    
+//  }
   
   public void startLoading()
   {
@@ -100,6 +106,20 @@ public class AppPackageView extends Composite
   public void stopLoading()
   {
     AppLoadingView.getInstance().stop();
+  }
+
+  @Override
+  public void reloadPackageList()
+  {
+    mMainErrorsList.refreshList();
+    
+  }
+
+  @Override
+  public void showReport(BasicErrorInfoShared basicErrorInfo)
+  {
+    mACRAReportView.showACRAReport(basicErrorInfo);
+    
   }
 
 }

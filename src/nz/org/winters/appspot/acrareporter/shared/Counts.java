@@ -90,6 +90,16 @@ public class Counts implements Serializable, IsSerializable {
 				+ ", LookedAt=" + LookedAt + ", Deleted=" + Deleted + "]";
 	}
 
+	public int NewReports()
+	{
+	  return Reports - LookedAt;
+	}
+	
+	public int NotFixedReports()
+	{
+	  return Reports - Fixed;
+	}
+	
 	public void clear() {
 		Reports = 0;
 		Fixed = 0;

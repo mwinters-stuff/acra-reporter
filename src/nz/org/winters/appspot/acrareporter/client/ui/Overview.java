@@ -29,6 +29,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -85,10 +86,9 @@ public class Overview extends Composite implements ChangeHandler
 
   private DataTable                                 mTotalsMonthGraphData;
   private DataTable                                 mPackageMonthGraphData;
-  // private Table mPackageTable;
-  // private DataTable mPackageTableData;
   private List<AppPackageShared>                    mAppPackageShared;
   private DateFormat                                mShortDateFormat;
+  private ListDataProvider<AppPackageShared>        mPackageTableDataProvider;
 
   private int                                       browserWidth;
   private int                                       browserHeight;
@@ -110,6 +110,7 @@ public class Overview extends Composite implements ChangeHandler
   {
     this.loginInfo = loginInfo;
     initWidget(uiBinder.createAndBindUi(this));
+    AppLoadingView.getInstance().start();
 
     browserWidth = 1200;
     browserHeight = 540;
@@ -140,19 +141,15 @@ public class Overview extends Composite implements ChangeHandler
         DateFormat.Options dfo = DateFormat.Options.create();
         dfo.setPattern(DateFormat.FormatType.SHORT);
         mShortDateFormat = DateFormat.create(dfo);
-        // Panel panel = RootPanel.get();
-
+       
         mPackageTotalsGraph = new PieChart(createTotalReportTable(), createTotalReportOptions());
         pieHolder.add(mPackageTotalsGraph);
-        //mPackageTotalsGraph.addSelectHandler(mTotalsSelectHandler);
+      
 
         mTotalsMonthGraph = new LineChart(createTotalsMonthTable(), createTotalsMonthOptions());
         topPanel.add(mTotalsMonthGraph);
 
-        // mPackageTable = new Table(createPackageTableTable(),
-        // createPackageTableOptions());
-        // midPanel.add(mPackageTable);
-        // mPackageTable.addSelectHandler(mPackageTableSelectHandler);
+       
 
         mPackageMonthGraph = new LineChart(createPackageMonthTable(), createPackageMonthOptions(null));
         midPanel.add(mPackageMonthGraph);
@@ -165,6 +162,7 @@ public class Overview extends Composite implements ChangeHandler
           {
             totalsDataSelection.setEnabled(true);
 
+            AppLoadingView.getInstance().stop();
           }
 
         });
@@ -194,16 +192,16 @@ public class Overview extends Composite implements ChangeHandler
         options.setTitle("Total Reports per App");
         break;
       case 1: // fixed
-        options.setTitle("Total Fixed per App");
+        options.setTitle("Total Reports Fixed per App");
         break;
       case 2: // looked at
-        options.setTitle("Total Looked At per App");
+        options.setTitle("Total Reports Looked At per App");
         break;
       case 3: // not fixed
-        options.setTitle("Total Not Fixed per App");
+        options.setTitle("Total Reports Not Fixed per App");
         break;
       case 4: // new
-        options.setTitle("Total New per App");
+        options.setTitle("Total New Reports per App");
         break;
     }
     Properties animation = Properties.create();
@@ -390,8 +388,8 @@ public class Overview extends Composite implements ChangeHandler
             mPackageMonthGraphData.setValue(i, 1, data.Reports);
             mPackageMonthGraphData.setValue(i, 2, data.Fixed);
             mPackageMonthGraphData.setValue(i, 3, data.LookedAt);
-            mPackageMonthGraphData.setValue(i, 4, data.Reports - data.Fixed);
-            mPackageMonthGraphData.setValue(i, 5, data.Reports - data.LookedAt);
+            mPackageMonthGraphData.setValue(i, 4, data.NotFixedReports());
+            mPackageMonthGraphData.setValue(i, 5, data.NewReports());
           }
           mShortDateFormat.format(mPackageMonthGraphData, 0);
 
@@ -411,57 +409,15 @@ public class Overview extends Composite implements ChangeHandler
   protected String getAppName(String packageName)
   {
     List<AppPackageShared> shared = mPackageTableDataProvider.getList();
-    for(AppPackageShared appPackage: shared)
+    for (AppPackageShared appPackage : shared)
     {
-      if(appPackage.PACKAGE_NAME.equals(packageName))
+      if (appPackage.PACKAGE_NAME.equals(packageName))
       {
         return appPackage.AppName;
       }
     }
     return "";
   }
-
-//  SelectHandler                              mTotalsSelectHandler = new SelectHandler()
-//                                                                  {
-//
-//                                                                    @Override
-//                                                                    public void onSelect(SelectEvent event)
-//                                                                    {
-//                                                                      JsArray<Selection> selected = mPackageTotalsGraph.getSelections();
-//
-//                                                                      if (selected.length() == 0)
-//                                                                        return;
-//
-//                                                                      String packageName = mAppPackageShared.get(selected.get(0).getRow()).PACKAGE_NAME;
-//
-//                                                                      // mPackageTable.setSelections(selected);
-//                                                                      updateAppMonthGraph(packageName);
-//                                                                    }
-//
-//                                                                  };
-  private ListDataProvider<AppPackageShared> mPackageTableDataProvider;
-
-  // SelectHandler mPackageTableSelectHandler = new SelectHandler()
-  // {
-  //
-  // @Override
-  // public void onSelect(SelectEvent event)
-  // {
-  // JsArray<Selection> selected = mPackageTable.getSelections();
-  // Selection sel = selected.get(0);
-  // if(sel != null)
-  // {
-  // int row = sel.getRow();
-  // Selection news = Selection.createRowSelection(row);
-  //
-  // JsArray<Selection> pieselect = Selection.createArray().cast();
-  // pieselect.push(news);
-  // mPackageTotalsGraph.setSelections(pieselect);
-  // updateAppMonthGraph(selected);
-  // }
-  // }
-  //
-  // };
 
   @Override
   public void onChange(ChangeEvent event)
@@ -477,8 +433,6 @@ public class Overview extends Composite implements ChangeHandler
 
     mTotalGraphData.addRows(mAppPackageShared.size());
     // mPackageTableData.addRows(mAppPackageShared.size());
-    int lastnewc = 0;
-    int selectRow = 0;
 
     List<AppPackageShared> tableList = mPackageTableDataProvider.getList();
     tableList.clear();
@@ -489,7 +443,7 @@ public class Overview extends Composite implements ChangeHandler
 
       mTotalGraphData.setValue(i, 0, data.AppName);
 
-      int newc = data.Totals.Reports - data.Totals.LookedAt;
+      int newc = data.Totals.NewReports();
       switch (totalsDataSelection.getSelectedIndex())
       {
         case 0: // reports
@@ -502,37 +456,23 @@ public class Overview extends Composite implements ChangeHandler
           mTotalGraphData.setValue(i, 1, data.Totals.LookedAt);
           break;
         case 3: // not fixed
-          mTotalGraphData.setValue(i, 1, data.Totals.Reports - data.Totals.Fixed);
+          mTotalGraphData.setValue(i, 1, data.Totals.NotFixedReports());
           break;
         case 4: // new
           mTotalGraphData.setValue(i, 1, newc);
           break;
       }
 
-      // mTotalGraphData.setProperty(i,0,"DATA", Long.toString(data.id));
-      if (newc > lastnewc)
-      {
-        lastnewc = newc;
-        selectRow = i;
-      }
-
     }
     mPackageTotalsGraph.draw(mTotalGraphData, createTotalReportOptions());
 
     appTotalsTable.getColumnSortList().clear();
-    appTotalsTable.getColumnSortList().push(new ColumnSortInfo(appTotalsTable.getColumn(1), false));
+    appTotalsTable.getColumnSortList().push(appTotalsTable.getColumn(1));
 
-    // mPackageTable.draw(mPackageTableData, createPackageTableOptions());
-    // if (mPackageTable.getSelections().length() == 0)
-    // {
-    // Selection sel = Selection.createRowSelection(selectRow);
-    // JsArray<Selection> tableselect = Selection.createArray().cast();
-    // tableselect.push(sel);
-    // mPackageTable.setSelections(tableselect);
-    // // mPackageTotalsGraph.setSelections(tableselect);
-    // updateAppMonthGraph(tableselect);
-    // }
-
+    if (!tableList.isEmpty())
+    {
+      appTotalsTable.getSelectionModel().setSelected(tableList.get(0), true);
+    }
   }
 
   private void editPackage(AppPackageShared packagedata)
@@ -554,7 +494,13 @@ public class Overview extends Composite implements ChangeHandler
 
   private void viewPackage(AppPackageShared packagedata)
   {
-    Window.alert(packagedata.AppName);
+    
+    RootLayoutPanel.get().clear();
+    RootLayoutPanel.get().add(new AppPackageView(loginInfo,packagedata));
+
+  //  panel.add(new OldMainPage(loginInfo));
+    
+    
   }
 
   private void createPackageTableColumns()
@@ -586,12 +532,13 @@ public class Overview extends Composite implements ChangeHandler
       public String getValue(AppPackageShared data)
       {
 
-        return Integer.toString(data.Totals.Reports - data.Totals.LookedAt);
+        return Integer.toString(data.Totals.NewReports());
       }
 
     };
     newColumn.setSortable(true);
     newColumn.setHorizontalAlignment(Column.ALIGN_RIGHT);
+    newColumn.setDefaultSortAscending(false);
 
     Column<AppPackageShared, String> notFixedColumn = new Column<AppPackageShared, String>(new TextCell())
     {
@@ -599,7 +546,7 @@ public class Overview extends Composite implements ChangeHandler
       public String getValue(AppPackageShared data)
       {
 
-        return Integer.toString(data.Totals.Reports - data.Totals.Fixed);
+        return Integer.toString(data.Totals.NotFixedReports());
       }
 
     };
@@ -719,9 +666,7 @@ public class Overview extends Composite implements ChangeHandler
 
         if (o1 != null && o2 != null)
         {
-          int o1value = o1.Totals.Reports - o1.Totals.LookedAt;
-          int o2value = o2.Totals.Reports - o2.Totals.LookedAt;
-          return new Integer(o1value).compareTo(o2value);
+          return new Integer(o1.Totals.NewReports()).compareTo(o2.Totals.NewReports());
         }
         return -1;
       }
@@ -737,9 +682,7 @@ public class Overview extends Composite implements ChangeHandler
 
         if (o1 != null && o2 != null)
         {
-          int o1value = o1.Totals.Reports - o1.Totals.Fixed;
-          int o2value = o2.Totals.Reports - o2.Totals.Fixed;
-          return new Integer(o1value).compareTo(o2value);
+          return new Integer(o1.Totals.NotFixedReports()).compareTo(o2.Totals.NotFixedReports());
         }
         return -1;
       }
