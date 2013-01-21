@@ -39,11 +39,9 @@ import nz.org.winters.appspot.acrareporter.shared.AppPackageShared;
 import nz.org.winters.appspot.acrareporter.shared.AppUserShared;
 import nz.org.winters.appspot.acrareporter.shared.BasicErrorInfoShared;
 import nz.org.winters.appspot.acrareporter.shared.Configuration;
-import nz.org.winters.appspot.acrareporter.shared.Counts;
 import nz.org.winters.appspot.acrareporter.shared.DailyCountsShared;
 import nz.org.winters.appspot.acrareporter.shared.LoginInfo;
 import nz.org.winters.appspot.acrareporter.shared.MappingFileShared;
-import nz.org.winters.appspot.acrareporter.shared.PackageGraphData;
 import nz.org.winters.appspot.acrareporter.shared.Utils;
 import nz.org.winters.appspot.acrareporter.store.ACRALog;
 import nz.org.winters.appspot.acrareporter.store.AppPackage;
@@ -55,7 +53,6 @@ import nz.org.winters.appspot.acrareporter.store.RegisterDataStores;
 
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-import com.google.gwt.visualization.client.visualizations.corechart.PieChart;
 import com.googlecode.objectify.ObjectifyService;
 
 /**
@@ -655,17 +652,10 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
   }
 
   @Override
-  public List<PackageGraphData> getPackageGraphDataTotals(LoginInfo user) throws IllegalArgumentException
+  public List<AppPackageShared> getPackageGraphDataTotals(LoginInfo user) throws IllegalArgumentException
   {
-    List<PackageGraphData> result = new ArrayList<PackageGraphData>();
-    
     List<AppPackageShared> appPackages = getPackages(user);
-    for(AppPackageShared appPackage: appPackages)
-    {
-      PackageGraphData data= new PackageGraphData(appPackage);
-      result.add(data);
-    }
-    return result;
+    return appPackages;
   }
 
   @Override

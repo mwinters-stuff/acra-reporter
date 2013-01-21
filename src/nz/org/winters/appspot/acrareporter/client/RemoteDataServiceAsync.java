@@ -24,7 +24,6 @@ import nz.org.winters.appspot.acrareporter.shared.BasicErrorInfoShared;
 import nz.org.winters.appspot.acrareporter.shared.DailyCountsShared;
 import nz.org.winters.appspot.acrareporter.shared.LoginInfo;
 import nz.org.winters.appspot.acrareporter.shared.MappingFileShared;
-import nz.org.winters.appspot.acrareporter.shared.PackageGraphData;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
@@ -83,7 +82,7 @@ public interface RemoteDataServiceAsync
 
   void addAppUser(AppUserShared appUserShared, AsyncCallback<Void> callback);
 
-  void getPackageGraphDataTotals(LoginInfo user, AsyncCallback<List<PackageGraphData>> callback);
+  void getPackageGraphDataTotals(LoginInfo user, AsyncCallback<List<AppPackageShared>> callback);
 
   void getLastMonthDailyCounts(LoginInfo user, AsyncCallback<List<DailyCountsShared>> callback);
 

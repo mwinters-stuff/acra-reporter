@@ -5,11 +5,13 @@ import java.util.List;
 
 import nz.org.winters.appspot.acrareporter.client.RemoteDataService;
 import nz.org.winters.appspot.acrareporter.client.RemoteDataServiceAsync;
+import nz.org.winters.appspot.acrareporter.shared.AppPackageShared;
+import nz.org.winters.appspot.acrareporter.shared.BasicErrorInfoShared;
 import nz.org.winters.appspot.acrareporter.shared.DailyCountsShared;
 import nz.org.winters.appspot.acrareporter.shared.LoginInfo;
-import nz.org.winters.appspot.acrareporter.shared.PackageGraphData;
 
 import com.google.gwt.ajaxloader.client.Properties;
+import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JsArray;
@@ -17,19 +19,25 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.ColumnSortList.ColumnSortInfo;
+import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.ProvidesKey;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SelectionChangeEvent.Handler;
+import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.gwt.visualization.client.AbstractDataTable;
 import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
 import com.google.gwt.visualization.client.DataTable;
@@ -44,47 +52,55 @@ import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
 import com.google.gwt.visualization.client.visualizations.corechart.PieChart;
 import com.google.gwt.visualization.client.visualizations.corechart.PieChart.PieOptions;
-import com.google.gwt.user.cellview.client.DataGrid;
 
 public class Overview extends Composite implements ChangeHandler
 {
 
-  private static OverviewUiBinder      uiBinder       = GWT.create(OverviewUiBinder.class);
+  private static OverviewUiBinder                   uiBinder       = GWT.create(OverviewUiBinder.class);
   @UiField
-  HorizontalPanel                      topPanel;
+  HorizontalPanel                                   topPanel;
   @UiField
-  VerticalPanel                        mainPanel;
+  VerticalPanel                                     mainPanel;
   @UiField
-  HorizontalPanel                      midPanel;
+  HorizontalPanel                                   midPanel;
   @UiField
-  ListBox                              totalsDataSelection;
+  ListBox                                           totalsDataSelection;
   @UiField
-  SimplePanel                          pieHolder;
+  SimplePanel                                       pieHolder;
   @UiField
-  HorizontalPanel                      bottomPanel;
+  HorizontalPanel                                   bottomPanel;
   @UiField
-  VerticalPanel                        panelAppGrid;
+  VerticalPanel                                     panelAppGrid;
   @UiField(provided = true)
-  DataGrid<PackageGraphData>          appTotalsTable = new DataGrid<PackageGraphData>();
+  DataGrid<AppPackageShared>                        appTotalsTable = new DataGrid<AppPackageShared>();
 
-  private final RemoteDataServiceAsync remoteService  = GWT.create(RemoteDataService.class);
+  private final RemoteDataServiceAsync              remoteService  = GWT.create(RemoteDataService.class);
 
-  private LoginInfo                    loginInfo;
+  private LoginInfo                                 loginInfo;
 
-  private DataTable                    mTotalGraphData;
-  private PieChart                     mPackageTotalsGraph;
-  private LineChart                    mTotalsMonthGraph;
-  private LineChart                    mPackageMonthGraph;
+  private DataTable                                 mTotalGraphData;
+  private PieChart                                  mPackageTotalsGraph;
+  private LineChart                                 mTotalsMonthGraph;
+  private LineChart                                 mPackageMonthGraph;
 
-  private DataTable                    mTotalsMonthGraphData;
-  private DataTable                    mPackageMonthGraphData;
+  private DataTable                                 mTotalsMonthGraphData;
+  private DataTable                                 mPackageMonthGraphData;
   // private Table mPackageTable;
   // private DataTable mPackageTableData;
-  private List<PackageGraphData>       mPackageGraphData;
-  private DateFormat                   mShortDateFormat;
+  private List<AppPackageShared>                    mAppPackageShared;
+  private DateFormat                                mShortDateFormat;
 
-  private int                          browserWidth;
-  private int                          browserHeight;
+  private int                                       browserWidth;
+  private int                                       browserHeight;
+
+  public static final ProvidesKey<AppPackageShared> KEY_PROVIDER   = new ProvidesKey<AppPackageShared>()
+                                                                   {
+                                                                     @Override
+                                                                     public Object getKey(AppPackageShared item)
+                                                                     {
+                                                                       return item == null ? null : item.id;
+                                                                     }
+                                                                   };
 
   interface OverviewUiBinder extends UiBinder<Widget, Overview>
   {
@@ -128,7 +144,7 @@ public class Overview extends Composite implements ChangeHandler
 
         mPackageTotalsGraph = new PieChart(createTotalReportTable(), createTotalReportOptions());
         pieHolder.add(mPackageTotalsGraph);
-        mPackageTotalsGraph.addSelectHandler(mTotalsSelectHandler);
+        //mPackageTotalsGraph.addSelectHandler(mTotalsSelectHandler);
 
         mTotalsMonthGraph = new LineChart(createTotalsMonthTable(), createTotalsMonthOptions());
         topPanel.add(mTotalsMonthGraph);
@@ -298,13 +314,13 @@ public class Overview extends Composite implements ChangeHandler
 
   private void updateTotalsGraph()
   {
-    remoteService.getPackageGraphDataTotals(loginInfo, new AsyncCallback<List<PackageGraphData>>()
+    remoteService.getPackageGraphDataTotals(loginInfo, new AsyncCallback<List<AppPackageShared>>()
     {
 
       @Override
-      public void onSuccess(List<PackageGraphData> result)
+      public void onSuccess(List<AppPackageShared> result)
       {
-        mPackageGraphData = result;
+        mAppPackageShared = result;
         loadTotalsGraphData();
       }
 
@@ -353,14 +369,8 @@ public class Overview extends Composite implements ChangeHandler
 
   }
 
-  private void updateAppMonthGraph(JsArray<Selection> tableselect)
+  private void updateAppMonthGraph(final String packageName)
   {
-    final JsArray<Selection> sel = tableselect;// mPackageTable.getSelections();
-
-    if (sel.length() == 0)
-      return;
-
-    String packageName = mPackageGraphData.get(sel.get(0).getRow()).PACKAGE_NAME;
 
     remoteService.getPackageLastMonthDailyCounts(loginInfo, packageName, new AsyncCallback<List<DailyCountsShared>>()
     {
@@ -386,7 +396,7 @@ public class Overview extends Composite implements ChangeHandler
           mShortDateFormat.format(mPackageMonthGraphData, 0);
 
         }
-        mPackageMonthGraph.draw(mPackageMonthGraphData, createPackageMonthOptions(mPackageGraphData.get(sel.get(0).getRow()).AppName));
+        mPackageMonthGraph.draw(mPackageMonthGraphData, createPackageMonthOptions(getAppName(packageName)));
 
       }
 
@@ -398,20 +408,38 @@ public class Overview extends Composite implements ChangeHandler
     });
   }
 
-  SelectHandler                              mTotalsSelectHandler = new SelectHandler()
-                                                                  {
+  protected String getAppName(String packageName)
+  {
+    List<AppPackageShared> shared = mPackageTableDataProvider.getList();
+    for(AppPackageShared appPackage: shared)
+    {
+      if(appPackage.PACKAGE_NAME.equals(packageName))
+      {
+        return appPackage.AppName;
+      }
+    }
+    return "";
+  }
 
-                                                                    @Override
-                                                                    public void onSelect(SelectEvent event)
-                                                                    {
-                                                                      JsArray<Selection> selected = mPackageTotalsGraph.getSelections();
-
-                                                                      // mPackageTable.setSelections(selected);
-                                                                      updateAppMonthGraph(selected);
-                                                                    }
-
-                                                                  };
-  private ListDataProvider<PackageGraphData> mPackageTableDataProvider;
+//  SelectHandler                              mTotalsSelectHandler = new SelectHandler()
+//                                                                  {
+//
+//                                                                    @Override
+//                                                                    public void onSelect(SelectEvent event)
+//                                                                    {
+//                                                                      JsArray<Selection> selected = mPackageTotalsGraph.getSelections();
+//
+//                                                                      if (selected.length() == 0)
+//                                                                        return;
+//
+//                                                                      String packageName = mAppPackageShared.get(selected.get(0).getRow()).PACKAGE_NAME;
+//
+//                                                                      // mPackageTable.setSelections(selected);
+//                                                                      updateAppMonthGraph(packageName);
+//                                                                    }
+//
+//                                                                  };
+  private ListDataProvider<AppPackageShared> mPackageTableDataProvider;
 
   // SelectHandler mPackageTableSelectHandler = new SelectHandler()
   // {
@@ -447,34 +475,34 @@ public class Overview extends Composite implements ChangeHandler
     mTotalGraphData.removeRows(0, mTotalGraphData.getNumberOfRows());
     // mPackageTableData.removeRows(0, mPackageTableData.getNumberOfRows());
 
-    mTotalGraphData.addRows(mPackageGraphData.size());
-    // mPackageTableData.addRows(mPackageGraphData.size());
+    mTotalGraphData.addRows(mAppPackageShared.size());
+    // mPackageTableData.addRows(mAppPackageShared.size());
     int lastnewc = 0;
     int selectRow = 0;
-    
-    List<PackageGraphData> tableList = mPackageTableDataProvider.getList();
+
+    List<AppPackageShared> tableList = mPackageTableDataProvider.getList();
     tableList.clear();
-    for (int i = 0; i < mPackageGraphData.size(); i++)
+    for (int i = 0; i < mAppPackageShared.size(); i++)
     {
-      PackageGraphData data = mPackageGraphData.get(i);
+      AppPackageShared data = mAppPackageShared.get(i);
       tableList.add(data);
 
       mTotalGraphData.setValue(i, 0, data.AppName);
 
-      int newc = data.counts.Reports - data.counts.LookedAt;
+      int newc = data.Totals.Reports - data.Totals.LookedAt;
       switch (totalsDataSelection.getSelectedIndex())
       {
         case 0: // reports
-          mTotalGraphData.setValue(i, 1, data.counts.Reports);
+          mTotalGraphData.setValue(i, 1, data.Totals.Reports);
           break;
         case 1: // fixed
-          mTotalGraphData.setValue(i, 1, data.counts.Fixed);
+          mTotalGraphData.setValue(i, 1, data.Totals.Fixed);
           break;
         case 2: // looked at
-          mTotalGraphData.setValue(i, 1, data.counts.LookedAt);
+          mTotalGraphData.setValue(i, 1, data.Totals.LookedAt);
           break;
         case 3: // not fixed
-          mTotalGraphData.setValue(i, 1, data.counts.Reports - data.counts.Fixed);
+          mTotalGraphData.setValue(i, 1, data.Totals.Reports - data.Totals.Fixed);
           break;
         case 4: // new
           mTotalGraphData.setValue(i, 1, newc);
@@ -490,6 +518,7 @@ public class Overview extends Composite implements ChangeHandler
 
     }
     mPackageTotalsGraph.draw(mTotalGraphData, createTotalReportOptions());
+
     appTotalsTable.getColumnSortList().clear();
     appTotalsTable.getColumnSortList().push(new ColumnSortInfo(appTotalsTable.getColumn(1), false));
 
@@ -506,103 +535,166 @@ public class Overview extends Composite implements ChangeHandler
 
   }
 
-  private void editPackage(String packageName)
+  private void editPackage(AppPackageShared packagedata)
   {
-    Window.alert(packageName);
+    // Window.alert(object.AppName);
+    PackageEdit.doEditDialog(packagedata, remoteService, new PackageEdit.DialogCallback()
+    {
+
+      @Override
+      public void result(boolean ok, AppPackageShared appPackageShared)
+      {
+        if (ok)
+        {
+          loadTotalsGraphData();
+        }
+      }
+    });
   }
 
-  private void viewPackage(String packageName)
+  private void viewPackage(AppPackageShared packagedata)
   {
-    Window.alert(packageName);
+    Window.alert(packagedata.AppName);
   }
 
   private void createPackageTableColumns()
   {
-    mPackageTableDataProvider = new ListDataProvider<PackageGraphData>();
+    mPackageTableDataProvider = new ListDataProvider<AppPackageShared>();
+    ListHandler<AppPackageShared> columnSortHandler = new ListHandler<AppPackageShared>(mPackageTableDataProvider.getList());
     mPackageTableDataProvider.addDataDisplay(appTotalsTable);
     panelAppGrid.setWidth((int) ((double) browserWidth * 0.5) + "px");
-    panelAppGrid.setHeight("300px");
+    // panelAppGrid.setHeight("300px");
+    panelAppGrid.setHeight((int) ((double) browserHeight * 0.5) + "px");
+
+    appTotalsTable.setAutoHeaderRefreshDisabled(true);
+    appTotalsTable.setEmptyTableWidget(new Label("No Apps"));
 
     // Create name column.
-    Column<PackageGraphData, String> nameColumn = new Column<PackageGraphData, String>(new TextCell())
+    Column<AppPackageShared, String> nameColumn = new Column<AppPackageShared, String>(new TextCell())
     {
       @Override
-      public String getValue(PackageGraphData data)
+      public String getValue(AppPackageShared data)
       {
         return data.AppName;
       }
     };
     nameColumn.setSortable(true);
 
-    Column<PackageGraphData, String> newColumn = new Column<PackageGraphData, String>(new TextCell())
+    Column<AppPackageShared, String> newColumn = new Column<AppPackageShared, String>(new TextCell())
     {
       @Override
-      public String getValue(PackageGraphData data)
+      public String getValue(AppPackageShared data)
       {
 
-        return Integer.toString(data.counts.Reports - data.counts.LookedAt);
+        return Integer.toString(data.Totals.Reports - data.Totals.LookedAt);
       }
 
     };
     newColumn.setSortable(true);
     newColumn.setHorizontalAlignment(Column.ALIGN_RIGHT);
 
-    Column<PackageGraphData, String> notFixedColumn = new Column<PackageGraphData, String>(new TextCell())
+    Column<AppPackageShared, String> notFixedColumn = new Column<AppPackageShared, String>(new TextCell())
     {
       @Override
-      public String getValue(PackageGraphData data)
+      public String getValue(AppPackageShared data)
       {
 
-        return Integer.toString(data.counts.Reports - data.counts.Fixed);
+        return Integer.toString(data.Totals.Reports - data.Totals.Fixed);
       }
 
     };
     notFixedColumn.setSortable(true);
     notFixedColumn.setHorizontalAlignment(Column.ALIGN_RIGHT);
 
-    Column<PackageGraphData, String> lookedAtColumn = new Column<PackageGraphData, String>(new TextCell())
+    Column<AppPackageShared, String> lookedAtColumn = new Column<AppPackageShared, String>(new TextCell())
     {
       @Override
-      public String getValue(PackageGraphData data)
+      public String getValue(AppPackageShared data)
       {
 
-        return Integer.toString(data.counts.LookedAt);
+        return Integer.toString(data.Totals.LookedAt);
       }
 
     };
     lookedAtColumn.setSortable(true);
     lookedAtColumn.setHorizontalAlignment(Column.ALIGN_RIGHT);
 
-    Column<PackageGraphData, String> fixedColumn = new Column<PackageGraphData, String>(new TextCell())
+    Column<AppPackageShared, String> fixedColumn = new Column<AppPackageShared, String>(new TextCell())
     {
       @Override
-      public String getValue(PackageGraphData data)
+      public String getValue(AppPackageShared data)
       {
 
-        return Integer.toString(data.counts.Fixed);
+        return Integer.toString(data.Totals.Fixed);
       }
 
     };
     fixedColumn.setSortable(true);
     fixedColumn.setHorizontalAlignment(Column.ALIGN_RIGHT);
 
-    Column<PackageGraphData, String> reportsColumn = new Column<PackageGraphData, String>(new TextCell())
+    Column<AppPackageShared, String> reportsColumn = new Column<AppPackageShared, String>(new TextCell())
     {
       @Override
-      public String getValue(PackageGraphData data)
+      public String getValue(AppPackageShared data)
       {
 
-        return Integer.toString(data.counts.Reports);
+        return Integer.toString(data.Totals.Reports);
       }
 
     };
+
     reportsColumn.setSortable(true);
     reportsColumn.setHorizontalAlignment(Column.ALIGN_RIGHT);
 
-    ListHandler<PackageGraphData> columnSortHandler = new ListHandler<PackageGraphData>(mPackageTableDataProvider.getList());
-    columnSortHandler.setComparator(nameColumn, new Comparator<PackageGraphData>()
+    ActionCell<AppPackageShared> actionEdit = new ActionCell<AppPackageShared>("Edit", new ActionCell.Delegate<AppPackageShared>()
     {
-      public int compare(PackageGraphData o1, PackageGraphData o2)
+
+      @Override
+      public void execute(AppPackageShared object)
+      {
+        editPackage(object);
+      }
+
+    });
+
+    Column<AppPackageShared, AppPackageShared> editColumn = new Column<AppPackageShared, AppPackageShared>(actionEdit)
+    {
+
+      @Override
+      public AppPackageShared getValue(AppPackageShared object)
+      {
+        return object;
+      }
+
+    };
+    editColumn.setHorizontalAlignment(Column.ALIGN_CENTER);
+
+    ActionCell<AppPackageShared> actionOpen = new ActionCell<AppPackageShared>("Open", new ActionCell.Delegate<AppPackageShared>()
+    {
+
+      @Override
+      public void execute(AppPackageShared object)
+      {
+        viewPackage(object);
+      }
+
+    });
+
+    Column<AppPackageShared, AppPackageShared> openColumn = new Column<AppPackageShared, AppPackageShared>(actionOpen)
+    {
+
+      @Override
+      public AppPackageShared getValue(AppPackageShared object)
+      {
+        return object;
+      }
+
+    };
+    openColumn.setHorizontalAlignment(Column.ALIGN_CENTER);
+
+    columnSortHandler.setComparator(nameColumn, new Comparator<AppPackageShared>()
+    {
+      public int compare(AppPackageShared o1, AppPackageShared o2)
       {
         if (o1 == o2)
         {
@@ -616,9 +708,9 @@ public class Overview extends Composite implements ChangeHandler
         return -1;
       }
     });
-    columnSortHandler.setComparator(newColumn, new Comparator<PackageGraphData>()
+    columnSortHandler.setComparator(newColumn, new Comparator<AppPackageShared>()
     {
-      public int compare(PackageGraphData o1, PackageGraphData o2)
+      public int compare(AppPackageShared o1, AppPackageShared o2)
       {
         if (o1 == o2)
         {
@@ -627,16 +719,16 @@ public class Overview extends Composite implements ChangeHandler
 
         if (o1 != null && o2 != null)
         {
-          int o1value = o1.counts.Reports - o1.counts.LookedAt;
-          int o2value = o2.counts.Reports - o2.counts.LookedAt;
+          int o1value = o1.Totals.Reports - o1.Totals.LookedAt;
+          int o2value = o2.Totals.Reports - o2.Totals.LookedAt;
           return new Integer(o1value).compareTo(o2value);
         }
         return -1;
       }
     });
-    columnSortHandler.setComparator(notFixedColumn, new Comparator<PackageGraphData>()
+    columnSortHandler.setComparator(notFixedColumn, new Comparator<AppPackageShared>()
     {
-      public int compare(PackageGraphData o1, PackageGraphData o2)
+      public int compare(AppPackageShared o1, AppPackageShared o2)
       {
         if (o1 == o2)
         {
@@ -645,16 +737,16 @@ public class Overview extends Composite implements ChangeHandler
 
         if (o1 != null && o2 != null)
         {
-          int o1value = o1.counts.Reports - o1.counts.Fixed;
-          int o2value = o2.counts.Reports - o2.counts.Fixed;
+          int o1value = o1.Totals.Reports - o1.Totals.Fixed;
+          int o2value = o2.Totals.Reports - o2.Totals.Fixed;
           return new Integer(o1value).compareTo(o2value);
         }
         return -1;
       }
     });
-    columnSortHandler.setComparator(lookedAtColumn, new Comparator<PackageGraphData>()
+    columnSortHandler.setComparator(lookedAtColumn, new Comparator<AppPackageShared>()
     {
-      public int compare(PackageGraphData o1, PackageGraphData o2)
+      public int compare(AppPackageShared o1, AppPackageShared o2)
       {
         if (o1 == o2)
         {
@@ -663,14 +755,14 @@ public class Overview extends Composite implements ChangeHandler
 
         if (o1 != null && o2 != null)
         {
-          return new Integer(o1.counts.LookedAt).compareTo(o2.counts.LookedAt);
+          return new Integer(o1.Totals.LookedAt).compareTo(o2.Totals.LookedAt);
         }
         return -1;
       }
     });
-    columnSortHandler.setComparator(fixedColumn, new Comparator<PackageGraphData>()
+    columnSortHandler.setComparator(fixedColumn, new Comparator<AppPackageShared>()
     {
-      public int compare(PackageGraphData o1, PackageGraphData o2)
+      public int compare(AppPackageShared o1, AppPackageShared o2)
       {
         if (o1 == o2)
         {
@@ -679,14 +771,14 @@ public class Overview extends Composite implements ChangeHandler
 
         if (o1 != null && o2 != null)
         {
-          return new Integer(o1.counts.Fixed).compareTo(o2.counts.Fixed);
+          return new Integer(o1.Totals.Fixed).compareTo(o2.Totals.Fixed);
         }
         return -1;
       }
     });
-    columnSortHandler.setComparator(reportsColumn, new Comparator<PackageGraphData>()
+    columnSortHandler.setComparator(reportsColumn, new Comparator<AppPackageShared>()
     {
-      public int compare(PackageGraphData o1, PackageGraphData o2)
+      public int compare(AppPackageShared o1, AppPackageShared o2)
       {
         if (o1 == o2)
         {
@@ -695,12 +787,12 @@ public class Overview extends Composite implements ChangeHandler
 
         if (o1 != null && o2 != null)
         {
-          return new Integer(o1.counts.Reports).compareTo(o2.counts.Reports);
+          return new Integer(o1.Totals.Reports).compareTo(o2.Totals.Reports);
         }
         return -1;
       }
     });
-    
+
     appTotalsTable.addColumnSortHandler(columnSortHandler);
 
     appTotalsTable.addColumn(nameColumn, "App");
@@ -709,9 +801,31 @@ public class Overview extends Composite implements ChangeHandler
     appTotalsTable.addColumn(lookedAtColumn, "Looked At");
     appTotalsTable.addColumn(fixedColumn, "Fixed");
     appTotalsTable.addColumn(reportsColumn, "Reports");
+    appTotalsTable.addColumn(editColumn, "");
+    appTotalsTable.addColumn(openColumn, "");
+
+    String numWidth = "10%";
+    appTotalsTable.setColumnWidth(newColumn, numWidth);
+    appTotalsTable.setColumnWidth(notFixedColumn, numWidth);
+    appTotalsTable.setColumnWidth(lookedAtColumn, numWidth);
+    appTotalsTable.setColumnWidth(fixedColumn, numWidth);
+    appTotalsTable.setColumnWidth(reportsColumn, numWidth);
+    appTotalsTable.setColumnWidth(editColumn, "60px");
+    appTotalsTable.setColumnWidth(openColumn, "85px");
 
     // appTotalsTable.addColumn(, "Actions");
+    final SingleSelectionModel<AppPackageShared> singleSelectionModel = new SingleSelectionModel<AppPackageShared>(KEY_PROVIDER);
+    appTotalsTable.setSelectionModel(singleSelectionModel, DefaultSelectionEventManager.<AppPackageShared> createDefaultManager());
+    singleSelectionModel.addSelectionChangeHandler(new Handler()
+    {
 
+      @Override
+      public void onSelectionChange(SelectionChangeEvent event)
+      {
+        AppPackageShared appPackage = singleSelectionModel.getSelectedObject();
+        updateAppMonthGraph(appPackage.PACKAGE_NAME);
+      }
+    });
   }
 
 }
