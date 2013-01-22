@@ -37,6 +37,8 @@ public class AppPackageView extends Composite implements CallbackReloadPackageLi
   private LoginInfo                     mLoginInfo;
   private AppPackageShared              mAppPackageShared;
 
+  private UIConstants                   constants     = (UIConstants) GWT.create(UIConstants.class);
+
   private CallbackClosePackageView      mCallbackClosePackageView;
 
   private static AppPackageViewUiBinder uiBinder      = GWT.create(AppPackageViewUiBinder.class);
@@ -62,7 +64,7 @@ public class AppPackageView extends Composite implements CallbackReloadPackageLi
 
     dockLayoutPanel.addWest(mMainErrorsList, 280);
     dockLayoutPanel.add(mACRAReportView);
-    labelTitle.setText(labelTitle.getText() + " " + appPackageShared.AppName + " - " + appPackageShared.PACKAGE_NAME);
+    labelTitle.setText(constants.appPackageLabelTitle(appPackageShared.AppName,appPackageShared.PACKAGE_NAME));
 
     mACRAReportView.clearData();
     mMainErrorsList.setAppPackage(appPackageShared.PACKAGE_NAME);
@@ -130,7 +132,7 @@ public class AppPackageView extends Composite implements CallbackReloadPackageLi
       {
         if (ok)
         {
-          labelTitle.setText("Crash Reports for: " + appPackageShared.AppName + " - " + appPackageShared.PACKAGE_NAME);
+          labelTitle.setText(constants.appPackageLabelTitle(appPackageShared.AppName,appPackageShared.PACKAGE_NAME));
         }
       }
     });

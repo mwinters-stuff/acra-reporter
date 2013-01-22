@@ -1,4 +1,5 @@
 package nz.org.winters.appspot.acrareporter.client.ui;
+
 /*
  * Copyright 2013 Mathew Winters
 
@@ -6,14 +7,14 @@ package nz.org.winters.appspot.acrareporter.client.ui;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+ http://www.apache.org/licenses/LICENSE-2.0
 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 import nz.org.winters.appspot.acrareporter.client.RemoteDataService;
 import nz.org.winters.appspot.acrareporter.client.RemoteDataServiceAsync;
 import nz.org.winters.appspot.acrareporter.shared.ACRALogShared;
@@ -139,13 +140,15 @@ public class ACRAReportView extends Composite
   NameValueList                         nvlSettingsSystem;
   NameValueList                         nvlSettingsSecure;
 
-  private LoginInfo mLoginInfo;
-  private CallbackReloadPackageList      mCallbackReloadPackageList;
+  private UIConstants                   constants     = (UIConstants) GWT.create(UIConstants.class);
+
+  private LoginInfo                     mLoginInfo;
+  private CallbackReloadPackageList     mCallbackReloadPackageList;
   private final RemoteDataServiceAsync  remoteService = GWT.create(RemoteDataService.class);
 
-  private NameValueList nvlSettingsGlobal;
+  private NameValueList                 nvlSettingsGlobal;
 
-  private AppPackageShared mAppPackageShared;
+  private AppPackageShared              mAppPackageShared;
 
   private static ACRAReportViewUiBinder uiBinder      = GWT.create(ACRAReportViewUiBinder.class);
 
@@ -157,13 +160,13 @@ public class ACRAReportView extends Composite
   {
     public void reloadPackageList();
   }
-  
+
   public ACRAReportView(CallbackReloadPackageList callback, LoginInfo loginInfo, AppPackageShared appPackageShared)
   {
     mLoginInfo = loginInfo;
 
     mCallbackReloadPackageList = callback;
-    mAppPackageShared= appPackageShared;
+    mAppPackageShared = appPackageShared;
 
     initWidget(uiBinder.createAndBindUi(this));
 
@@ -207,8 +210,7 @@ public class ACRAReportView extends Composite
                                                      @Override
                                                      public void onFailure(Throwable caught)
                                                      {
-                                                       // TODO Auto-generated
-                                                       // method stub
+
                                                        stopLoading();
                                                        clearData();
                                                      }
@@ -216,7 +218,7 @@ public class ACRAReportView extends Composite
 
   private BasicErrorInfoShared mSelectedBasicErrorInfo;
 
-  private ACRALogShared mACRALog;
+  private ACRALogShared        mACRALog;
 
   private void populateValues(ACRALogShared result)
   {
@@ -225,11 +227,11 @@ public class ACRAReportView extends Composite
     if (result == null)
     {
       stopLoading();
-      captionPanelCenter.setCaptionText("Report: " + beio.REPORT_ID + " - Error Fetching");
+      captionPanelCenter.setCaptionText(constants.acraReportViewErrorFetch(result.REPORT_ID));
       clearData();
       return;
     }
-    captionPanelCenter.setCaptionText("Report: " + result.REPORT_ID);
+    captionPanelCenter.setCaptionText(constants.acraReportViewLabelTitle(result.REPORT_ID));
 
     textStackTrace.setText(Utils.isEmpty(result.MAPPED_STACK_TRACE) ? result.STACK_TRACE : result.MAPPED_STACK_TRACE);
     if (textStackTrace.getText().length() == 0)
@@ -274,7 +276,6 @@ public class ACRAReportView extends Composite
     textDeviceID.setText(result.DEVICE_ID);
     textUserIP.setText(result.USER_IP);
     textUserEMail.setText(result.USER_EMAIL);
-    
 
     checkFixed.setValue(beio.fixed);
     checkLookedAt.setValue(beio.lookedAt);
@@ -315,7 +316,7 @@ public class ACRAReportView extends Composite
   {
     String lines[] = featuresString.split("\n");
 
-    TreeItem root = tree.addTextItem("Android");
+    TreeItem root = tree.addTextItem(constants.android());
 
     for (String line : lines)
     {
@@ -335,7 +336,7 @@ public class ACRAReportView extends Composite
 
   public void clearData()
   {
-    captionPanelCenter.setCaptionText("Report");
+    captionPanelCenter.setCaptionText(constants.acraReportViewLabelReport());
     textStackTrace.setText("");
     textRawStackTrace.setText("");
     nvlBuild.clearData();
@@ -386,7 +387,7 @@ public class ACRAReportView extends Composite
   @UiHandler("buttonDeleteReport")
   void onButtonDeleteReportClick(ClickEvent event)
   {
-    if (!Window.confirm("Are you sure you want to delete this report?"))
+    if (!Window.confirm(constants.acraReportViewConfirmDelete()))
     {
       return;
     }
@@ -524,18 +525,18 @@ public class ACRAReportView extends Composite
   @UiHandler("buttonReportEmail")
   void onButtonReportEmailClick(ClickEvent event)
   {
-    EMailTemplateSend.doDialog(mLoginInfo, mAppPackageShared , mACRALog, remoteService, new EMailTemplateSend.DialogCallback()
+    EMailTemplateSend.doDialog(mLoginInfo, mAppPackageShared, mACRALog, remoteService, new EMailTemplateSend.DialogCallback()
     {
-      
+
       @Override
       public void result(boolean ok)
       {
-        if(ok)
+        if (ok)
         {
           mSelectedBasicErrorInfo.emailed = true;
           populateValues(mACRALog);
         }
-        
+
       }
     });
   }
@@ -543,16 +544,16 @@ public class ACRAReportView extends Composite
   public void showACRAReport(BasicErrorInfoShared beio)
   {
     mSelectedBasicErrorInfo = beio;
-    captionPanelCenter.setCaptionText("Report: " + beio.REPORT_ID + " - Loading...");
+    captionPanelCenter.setCaptionText(constants.acraReportViewLabelTitle(beio.REPORT_ID));
     clearData();
     remoteService.getACRALog(beio.REPORT_ID, mGetACRALogCallback);
 
   }
-  
+
   public void startLoading()
   {
     AppLoadingView.getInstance().start();
-    
+
   }
 
   public void stopLoading()

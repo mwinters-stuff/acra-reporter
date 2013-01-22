@@ -64,24 +64,11 @@ import com.google.gwt.view.client.SingleSelectionModel;
 
 public class MainErrorsList extends Composite implements Handler
 {
-  public static interface CwConstants extends Constants
-  {
-    @DefaultStringValue("User Crash Date")
-    String cwDataGridColumnUserCrashDate();
-
-    @DefaultStringValue("Version")
-    String cwDataGridColumnUserAppVersionName();
-
-    @DefaultStringValue("Android Version")
-    String cwDataGridColumnUserAndroidVersion();
-
-  }
-  
   public interface CallbackShowReport{
     public void showReport(BasicErrorInfoShared basicErrorInfo);
   }
 
-  private CwConstants                                   constants     = (CwConstants) GWT.create(CwConstants.class);
+  private UIConstants                                   constants     = (UIConstants) GWT.create(UIConstants.class);
 
   public static final ProvidesKey<BasicErrorInfoShared> KEY_PROVIDER  = new ProvidesKey<BasicErrorInfoShared>()
                                                                       {
@@ -154,7 +141,7 @@ public class MainErrorsList extends Composite implements Handler
     // dataGrid = new DataGrid<BasicErrorInfoShared>();
     // dataGrid.setWidth("100%");
     dataGrid.setAutoHeaderRefreshDisabled(true);
-    dataGrid.setEmptyTableWidget(new Label("Empty"));
+    dataGrid.setEmptyTableWidget(new Label(constants.gridEmpty()));
 
     sortHandler = new ListHandler<BasicErrorInfoShared>(dataProvider.getList());
     dataGrid.addColumnSortHandler(sortHandler);
@@ -363,7 +350,7 @@ public class MainErrorsList extends Composite implements Handler
       {
         if (multipleSelectionModel.getSelectedSet().isEmpty())
           return;
-        if (!Window.confirm("Are you sure you want to delete the selected error reports?"))
+        if (!Window.confirm(constants.errorListConfirmDelete()))
           return;
 
         final Set<BasicErrorInfoShared> selected = multipleSelectionModel.getSelectedSet();
@@ -446,20 +433,7 @@ public class MainErrorsList extends Composite implements Handler
 
   private void initTableColumns(final SelectionModel<BasicErrorInfoShared> selectionModel, ListHandler<BasicErrorInfoShared> sortHandler)
   {
-    // Column<BasicErrorInfoShared, Boolean> checkColumn = new
-    // Column<BasicErrorInfoShared, Boolean>(new CheckboxCell(true, false))
-    // {
-    // @Override
-    // public Boolean getValue(BasicErrorInfoShared object)
-    // {
-    // // Get the value from the selection model.
-    // return selectionModel.isSelected(object);
-    // }
-    // };
-    // dataGrid.addColumn(checkColumn, SafeHtmlUtils.fromSafeConstant("<br/>"));
-    // dataGrid.setColumnWidth(checkColumn, 40, Unit.PX);
-
-    // UserCrashDate.
+   
     Column<BasicErrorInfoShared, String> userCrashDateColumn = new Column<BasicErrorInfoShared, String>(new TextCell())
     {
       @Override
@@ -483,7 +457,7 @@ public class MainErrorsList extends Composite implements Handler
         }
       }
     });
-    dataGrid.addColumn(userCrashDateColumn, constants.cwDataGridColumnUserCrashDate());
+    dataGrid.addColumn(userCrashDateColumn, constants.errorListGridCrashDate());
     dataGrid.setColumnWidth(userCrashDateColumn, 150, Unit.PX);
 
     // AppVersionName
@@ -504,7 +478,7 @@ public class MainErrorsList extends Composite implements Handler
         return o1.APP_VERSION_NAME.compareTo(o2.APP_VERSION_NAME);
       }
     });
-    dataGrid.addColumn(appVersionNameColumn, constants.cwDataGridColumnUserAppVersionName());
+    dataGrid.addColumn(appVersionNameColumn, constants.errorListGridVersion());
     dataGrid.setColumnWidth(appVersionNameColumn, 100, Unit.PX);
 
   }

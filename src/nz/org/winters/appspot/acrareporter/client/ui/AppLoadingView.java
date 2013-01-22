@@ -16,6 +16,7 @@ package nz.org.winters.appspot.acrareporter.client.ui;
 */
 import nz.org.winters.appspot.acrareporter.client.ui.images.Resources;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Image;
@@ -25,6 +26,8 @@ import com.google.gwt.user.client.ui.Widget;
 public final class AppLoadingView extends PopupPanel 
 {
     private final FlowPanel container = new FlowPanel();
+    private UIConstants                   constants     = (UIConstants) GWT.create(UIConstants.class);
+
 
     private static AppLoadingView mInstance = null;
     
@@ -42,7 +45,7 @@ public final class AppLoadingView extends PopupPanel
         final Image ajaxImage = new Image(Resources.INSTANCE.loaderImage());
         final Grid grid = new Grid(1, 2);  
         grid.setWidget(0, 0, ajaxImage);
-        grid.setText(0, 1, "Loading...");    
+        grid.setText(0, 1, constants.loadingViewLabelLoading());    
         this.container.add(grid);
         add(this.container);       
     }
