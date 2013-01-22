@@ -9,11 +9,14 @@ import nz.org.winters.appspot.acrareporter.shared.BasicErrorInfoShared;
 import nz.org.winters.appspot.acrareporter.shared.LoginInfo;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
 public class AppPackageView extends Composite implements CallbackReloadPackageList, CallbackShowReport
@@ -22,85 +25,59 @@ public class AppPackageView extends Composite implements CallbackReloadPackageLi
 
   @UiField
   DockLayoutPanel                       dockLayoutPanel;
+  @UiField
+  Button                                buttonClose;
+  @UiField
+  Label                                 labelTitle;
 
   private MainErrorsList                mMainErrorsList;
   private ACRAReportView                mACRAReportView;
-
-  
   protected BasicErrorInfoShared        mSelectedBasicErrorInfo;
-//  private AppPackageShared mAppPackage;
 
-  private String mPackageName;
+  private LoginInfo                     mLoginInfo;
+  private AppPackageShared              mAppPackageShared;
 
-  private LoginInfo mLoginInfo;
+  private CallbackClosePackageView      mCallbackClosePackageView;
 
-  private AppPackageShared mAppPackageShared;
-  
   private static AppPackageViewUiBinder uiBinder      = GWT.create(AppPackageViewUiBinder.class);
+
+  public interface CallbackClosePackageView
+  {
+    public void close(AppPackageView view);
+  }
 
   interface AppPackageViewUiBinder extends UiBinder<Widget, AppPackageView>
   {
   }
 
-  public AppPackageView(LoginInfo loginInfo, AppPackageShared appPackageShared)
+  public AppPackageView(LoginInfo loginInfo, AppPackageShared appPackageShared, CallbackClosePackageView callbackClose)
   {
+    mCallbackClosePackageView = callbackClose;
     mAppPackageShared = appPackageShared;
     mLoginInfo = loginInfo;
     initWidget(uiBinder.createAndBindUi(this));
-    
-    mACRAReportView = new ACRAReportView(this,loginInfo, appPackageShared);
-    mMainErrorsList = new MainErrorsList(this,loginInfo, appPackageShared);
+
+    mACRAReportView = new ACRAReportView(this, loginInfo, appPackageShared);
+    mMainErrorsList = new MainErrorsList(this, loginInfo, appPackageShared);
 
     dockLayoutPanel.addWest(mMainErrorsList, 280);
     dockLayoutPanel.add(mACRAReportView);
+    labelTitle.setText(labelTitle.getText() + " " + appPackageShared.AppName + " - " + appPackageShared.PACKAGE_NAME);
+
     mACRAReportView.clearData();
-    setAppPackage(appPackageShared.PACKAGE_NAME);
+    mMainErrorsList.setAppPackage(appPackageShared.PACKAGE_NAME);
   }
-
-  public void setAppPackage(String PACKAGE_NAME)
-  {
-    mPackageName = PACKAGE_NAME;
-    mMainErrorsList.setAppPackage(PACKAGE_NAME);
-//    remoteService.getPackage(PACKAGE_NAME, new AsyncGetPackage());
-    
-  }
-
-//  private final class AsyncGetPackage implements AsyncCallback<AppPackageShared>
-//  {
-//    
-//    @Override
-//    public void onSuccess(AppPackageShared result)
-//    {
-//      mAppPackage = result;
-//     // textAppStats.setText("App Stats - " + result.Totals.toLabelString());
-//      stopLoading();
-//    }
-//
-//    @Override
-//    public void onFailure(Throwable caught)
-//    {
-//     // textAppStats.setText("");
-//      stopLoading();
-//    }
-//  }
 
   public void clearData()
   {
     mACRAReportView.clearData();
-    
+
   }
 
-//  public void showACRAReport(BasicErrorInfoShared beio)
-//  {
-//    mSelectedBasicErrorInfo = beio;
-//    mACRAReportView.showACRAReport(mLoginInfo, beio);
-//    
-//  }
-  
   public void startLoading()
   {
     AppLoadingView.getInstance().start();
-    
+
   }
 
   public void stopLoading()
@@ -112,14 +89,50 @@ public class AppPackageView extends Composite implements CallbackReloadPackageLi
   public void reloadPackageList()
   {
     mMainErrorsList.refreshList();
-    
+
   }
 
   @Override
   public void showReport(BasicErrorInfoShared basicErrorInfo)
   {
     mACRAReportView.showACRAReport(basicErrorInfo);
-    
+
   }
 
+  @UiHandler("buttonClose")
+  void onButtonCloseClick(ClickEvent event)
+  {
+    mCallbackClosePackageView.close(this);
+  }
+
+  @UiHandler("buttonMapFiles")
+  void onButtonMapFilesClick(ClickEvent event)
+  {
+    MappingList.doDialog(mAppPackageShared.PACKAGE_NAME, new MappingList.DialogCallback()
+    {
+
+      @Override
+      public void closed()
+      {
+
+      }
+    });
+  }
+
+  @UiHandler("buttonEditPackage")
+  void onButtonEditPackageClick(ClickEvent event)
+  {
+    PackageEdit.doEditDialog(mAppPackageShared, remoteService, new PackageEdit.DialogCallback()
+    {
+
+      @Override
+      public void result(boolean ok, AppPackageShared appPackageShared)
+      {
+        if (ok)
+        {
+          labelTitle.setText("Crash Reports for: " + appPackageShared.AppName + " - " + appPackageShared.PACKAGE_NAME);
+        }
+      }
+    });
+  }
 }

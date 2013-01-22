@@ -1,0 +1,12 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:style>
+		
+	</ui:style>
+	<g:VerticalPanel horizontalAlignment="ALIGN_CENTER" spacing="4" >
+		<g:Button ui:field="buttonEdit" text="Edit" width="60px"/>
+		<g:Button ui:field="buttonNew" text="New" width="60px"/>
+		<g:Button text="Delete" ui:field="buttonDelete" width="60px"/>
+	</g:VerticalPanel>
+</ui:UiBinder> 

@@ -6,7 +6,6 @@ import java.util.List;
 import nz.org.winters.appspot.acrareporter.client.RemoteDataService;
 import nz.org.winters.appspot.acrareporter.client.RemoteDataServiceAsync;
 import nz.org.winters.appspot.acrareporter.shared.AppPackageShared;
-import nz.org.winters.appspot.acrareporter.shared.BasicErrorInfoShared;
 import nz.org.winters.appspot.acrareporter.shared.DailyCountsShared;
 import nz.org.winters.appspot.acrareporter.shared.LoginInfo;
 
@@ -14,14 +13,12 @@ import com.google.gwt.ajaxloader.client.Properties;
 import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.JsArray;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
-import com.google.gwt.user.cellview.client.ColumnSortList.ColumnSortInfo;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -29,7 +26,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.RootLayoutPanel;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -42,10 +39,8 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.gwt.visualization.client.AbstractDataTable;
 import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
 import com.google.gwt.visualization.client.DataTable;
-import com.google.gwt.visualization.client.Selection;
 import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.events.ReadyHandler;
-import com.google.gwt.visualization.client.events.SelectHandler;
 import com.google.gwt.visualization.client.formatters.DateFormat;
 import com.google.gwt.visualization.client.visualizations.Table;
 import com.google.gwt.visualization.client.visualizations.corechart.CoreChart;
@@ -53,8 +48,12 @@ import com.google.gwt.visualization.client.visualizations.corechart.LineChart;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
 import com.google.gwt.visualization.client.visualizations.corechart.PieChart;
 import com.google.gwt.visualization.client.visualizations.corechart.PieChart.PieOptions;
+import com.google.gwt.visualization.client.visualizations.corechart.TextStyle;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
 
-public class Overview extends Composite implements ChangeHandler
+public class Overview extends Composite implements ChangeHandler, AppPackageView.CallbackClosePackageView
 {
 
   private static OverviewUiBinder                   uiBinder       = GWT.create(OverviewUiBinder.class);
@@ -74,6 +73,11 @@ public class Overview extends Composite implements ChangeHandler
   VerticalPanel                                     panelAppGrid;
   @UiField(provided = true)
   DataGrid<AppPackageShared>                        appTotalsTable = new DataGrid<AppPackageShared>();
+  @UiField
+  VerticalPanel                                     basePanel;
+  @UiField
+  ScrollPanel                                       overviewPanel;
+  @UiField Button buttonAddPackage;
 
   private final RemoteDataServiceAsync              remoteService  = GWT.create(RemoteDataService.class);
 
@@ -93,6 +97,8 @@ public class Overview extends Composite implements ChangeHandler
   private int                                       browserWidth;
   private int                                       browserHeight;
 
+  private TextStyle                                 mBoldTitleFont;
+
   public static final ProvidesKey<AppPackageShared> KEY_PROVIDER   = new ProvidesKey<AppPackageShared>()
                                                                    {
                                                                      @Override
@@ -101,6 +107,7 @@ public class Overview extends Composite implements ChangeHandler
                                                                        return item == null ? null : item.id;
                                                                      }
                                                                    };
+
 
   interface OverviewUiBinder extends UiBinder<Widget, Overview>
   {
@@ -138,18 +145,18 @@ public class Overview extends Composite implements ChangeHandler
     {
       public void run()
       {
+        mBoldTitleFont = TextStyle.create();
+        mBoldTitleFont.setFontSize(18);
+
         DateFormat.Options dfo = DateFormat.Options.create();
         dfo.setPattern(DateFormat.FormatType.SHORT);
         mShortDateFormat = DateFormat.create(dfo);
-       
+
         mPackageTotalsGraph = new PieChart(createTotalReportTable(), createTotalReportOptions());
         pieHolder.add(mPackageTotalsGraph);
-      
 
         mTotalsMonthGraph = new LineChart(createTotalsMonthTable(), createTotalsMonthOptions());
         topPanel.add(mTotalsMonthGraph);
-
-       
 
         mPackageMonthGraph = new LineChart(createPackageMonthTable(), createPackageMonthOptions(null));
         midPanel.add(mPackageMonthGraph);
@@ -167,8 +174,7 @@ public class Overview extends Composite implements ChangeHandler
 
         });
 
-        updateTotalsGraph();
-        updateTotalsMonthGraph();
+       updateData();
 
       }
 
@@ -176,6 +182,12 @@ public class Overview extends Composite implements ChangeHandler
 
     VisualizationUtils.loadVisualizationApi(onLoadCallback, CoreChart.PACKAGE, Table.PACKAGE);
 
+  }
+
+  private void updateData()
+  {
+    updateTotalsGraph();
+    updateTotalsMonthGraph();    
   }
 
   // report pie chart
@@ -204,6 +216,8 @@ public class Overview extends Composite implements ChangeHandler
         options.setTitle("Total New Reports per App");
         break;
     }
+
+    options.setTitleTextStyle(mBoldTitleFont);
     Properties animation = Properties.create();
     animation.set("duration", 1000.0);
     animation.set("easing", "out");
@@ -219,6 +233,7 @@ public class Overview extends Composite implements ChangeHandler
     Options options = Options.create();
     options.setWidth((int) ((double) browserWidth * 0.6));
     options.setHeight((int) ((double) browserHeight * 0.4));
+    options.setTitleTextStyle(mBoldTitleFont);
 
     options.setTitle("Total reports per day");
 
@@ -252,6 +267,7 @@ public class Overview extends Composite implements ChangeHandler
       options.setTitle("App Month");
 
     }
+    options.setTitleTextStyle(mBoldTitleFont);
 
     Properties animation = Properties.create();
     animation.set("duration", 1000.0);
@@ -278,6 +294,7 @@ public class Overview extends Composite implements ChangeHandler
     mTotalsMonthGraphData.addColumn(ColumnType.DATE, "Date");
     mTotalsMonthGraphData.addColumn(ColumnType.NUMBER, "Reports");
     mTotalsMonthGraphData.addColumn(ColumnType.NUMBER, "Fixed");
+    mTotalsMonthGraphData.addColumn(ColumnType.NUMBER, "New");
 
     return mTotalsMonthGraphData;
   }
@@ -357,6 +374,7 @@ public class Overview extends Composite implements ChangeHandler
           mTotalsMonthGraphData.setValue(i, 0, data.date);
           mTotalsMonthGraphData.setValue(i, 1, data.Reports);
           mTotalsMonthGraphData.setValue(i, 2, data.Fixed);
+          mTotalsMonthGraphData.setValue(i, 3, data.NewReports());
         }
         mShortDateFormat.format(mTotalsMonthGraphData, 0);
 
@@ -494,13 +512,18 @@ public class Overview extends Composite implements ChangeHandler
 
   private void viewPackage(AppPackageShared packagedata)
   {
-    
-    RootLayoutPanel.get().clear();
-    RootLayoutPanel.get().add(new AppPackageView(loginInfo,packagedata));
 
-  //  panel.add(new OldMainPage(loginInfo));
-    
-    
+    // RootLayoutPanel.get().clear();
+    // RootLayoutPanel.get().add(new AppPackageView(loginInfo,packagedata));
+
+    // panel.add(new OldMainPage(loginInfo));
+
+    AppLoadingView.getInstance().start();
+
+    overviewPanel.setVisible(false);
+    basePanel.remove(overviewPanel);
+    basePanel.add(new AppPackageView(loginInfo, packagedata,this));
+
   }
 
   private void createPackageTableColumns()
@@ -771,4 +794,42 @@ public class Overview extends Composite implements ChangeHandler
     });
   }
 
+  @Override
+  public void close(AppPackageView view)
+  {
+    AppLoadingView.getInstance().start();
+    overviewPanel.setVisible(true);
+    view.setVisible(false);
+    
+    basePanel.remove(view);
+    basePanel.add(overviewPanel);
+
+    updateData();
+    
+    AppLoadingView.getInstance().stop();
+    
+  }
+
+  @UiHandler("buttonAddPackage")
+  void onButtonAddPackageClick(ClickEvent event) {
+    PackageEdit.doAddDialog(loginInfo, remoteService, new PackageEdit.DialogCallback()
+    {
+
+      @Override
+      public void result(boolean ok, AppPackageShared appPackageShared)
+      {
+        if (ok)
+        {
+          mAppPackageShared.add(appPackageShared);
+          loadTotalsGraphData();
+          
+        }
+      }
+    });
+    
+  }
+  @UiHandler("buttonUsers")
+  void onButtonUsersClick(ClickEvent event) {
+    PopupUsers.showPopup(loginInfo, (Widget)event.getSource());
+  }
 }

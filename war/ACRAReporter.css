@@ -140,3 +140,17 @@ html>body .gwt-DecoratedTabBar {
 	text-align: center;
 	margin-left: -16px;
 }
+.gwt-LabelBold {
+	font-size: medium;
+	font-family: sans-serif;
+	font-weight: bold;
+	text-align: center;
+}
+.gwt-LabelBoldBig {
+	
+	font-size: large;
+	font-family: sans-serif;
+	font-weight: bold;
+	text-align: center;
+}
+
