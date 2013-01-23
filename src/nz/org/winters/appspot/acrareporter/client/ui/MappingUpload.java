@@ -39,6 +39,7 @@ public class MappingUpload extends Composite
     public void result(boolean ok);
   }
 
+  private static UIConstants                   constants     = (UIConstants) GWT.create(UIConstants.class);
   private static MappingUploadUiBinder uiBinder = GWT.create(MappingUploadUiBinder.class);
   @UiField(provided=true)
   FormPanel                            form;
@@ -85,13 +86,13 @@ public class MappingUpload extends Composite
         String fileName = fileUpload.getFilename();
         if (Utils.isEmpty(fileName))
         {
-          Window.alert("The file must be selected");
+          Window.alert(constants.mappingUploadAlertNofile());
           event.cancel();
           return;
         }
         if (textVersion.getText().length() == 0)
         {
-          Window.alert("The version must not be empty");
+          Window.alert(constants.mappingUploadAlertNoVersion());
           event.cancel();
         }
 
@@ -104,7 +105,7 @@ public class MappingUpload extends Composite
         String result = event.getResults();
         if(Utils.isEmpty(result) || !result.equalsIgnoreCase("OK"))
         {
-          Window.alert("Server Response: " + result);
+          Window.alert(constants.mappingUploadAlertResponse(result));
         }else
           callback.result(true);
       }
@@ -123,7 +124,7 @@ public class MappingUpload extends Composite
     }
     if (textVersion.getText().length() == 0)
     {
-      Window.alert("The version must not be empty");
+      Window.alert(constants.mappingUploadAlertNoVersion());
       return;
     }
     form.submit();
@@ -140,7 +141,7 @@ public class MappingUpload extends Composite
   {
 
     final DialogBox dialogBox = new DialogBox();
-    dialogBox.setText("Upload Proguard Mapping for " + packageName);
+    dialogBox.setText(constants.mappingUploadLabelTitle(packageName));
 
     // Create a table to layout the content
     MappingUpload pet = new MappingUpload(packageName, new MappingUpload.DialogCallback()

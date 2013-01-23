@@ -1,6 +1,9 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	xmlns:g="urn:import:com.google.gwt.user.client.ui"
+	ui:generateFormat='com.google.gwt.i18n.rebind.format.PropertiesFormat'
+	ui:generateKeys="com.google.gwt.i18n.rebind.keygen.MD5KeyGenerator"
+	ui:generateLocales="default">
 	<ui:style>
 		
 	</ui:style>
@@ -8,16 +11,16 @@
 		<g:north size="38.0">
 			<g:HorizontalPanel horizontalAlignment="ALIGN_CENTER" width="100%" spacing="4">
 				<g:Cell verticalAlignment="ALIGN_MIDDLE" width="100%">
-					<g:Label text="Crash Reports for: " styleName="gwt-LabelBold" horizontalAlignment="ALIGN_LEFT" ui:field="labelTitle" />
+					<g:Label styleName="gwt-LabelBold" horizontalAlignment="ALIGN_LEFT" ui:field="labelTitle">Crash Reports for:</g:Label>
 				</g:Cell>
 				<g:Cell horizontalAlignment="ALIGN_RIGHT" verticalAlignment="ALIGN_MIDDLE">
-					<g:Button width="100px" ui:field="buttonEditPackage">Edit App</g:Button>
+					<g:Button width="100px" ui:field="buttonEditPackage"><ui:msg>Edit App</ui:msg></g:Button>
 				</g:Cell>
 				<g:Cell horizontalAlignment="ALIGN_RIGHT" verticalAlignment="ALIGN_MIDDLE">
-					<g:Button width="100px" ui:field="buttonMapFiles">Map Files</g:Button>
+					<g:Button width="100px" ui:field="buttonMapFiles"><ui:msg>Map Files</ui:msg></g:Button>
 				</g:Cell>
 				<g:Cell horizontalAlignment="ALIGN_RIGHT" verticalAlignment="ALIGN_MIDDLE">
-					<g:Button width="60px" ui:field="buttonClose">Close</g:Button>
+					<g:Button width="60px" ui:field="buttonClose"><ui:msg>Close</ui:msg></g:Button>
 				</g:Cell>
 			</g:HorizontalPanel>
 		</g:north>

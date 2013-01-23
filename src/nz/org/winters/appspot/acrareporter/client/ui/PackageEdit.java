@@ -34,6 +34,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class PackageEdit extends Composite
 {
+  private static UIConstants                   constants     = (UIConstants) GWT.create(UIConstants.class);
   public interface DialogCallback
   {
     public void result(boolean ok, AppPackageShared appPackageShared);
@@ -114,7 +115,7 @@ public class PackageEdit extends Composite
   {
 
     final DialogBox dialogBox = new DialogBox();
-    dialogBox.setText("Edit Application Information for " + appPackageShared.PACKAGE_NAME);
+    dialogBox.setText(constants.packageEditLabelEdit(appPackageShared.PACKAGE_NAME));
 
     // Create a table to layout the content
     PackageEdit pet = new PackageEdit(appPackageShared, new PackageEdit.DialogCallback()
@@ -161,7 +162,7 @@ public class PackageEdit extends Composite
   public static void doAddDialog(final LoginInfo loginInfo, final RemoteDataServiceAsync remoteService, final DialogCallback callback)
   {
     final DialogBox dialogBox = new DialogBox();
-    dialogBox.setText("New Application Information");
+    dialogBox.setText(constants.packageEditLabelAdd());
 
     // Create a table to layout the content
     PackageEdit pet = new PackageEdit(new PackageEdit.DialogCallback()

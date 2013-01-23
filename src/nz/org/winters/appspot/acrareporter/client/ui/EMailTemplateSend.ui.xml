@@ -1,48 +1,53 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" ui:generateFormat='com.google.gwt.i18n.rebind.format.PropertiesFormat'
+	ui:generateKeys="com.google.gwt.i18n.rebind.keygen.MD5KeyGenerator"
+	ui:generateLocales="default">
 	<ui:style>
-		
+
 	</ui:style>
 	<g:VerticalPanel>
-	<g:Grid cellSpacing="4">
-				<g:row>
-					<g:customCell>
-						<g:Label text="E-Mail Addresses:" horizontalAlignment="ALIGN_RIGHT" width="130px" />
-					</g:customCell>
-					<g:customCell>
-						<g:TextArea ui:field="textEMailAddresses" visibleLines="5" characterWidth="50" />
-					</g:customCell>
-				</g:row>
-				<g:row>
-					<g:customCell>
-						<g:Label text="Subject:" horizontalAlignment="ALIGN_RIGHT" />
-					</g:customCell>
-					<g:customCell>
-						<g:TextBox ui:field="textSubject" visibleLength="50" />
-					</g:customCell>
-				</g:row>
-				<g:row>
-					<g:customCell>
-						<g:VerticalPanel height="100%">
-							<g:Cell height="100%">
-								<g:Label text="Message:" horizontalAlignment="ALIGN_RIGHT" width="130px" />
-							</g:Cell>
-						</g:VerticalPanel>
-					</g:customCell>
-					<g:customCell>
-						<g:TextArea characterWidth="80" visibleLines="20"
-							ui:field="textBody" alignment="LEFT" />
-					</g:customCell>
+		<g:Grid cellSpacing="4">
+			<g:row>
+				<g:customCell>
+					<g:Label horizontalAlignment="ALIGN_RIGHT"
+						width="130px" ><ui:msg>E-Mail Addresses:</ui:msg></g:Label>
+				</g:customCell>
+				<g:customCell>
+					<g:TextArea ui:field="textEMailAddresses" visibleLines="5"
+						characterWidth="50" />
+				</g:customCell>
+			</g:row>
+			<g:row>
+				<g:customCell>
+					<g:Label  horizontalAlignment="ALIGN_RIGHT" ><ui:msg>Subject:</ui:msg></g:Label>
+				</g:customCell>
+				<g:customCell>
+					<g:TextBox ui:field="textSubject" visibleLength="50" />
+				</g:customCell>
+			</g:row>
+			<g:row>
+				<g:customCell>
+					<g:VerticalPanel height="100%">
+						<g:Cell height="100%">
+							<g:Label horizontalAlignment="ALIGN_RIGHT"
+								width="130px"><ui:mg>Message:</ui:mg></g:Label>
+						</g:Cell>
+					</g:VerticalPanel>
+				</g:customCell>
+				<g:customCell>
+					<g:TextArea characterWidth="80" visibleLines="20"
+						ui:field="textBody" alignment="LEFT" />
+				</g:customCell>
 
-				</g:row>
-			</g:Grid>
-			
-			<g:Cell horizontalAlignment="ALIGN_CENTER">
-				<g:HorizontalPanel spacing="4" horizontalAlignment="ALIGN_CENTER">
-				<g:Button ui:field="buttonOK" width="80px">OK</g:Button>
-				<g:Label width="20px"/>
-				<g:Button width="80px" ui:field="buttonCancel">Cancel</g:Button>
+			</g:row>
+		</g:Grid>
+
+		<g:Cell horizontalAlignment="ALIGN_CENTER">
+			<g:HorizontalPanel spacing="4" horizontalAlignment="ALIGN_CENTER">
+				<g:Button ui:field="buttonOK" width="80px"><ui:msg>OK</ui:msg></g:Button>
+				<g:Label width="20px" />
+				<g:Button width="80px" ui:field="buttonCancel"><ui:msg>Cancel</ui:msg></g:Button>
 			</g:HorizontalPanel>
 		</g:Cell>
 	</g:VerticalPanel>

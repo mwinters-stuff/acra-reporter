@@ -1,8 +1,10 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" ui:generateFormat='com.google.gwt.i18n.rebind.format.PropertiesFormat'
+	ui:generateKeys="com.google.gwt.i18n.rebind.keygen.MD5KeyGenerator"
+	ui:generateLocales="default">
 	<ui:style>
-
+		
 	</ui:style>
 	<g:CaptionPanel captionText="Selected Error" ui:field="captionPanelCenter">
 		<g:DockLayoutPanel unit="PX" width="100%" height="100%">
@@ -10,14 +12,14 @@
 				<g:FlowPanel width="100%" height="100%">
 					<g:HorizontalPanel>
 						<g:HorizontalPanel spacing="2">
-							<g:Label text="App Version Code:" width="170px" wordWrap="false"
-								horizontalAlignment="ALIGN_RIGHT" />
+							<g:Label width="170px" wordWrap="false"
+								horizontalAlignment="ALIGN_RIGHT" ><ui:msg>App Version Code:</ui:msg></g:Label>
 							<g:Label text="" width="170px" wordWrap="false"
 								ui:field="textAppVersionCode" />
 						</g:HorizontalPanel>
 						<g:HorizontalPanel spacing="2">
-							<g:Label text="App Version Name:" width="170px" wordWrap="false"
-								horizontalAlignment="ALIGN_RIGHT" />
+							<g:Label width="170px" wordWrap="false"
+								horizontalAlignment="ALIGN_RIGHT"><ui:msg>App Version Name:</ui:msg></g:Label>
 							<g:Label text="" width="170px" wordWrap="false"
 								ui:field="textAppVersionName" />
 						</g:HorizontalPanel>
@@ -25,60 +27,60 @@
 
 					<g:HorizontalPanel>
 						<g:HorizontalPanel spacing="2">
-							<g:Label text="Phone Model:" width="170px" wordWrap="false"
-								horizontalAlignment="ALIGN_RIGHT" />
+							<g:Label width="170px" wordWrap="false"
+								horizontalAlignment="ALIGN_RIGHT" ><ui:msg>Phone Model:</ui:msg></g:Label>
 							<g:Label text="" width="170px" wordWrap="false" ui:field="textPhoneModel" />
 						</g:HorizontalPanel>
 						<g:HorizontalPanel spacing="2">
-							<g:Label text="Brand:" width="170px" wordWrap="false"
-								horizontalAlignment="ALIGN_RIGHT" />
+							<g:Label width="170px" wordWrap="false"
+								horizontalAlignment="ALIGN_RIGHT" ><ui:msg>Brand:</ui:msg></g:Label>
 							<g:Label text="" width="170px" wordWrap="false" ui:field="textBrand" />
 						</g:HorizontalPanel>
 						<g:HorizontalPanel spacing="2">
-							<g:Label text="Product:" width="170px" wordWrap="false"
-								horizontalAlignment="ALIGN_RIGHT" />
+							<g:Label width="170px" wordWrap="false"
+								horizontalAlignment="ALIGN_RIGHT"><ui:msg>Product:</ui:msg></g:Label>
 							<g:Label text="" width="170px" wordWrap="false" ui:field="textProduct" />
 						</g:HorizontalPanel>
 						<g:HorizontalPanel spacing="2">
-							<g:Label text="Android Version:" width="170px" wordWrap="false"
-								horizontalAlignment="ALIGN_RIGHT" />
+							<g:Label width="170px" wordWrap="false"
+								horizontalAlignment="ALIGN_RIGHT" ><ui:msg>Android Version:</ui:msg></g:Label>
 							<g:Label text="" width="170px" wordWrap="false"
 								ui:field="textAndroidVersion" />
 						</g:HorizontalPanel>
 					</g:HorizontalPanel>
 					<g:HorizontalPanel>
 						<g:HorizontalPanel spacing="2">
-							<g:Label text="Memory Total/Available:" width="170px"
-								wordWrap="false" horizontalAlignment="ALIGN_RIGHT" />
+							<g:Label width="170px"
+								wordWrap="false" horizontalAlignment="ALIGN_RIGHT" ><ui:msg>Memory Total/Available:</ui:msg></g:Label>
 							<g:Label text="" width="170px" wordWrap="false" ui:field="textMemory" />
 						</g:HorizontalPanel>
 						<g:HorizontalPanel spacing="2">
-							<g:Label text="App Start Date:" width="170px" wordWrap="false"
-								horizontalAlignment="ALIGN_RIGHT" />
+							<g:Label width="170px" wordWrap="false"
+								horizontalAlignment="ALIGN_RIGHT" ><ui:msg>App Start Date:</ui:msg></g:Label>
 							<g:Label text="" width="170px" wordWrap="false"
 								ui:field="textUserAppStartDate" />
 						</g:HorizontalPanel>
 						<g:HorizontalPanel spacing="2">
-							<g:Label text="Crash Date:" width="170px" wordWrap="false"
-								horizontalAlignment="ALIGN_RIGHT" />
+							<g:Label width="170px" wordWrap="false"
+								horizontalAlignment="ALIGN_RIGHT"><ui:msg>Crash Date:</ui:msg></g:Label>
 							<g:Label text="" width="170px" wordWrap="false"
 								ui:field="textUserCrashDate" />
 						</g:HorizontalPanel>
 					</g:HorizontalPanel>
 					<g:HorizontalPanel>
 						<g:HorizontalPanel spacing="2">
-							<g:Label text="Device ID:" width="170px" wordWrap="false"
-								horizontalAlignment="ALIGN_RIGHT" />
+							<g:Label width="170px" wordWrap="false"
+								horizontalAlignment="ALIGN_RIGHT"><ui:msg>Device ID:</ui:msg></g:Label>
 							<g:Label text="" width="170px" wordWrap="false" ui:field="textDeviceID" />
 						</g:HorizontalPanel>
 						<g:HorizontalPanel spacing="2">
-							<g:Label text="User E-Mail:" width="170px" wordWrap="false"
-								horizontalAlignment="ALIGN_RIGHT" />
+							<g:Label width="170px" wordWrap="false"
+								horizontalAlignment="ALIGN_RIGHT"><ui:msg>User E-Mail:</ui:msg></g:Label>
 							<g:Label text="" width="170px" wordWrap="false" ui:field="textUserEMail" />
 						</g:HorizontalPanel>
 						<g:HorizontalPanel spacing="2">
-							<g:Label text="User IP:" width="170px" wordWrap="false"
-								horizontalAlignment="ALIGN_RIGHT" />
+							<g:Label width="170px" wordWrap="false"
+								horizontalAlignment="ALIGN_RIGHT"><ui:msg>User IP:</ui:msg></g:Label>
 							<g:Label text="" width="170px" wordWrap="false" ui:field="textUserIP" />
 						</g:HorizontalPanel>
 					</g:HorizontalPanel>
@@ -86,17 +88,17 @@
 					<g:HorizontalPanel verticalAlignment="ALIGN_MIDDLE"
 						spacing="4">
 						<g:Cell width="100">
-							<g:CheckBox text="Looked At" ui:field="checkLookedAt" />
+							<g:CheckBox ui:field="checkLookedAt"><ui:msg>Looked At</ui:msg></g:CheckBox>
 						</g:Cell>
 						<g:Cell width="100">
-							<g:CheckBox text="Fixed" ui:field="checkFixed" />
+							<g:CheckBox ui:field="checkFixed"><ui:msg>Fixed</ui:msg></g:CheckBox>
 						</g:Cell>
 						<g:Cell width="100">
-							<g:CheckBox text="E-mailed" ui:field="checkEMailed" />
+							<g:CheckBox ui:field="checkEMailed"><ui:msg>E-mailed</ui:msg></g:CheckBox>
 						</g:Cell>
-						<g:Button ui:field="buttonReportRetrace" width="70px">Retrace</g:Button>
-						<g:Button ui:field="buttonReportEmail" width="70px">E-Mail</g:Button>
-						<g:Button ui:field="buttonDeleteReport" width="70px">Delete</g:Button>
+						<g:Button ui:field="buttonReportRetrace" width="70px"><ui:msg>Retrace</ui:msg></g:Button>
+						<g:Button ui:field="buttonReportEmail" width="70px"><ui:msg>E-Mail</ui:msg></g:Button>
+						<g:Button ui:field="buttonDeleteReport" width="70px"><ui:msg>Delete</ui:msg></g:Button>
 					</g:HorizontalPanel>
 				</g:FlowPanel>
 			</g:north>
@@ -104,16 +106,16 @@
 				<g:TabLayoutPanel barHeight="3" barUnit="EM"
 					ui:field="tabPanel" width="100%" height="99%">
 					<g:tab>
-						<g:header>Stack Trace</g:header>
+						<g:header><ui:msg>Stack Trace</ui:msg></g:header>
 						<g:ScrollPanel>
 							<g:VerticalPanel width="100%">
 								<g:DisclosurePanel open="true" width="100%">
-									<g:header>Remapped stack trace</g:header>
+									<g:header><ui:msg>Remapped stack trace</ui:msg></g:header>
 									<g:TextArea ui:field="textStackTrace" styleName="monospacetext"
 										width="98%" visibleLines="40" />
 								</g:DisclosurePanel>
 								<g:DisclosurePanel open="false" width="100%">
-									<g:header>Original Stack Strace</g:header>
+									<g:header><ui:msg>Original Stack Strace</ui:msg></g:header>
 									<g:TextArea ui:field="textRawStackTrace" styleName="monospacetext"
 										width="98%" visibleLines="40" />
 								</g:DisclosurePanel>
@@ -121,31 +123,31 @@
 						</g:ScrollPanel>
 					</g:tab>
 					<g:tab>
-						<g:header>Device</g:header>
+						<g:header><ui:msg>Device</ui:msg></g:header>
 						<g:ScrollPanel>
 							<g:VerticalPanel width="100%">
 								<g:DisclosurePanel open="true" width="100%">
-									<g:header>Display</g:header>
+									<g:header><ui:msg>Display</ui:msg></g:header>
 									<g:SimplePanel ui:field="tabDisplay" />
 								</g:DisclosurePanel>
 								<g:DisclosurePanel open="false" width="100%">
-									<g:header>Initial Configuration</g:header>
+									<g:header><ui:msg>Initial Configuration</ui:msg></g:header>
 									<g:SimplePanel ui:field="tabInitialConfiguration" />
 								</g:DisclosurePanel>
 								<g:DisclosurePanel open="false" width="100%">
-									<g:header>Crash Configuration</g:header>
+									<g:header><ui:msg>Crash Configuration</ui:msg></g:header>
 									<g:SimplePanel ui:field="tabCrashConfiguration" />
 								</g:DisclosurePanel>
 								<g:DisclosurePanel open="false" width="100%">
-									<g:header>Build</g:header>
+									<g:header><ui:msg>Build</ui:msg></g:header>
 									<g:SimplePanel ui:field="tabBuild" />
 								</g:DisclosurePanel>
 								<g:DisclosurePanel open="false" width="100%">
-									<g:header>Device Features</g:header>
+									<g:header><ui:msg>Device Features</ui:msg></g:header>
 									<g:Tree ui:field="tabDeviceFeatures" styleName="monospacetext" />
 								</g:DisclosurePanel>
 								<g:DisclosurePanel open="false" width="100%">
-									<g:header>Environment</g:header>
+									<g:header><ui:msg>Environment</ui:msg></g:header>
 									<g:SimplePanel ui:field="tabEnvironment" />
 								</g:DisclosurePanel>
 							</g:VerticalPanel>
@@ -153,44 +155,44 @@
 
 					</g:tab>
 					<g:tab>
-						<g:header>Custom Data</g:header>
+						<g:header><ui:msg>Custom Data</ui:msg></g:header>
 						<g:TextArea ui:field="textCustomData" styleName="monospacetext" />
 					</g:tab>
 					<g:tab>
-						<g:header>User Comment</g:header>
+						<g:header><ui:msg>User Comment</ui:msg></g:header>
 						<g:TextArea ui:field="tabUserComment" styleName="monospacetext" />
 					</g:tab>
 					<g:tab>
-						<g:header>Logs</g:header>
+						<g:header><ui:msg>Logs</ui:msg></g:header>
 						<g:ScrollPanel>
 							<g:VerticalPanel width="100%">
 								<g:DisclosurePanel open="true" width="100%">
-									<g:header>Application</g:header>
+									<g:header><ui:msg>Application</ui:msg></g:header>
 									<g:TextArea ui:field="tabLogApplication" styleName="monospacetext"
 										width="98%" visibleLines="40" />
 								</g:DisclosurePanel>
 								<g:DisclosurePanel open="false" width="100%">
-									<g:header>Logcat</g:header>
+									<g:header><ui:msg>Logcat</ui:msg></g:header>
 									<g:TextArea ui:field="tabLogcat" styleName="monospacetext"
 										width="98%" visibleLines="40" />
 								</g:DisclosurePanel>
 								<g:DisclosurePanel open="false" width="100%">
-									<g:header>Events</g:header>
+									<g:header><ui:msg>Events</ui:msg></g:header>
 									<g:TextArea ui:field="tabLogEvents" styleName="monospacetext"
 										width="98%" visibleLines="40" />
 								</g:DisclosurePanel>
 								<g:DisclosurePanel open="false" width="100%">
-									<g:header>Radio</g:header>
+									<g:header><ui:msg>Radio</ui:msg></g:header>
 									<g:TextArea ui:field="tabLogRadio" styleName="monospacetext"
 										width="98%" visibleLines="40" />
 								</g:DisclosurePanel>
 								<g:DisclosurePanel open="false" width="100%">
-									<g:header>Dump Sys Mem Info</g:header>
+									<g:header><ui:msg>Dump Sys Mem Info</ui:msg></g:header>
 									<g:TextArea ui:field="tabDumpSysMemInfo" styleName="monospacetext"
 										width="98%" visibleLines="40" />
 								</g:DisclosurePanel>
 								<g:DisclosurePanel open="false" width="100%">
-									<g:header>Dropbox</g:header>
+									<g:header><ui:msg>Dropbox</ui:msg></g:header>
 									<g:TextArea ui:field="tabLogDropbox" styleName="monospacetext"
 										width="98%" visibleLines="40" />
 								</g:DisclosurePanel>
@@ -198,20 +200,20 @@
 						</g:ScrollPanel>
 					</g:tab>
 					<g:tab>
-						<g:header>Settings</g:header>
+						<g:header><ui:msg>Settings</ui:msg></g:header>
 						<g:ScrollPanel>
 							<g:VerticalPanel>
 								<g:DisclosurePanel open="true" ui:field="tabSharedPreferences">
-									<g:header>Shared Preferences</g:header>
+									<g:header><ui:msg>Shared Preferences</ui:msg></g:header>
 								</g:DisclosurePanel>
 								<g:DisclosurePanel open="false" ui:field="tabSettingsSystem">
-									<g:header>System Settings</g:header>
+									<g:header><ui:msg>System Settings</ui:msg></g:header>
 								</g:DisclosurePanel>
 								<g:DisclosurePanel open="false" ui:field="tabSettingsSecure">
-									<g:header>Secure Settings</g:header>
+									<g:header><ui:msg>Secure Settings</ui:msg></g:header>
 								</g:DisclosurePanel>
 								<g:DisclosurePanel open="false" ui:field="tabSettingsGlobal">
-									<g:header>Global Settings</g:header>
+									<g:header><ui:msg>Global Settings</ui:msg></g:header>
 								</g:DisclosurePanel>
 							</g:VerticalPanel>
 						</g:ScrollPanel>

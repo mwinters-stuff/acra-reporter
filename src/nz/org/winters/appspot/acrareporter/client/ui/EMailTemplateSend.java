@@ -36,10 +36,11 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.ui.Label;
 
 public class EMailTemplateSend extends Composite
 {
+  private static UIConstants constants = (UIConstants) GWT.create(UIConstants.class);
+
   public interface DialogCallback
   {
     public void result(boolean ok);
@@ -52,14 +53,12 @@ public class EMailTemplateSend extends Composite
   TextArea                                 textEMailAddresses;
   @UiField
   TextBox                                  textSubject;
- 
 
-  private DialogCallback                           mCallback;
-  private RemoteDataServiceAsync remoteService;
-  private List<String> reportIds;
-  private AppPackageShared appPackage;
-  private LoginInfo loginInfo;
-  
+  private DialogCallback                   mCallback;
+  private RemoteDataServiceAsync           remoteService;
+  private List<String>                     reportIds;
+  private AppPackageShared                 appPackage;
+  private LoginInfo                        loginInfo;
 
   interface EMailTemplateSendUiBinder extends UiBinder<Widget, EMailTemplateSend>
   {
@@ -81,21 +80,21 @@ public class EMailTemplateSend extends Composite
     startLoading();
     remoteService.findEMailAddresses(reportIds, new AsyncCallback<String>()
     {
-      
+
       @Override
       public void onSuccess(String result)
       {
         textEMailAddresses.setText(result);
         stopLoading();
-        
+
       }
-      
+
       @Override
       public void onFailure(Throwable caught)
       {
         Window.alert(caught.toString());
         stopLoading();
-        
+
       }
     });
   }
@@ -108,7 +107,7 @@ public class EMailTemplateSend extends Composite
     this.reportIds.add(acraLog.REPORT_ID);
     this.loginInfo = loginInfo;
     this.appPackage = appPackage;
-    
+
     initWidget(uiBinder.createAndBindUi(this));
 
     // populate.
@@ -117,7 +116,6 @@ public class EMailTemplateSend extends Composite
     textEMailAddresses.setText(Utils.findEMail(acraLog.USER_EMAIL, acraLog.USER_COMMENT));
   }
 
-  
   @UiHandler("buttonOK")
   void onButtonOKClick(ClickEvent event)
   {
@@ -125,14 +123,14 @@ public class EMailTemplateSend extends Composite
     startLoading();
     remoteService.sendFixedEMail(loginInfo, reportIds, textEMailAddresses.getText(), textSubject.getText(), textBody.getText(), new AsyncCallback<Void>()
     {
-      
+
       @Override
       public void onSuccess(Void result)
       {
         stopLoading();
         mCallback.result(true);
       }
-      
+
       @Override
       public void onFailure(Throwable caught)
       {
@@ -151,7 +149,7 @@ public class EMailTemplateSend extends Composite
   public static void doDialog(LoginInfo loginInfo, AppPackageShared appPackage, List<String> reportIds, final RemoteDataServiceAsync remoteService, final DialogCallback callback)
   {
     final DialogBox dialogBox = new DialogBox();
-    dialogBox.setText("Send Fixed E-Mail for " + appPackage.AppName);
+    dialogBox.setText(constants.emailLabelSend(appPackage.AppName));
 
     // Create a table to layout the content
     EMailTemplateSend pet = new EMailTemplateSend(loginInfo, appPackage, reportIds, remoteService, new EMailTemplateSend.DialogCallback()
@@ -181,7 +179,7 @@ public class EMailTemplateSend extends Composite
   public static void doDialog(LoginInfo loginInfo, AppPackageShared appPackage, ACRALogShared acraLog, final RemoteDataServiceAsync remoteService, final DialogCallback callback)
   {
     final DialogBox dialogBox = new DialogBox();
-    dialogBox.setText("Send Fixed E-Mail for " + appPackage.AppName);
+    dialogBox.setText(constants.emailLabelSend(appPackage.AppName));
 
     // Create a table to layout the content
     EMailTemplateSend pet = new EMailTemplateSend(loginInfo, appPackage, acraLog, remoteService, new EMailTemplateSend.DialogCallback()
@@ -207,11 +205,11 @@ public class EMailTemplateSend extends Composite
     dialogBox.show();
 
   }
-  
+
   public void startLoading()
   {
     AppLoadingView.getInstance().start();
-    
+
   }
 
   public void stopLoading()

@@ -28,13 +28,14 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.ProvidesKey;
 
 public class NameValueList extends Composite
 {
-
+  private UIConstants                   constants     = (UIConstants) GWT.create(UIConstants.class);
   public static class NameValueInfo implements Comparable<NameValueInfo> {
 
     /**
@@ -99,6 +100,7 @@ public class NameValueList extends Composite
     
     sortHandler = new ListHandler<NameValueInfo>(dataProvider.getList());
     cellTable.addColumnSortHandler(sortHandler);
+    cellTable.setEmptyTableWidget(new Label(constants.gridEmpty()));
     
     initTableColumns(sortHandler);
     
@@ -128,7 +130,7 @@ public class NameValueList extends Composite
           return o1.name.compareTo(o2.name);
       }
     });
-    cellTable.addColumn(nameColumn, "Name");
+    cellTable.addColumn(nameColumn, constants.gridName());
     cellTable.setColumnWidth(nameColumn, 300, Unit.PX);
 
     // Value
@@ -149,7 +151,7 @@ public class NameValueList extends Composite
         return o1.value.compareTo(o2.value);
       }
     });
-    cellTable.addColumn(valueColumn, "Value");
+    cellTable.addColumn(valueColumn, constants.gridValue());
     cellTable.setColumnWidth(valueColumn, 600, Unit.PX);
 
 

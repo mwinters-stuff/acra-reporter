@@ -1,4 +1,5 @@
 package nz.org.winters.appspot.acrareporter.client;
+
 /*
  * Copyright 2013 Mathew Winters
 
@@ -6,14 +7,14 @@ package nz.org.winters.appspot.acrareporter.client;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+ http://www.apache.org/licenses/LICENSE-2.0
 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 import nz.org.winters.appspot.acrareporter.client.ui.AppLoadingView;
 import nz.org.winters.appspot.acrareporter.client.ui.FrontPage;
 import nz.org.winters.appspot.acrareporter.client.ui.Overview;
@@ -37,12 +38,9 @@ import com.google.gwt.user.client.ui.Widget;
 public class ViewErrorReports implements EntryPoint
 {
 
-
-
-
   private static ViewErrorReportsUiBinder uiBinder = GWT.create(ViewErrorReportsUiBinder.class);
-  @UiField SimplePanel panel;
- 
+  @UiField
+  SimplePanel                             panel;
 
   interface ViewErrorReportsUiBinder extends UiBinder<Widget, ViewErrorReports>
   {
@@ -64,7 +62,7 @@ public class ViewErrorReports implements EntryPoint
 
   private LoginInfo                    loginInfo     = null;
 
-//  private boolean                      mSignup;
+  // private boolean mSignup;
 
   // private VerticalPanel loginPanel = new VerticalPanel();
   // private Label loginLabel = new Label(
@@ -80,7 +78,7 @@ public class ViewErrorReports implements EntryPoint
     }
     return baseUrl;
   }
-  
+
   public void onModuleLoad()
   {
     DOM.removeChild(RootPanel.getBodyElement(), DOM.getElementById("loading"));
@@ -89,7 +87,8 @@ public class ViewErrorReports implements EntryPoint
     Window.enableScrolling(false);
     Window.setMargin("0px");
 
-    // this little trick ensures that when using the debug instance locally that the
+    // this little trick ensures that when using the debug instance locally that
+    // the
     // login redirects work correctly..
     String baseUrl = getBaseURL();
 
@@ -108,7 +107,7 @@ public class ViewErrorReports implements EntryPoint
         if (loginInfo.isLoggedIn())
         {
           boolean signup = false;
-          if(Configuration.appUserMode == Configuration.UserMode.umMultipleSeperate)
+          if (Configuration.appUserMode == Configuration.UserMode.umMultipleSeperate)
           {
             Storage stockStore = Storage.getLocalStorageIfSupported();
             if (stockStore != null)
@@ -132,10 +131,10 @@ public class ViewErrorReports implements EntryPoint
             Window.alert("Not a valid user");
             Window.Location.replace(loginInfo.getLogoutUrl());
           }
-        } else if(Configuration.appUserMode ==  Configuration.UserMode.umMultipleSeperate)
+        } else if (Configuration.appUserMode == Configuration.UserMode.umMultipleSeperate)
         {
           loadFrontPage();
-        }else
+        } else
         {
           loadLogin(false);
         }
@@ -147,7 +146,8 @@ public class ViewErrorReports implements EntryPoint
 
   protected void loadSignup()
   {
-    RootLayoutPanel.get().add(new SignUp(loginInfo, new SignUp.Callback()
+    // RootLayoutPanel.get().add(
+    new SignUp(loginInfo, new SignUp.Callback()
     {
 
       @Override
@@ -155,7 +155,7 @@ public class ViewErrorReports implements EntryPoint
       {
         Window.Location.replace(getBaseURL());
       }
-    }));
+    });
   }
 
   private void doLogout()
@@ -224,17 +224,14 @@ public class ViewErrorReports implements EntryPoint
     RootLayoutPanel.get().clear();
     RootLayoutPanel.get().add(uiBinder.createAndBindUi(this));
 
-  //  panel.add(new OldMainPage(loginInfo));
+    // panel.add(new OldMainPage(loginInfo));
     panel.add(new Overview(loginInfo));
   }
 
- 
-  
-  
   public void startLoading()
   {
     AppLoadingView.getInstance().start();
-    
+
   }
 
   public void stopLoading()
@@ -242,17 +239,13 @@ public class ViewErrorReports implements EntryPoint
     AppLoadingView.getInstance().stop();
   }
 
- 
-//  @UiHandler("buttonLogout")
-//  void onButtonLogoutClick(ClickEvent event)
-//  {
-//    if(Window.confirm("Logout of your google account?"))
-//    {
-//      Window.Location.replace(loginInfo.getLogoutUrl());
-//    }
-//  }
+  // @UiHandler("buttonLogout")
+  // void onButtonLogoutClick(ClickEvent event)
+  // {
+  // if(Window.confirm("Logout of your google account?"))
+  // {
+  // Window.Location.replace(loginInfo.getLogoutUrl());
+  // }
+  // }
 
-  
-
-  
 }

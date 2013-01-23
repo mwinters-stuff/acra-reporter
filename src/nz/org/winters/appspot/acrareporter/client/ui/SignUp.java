@@ -14,14 +14,12 @@ package nz.org.winters.appspot.acrareporter.client.ui;
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-import nz.org.winters.appspot.acrareporter.client.NotLoggedInException;
 import nz.org.winters.appspot.acrareporter.client.RemoteDataService;
 import nz.org.winters.appspot.acrareporter.client.RemoteDataServiceAsync;
 import nz.org.winters.appspot.acrareporter.shared.AppUserShared;
 import nz.org.winters.appspot.acrareporter.shared.LoginInfo;
 import nz.org.winters.appspot.acrareporter.shared.Utils;
 
-import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -31,11 +29,11 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.ui.InlineHTML;
 
 public class SignUp extends Composite 
 {
@@ -62,6 +60,7 @@ public class SignUp extends Composite
   @UiField InlineHTML htmlStuff;
 
   private final RemoteDataServiceAsync remoteService = GWT.create(RemoteDataService.class);
+  private UIConstants                   constants     = (UIConstants) GWT.create(UIConstants.class);
 
   private static SignUpUiBinder uiBinder = GWT.create(SignUpUiBinder.class);
   private LoginInfo loginInfo;
@@ -78,6 +77,7 @@ public class SignUp extends Composite
 
   public SignUp(LoginInfo loginInfo, Callback callback)
   {
+    
     this.callback = callback;
     this.loginInfo = loginInfo;
  
@@ -86,17 +86,11 @@ public class SignUp extends Composite
     textEMailAddress.setText(loginInfo.getEmailAddress());
     textEMailAddress.setReadOnly(true);
     
-    htmlStuff.setHTML("<strong>Note:</strong><br>"+
-    "By signing up, you agree that the acra reporter is provided as-is, and is designed to meet the needs of the developer. <br>"+
-    "All care has been taken to ensure it works, but outside influences can cause problems, the developer is not liable for this or anything else.<br>"+
-    "You also agree, that as the need arises a subscription fee may be required, be it minimal to cover the costs of the app-engine above the free usage and provide the developer with a little pocket money (which is keenly spent on android devices).<br>"+ 
-    "You also must read the wiki on how to configure your outside tools (build systems & android apps) to use this tool.<br>"+
-    "Thanks."
-        );
+    htmlStuff.setHTML(constants.signupWibble());
     
     if(loginInfo.getAppUserShared() != null)
     {
-      Window.alert("The google account has already signed up!");
+      Window.alert(constants.signupAleryAlready());
       callback.finished();
     }
     
@@ -108,36 +102,36 @@ public class SignUp extends Composite
   {
     if(Utils.isEmpty(textFirstName.getText()))
     {
-      Window.alert("Please enter first name!");
+      Window.alert(constants.signupAleryFirstname());
       return;
     }
     if(Utils.isEmpty(textLastName.getText()))
     {
-      Window.alert("Please enter last name!");
+      Window.alert(constants.signupAleryLastname());
       return;
     }
     
     if(Utils.isEmpty(textCity.getText()))
     {
-      Window.alert("Please enter town / city!");
+      Window.alert(constants.signupAleryTown());
       return;
     }
 
     if(Utils.isEmpty(textCountry.getText()))
     {
-      Window.alert("Please enter Country!");
+      Window.alert(constants.signupAleryCountry());
       return;
     }
     
     if(Utils.isEmpty(textAuthUsername.getText()))
     {
-      Window.alert("Please enter Authentication Username!");
+      Window.alert(constants.signupAleryAuthUsername());
       return;
     }
 
     if(Utils.isEmpty(textAuthPassword.getText()))
     {
-      Window.alert("Please enter Authentication Password!");
+      Window.alert(constants.signupAleryAuthPassword());
       return;
     }
 
@@ -179,12 +173,5 @@ public class SignUp extends Composite
   }
   
   
-  private void handleError(Throwable error)
-  {
-    Window.alert(error.getMessage());
-    if (error instanceof NotLoggedInException)
-    {
-      Window.Location.replace(loginInfo.getLogoutUrl());
-    }
-  }
+ 
 }

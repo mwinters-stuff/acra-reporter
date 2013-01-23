@@ -52,6 +52,7 @@ import com.google.gwt.view.client.SelectionModel;
 
 public class MappingList extends Composite
 {
+  private static UIConstants                   constants     = (UIConstants) GWT.create(UIConstants.class);
   public static final ProvidesKey<MappingFileShared> KEY_PROVIDER = new ProvidesKey<MappingFileShared>()
                                                                   {
                                                                     @Override
@@ -172,7 +173,7 @@ public class MappingList extends Composite
           return 0;
       }
     });
-    dataGrid.addColumn(uploadDateColumn, "Upload Date");
+    dataGrid.addColumn(uploadDateColumn,constants.mappingListGridDate());
     dataGrid.setColumnWidth(uploadDateColumn, 200, Unit.PX);
 
     Column<MappingFileShared, String> versionColumn = new Column<MappingFileShared, String>(new TextCell())
@@ -192,7 +193,7 @@ public class MappingList extends Composite
         return o1.version.compareTo(o2.version);
       }
     });
-    dataGrid.addColumn(versionColumn, "Version");
+    dataGrid.addColumn(versionColumn, constants.mappingListGridVersion());
     dataGrid.setColumnWidth(versionColumn, 100, Unit.PX);
 
   }
@@ -207,7 +208,7 @@ public class MappingList extends Composite
   {
 
     final DialogBox dialogBox = new DialogBox();
-    dialogBox.setText("Proguard Mappings for " + packageName);
+    dialogBox.setText(constants.mappingListLabelTitle(packageName));
 
     MappingList mappinglist = new MappingList(packageName, new DialogCallback()
     {
@@ -238,7 +239,7 @@ public class MappingList extends Composite
       {
         if(selectionModel.getSelectedSet().isEmpty())
           return;
-        if (!Window.confirm("Are you sure you want to delete the selected mapping files?"))
+        if (!Window.confirm(constants.mappingListConformDelete()))
           return;
 
         final Set<MappingFileShared> selected = selectionModel.getSelectedSet();
@@ -296,7 +297,7 @@ public class MappingList extends Composite
           return;
        final MappingFileShared mfs = selectionModel.getSelectedSet().iterator().next();
         
-        InputDialog.doInput("Edit Proguard Mapping", "Version", mfs.version, new InputDialog.DialogCallback()
+        InputDialog.doInput(constants.mappingListLabelEditMapping(), constants.mappingListGridVersion(), mfs.version, new InputDialog.DialogCallback()
         {
           
           @Override

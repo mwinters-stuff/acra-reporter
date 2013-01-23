@@ -27,6 +27,8 @@ import com.google.appengine.api.users.UserServiceFactory;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.googlecode.objectify.ObjectifyService;
 
+///_ah/logout?continue=http%3A%2F%2F127.0.0.1%3A8888%2FACRAReporter.html%3Fgwt.codesvr%3D127.0.0.1%3A9997
+
 public class LoginServiceImpl extends RemoteServiceServlet implements LoginService
 {
 

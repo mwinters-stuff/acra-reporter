@@ -1,6 +1,9 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	xmlns:g="urn:import:com.google.gwt.user.client.ui"
+	ui:generateFormat='com.google.gwt.i18n.rebind.format.PropertiesFormat'
+	ui:generateKeys="com.google.gwt.i18n.rebind.keygen.MD5KeyGenerator"
+	ui:generateLocales="default">
 	<ui:style>
 
 	</ui:style>
@@ -8,16 +11,16 @@
 		<g:Cell width="100%">
 			<g:HorizontalPanel spacing="4">
 				<g:Cell verticalAlignment="ALIGN_MIDDLE">
-					<g:Label text="Input:" ui:field="labelInput" />
+					<g:Label ui:field="labelInput"><ui:msg>Input:</ui:msg></g:Label>
 				</g:Cell>
 				<g:TextBox ui:field="textBox" />
 			</g:HorizontalPanel>
 		</g:Cell>
 		<g:Cell horizontalAlignment="ALIGN_CENTER">
 			<g:HorizontalPanel spacing="4" horizontalAlignment="ALIGN_CENTER">
-				<g:Button ui:field="buttonOK" width="80px">OK</g:Button>
+				<g:Button ui:field="buttonOK" width="80px"><ui:msg>OK</ui:msg></g:Button>
 				<g:Label width="20px" />
-				<g:Button width="80px" ui:field="buttonCancel">Cancel</g:Button>
+				<g:Button width="80px" ui:field="buttonCancel"><ui:msg>Cancel</ui:msg></g:Button>
 			</g:HorizontalPanel>
 		</g:Cell>
 
