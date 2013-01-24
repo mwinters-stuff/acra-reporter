@@ -153,4 +153,19 @@ html>body .gwt-DecoratedTabBar {
 	font-weight: bold;
 	text-align: center;
 }
+.gwt-LabelInvertTop {
+	color: white;
+	padding: 2px;
+	font-size: medium;
+	font-weight: bold;
+	text-align: center;
+	background-color: Black;
+}
+.errorlistouter {
+	margin: 4px;
+	border-top: 1px Black;
+	border-right: solid;
+	border-left: Black;
+}
+
 

@@ -42,11 +42,12 @@ import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class ACRAReportView extends Composite
 {
   @UiField
-  CaptionPanel                          captionPanelCenter;
+  Label                          captionPanelCenter;
 
   @UiField
   TextArea                              textStackTrace;
@@ -227,11 +228,11 @@ public class ACRAReportView extends Composite
     if (result == null)
     {
       stopLoading();
-      captionPanelCenter.setCaptionText(constants.acraReportViewErrorFetch(result.REPORT_ID));
+      captionPanelCenter.setText(constants.acraReportViewErrorFetch(""));
       clearData();
       return;
     }
-    captionPanelCenter.setCaptionText(constants.acraReportViewLabelTitle(result.REPORT_ID));
+    captionPanelCenter.setText(constants.acraReportViewLabelTitle(result.REPORT_ID));
 
     textStackTrace.setText(Utils.isEmpty(result.MAPPED_STACK_TRACE) ? result.STACK_TRACE : result.MAPPED_STACK_TRACE);
     if (textStackTrace.getText().length() == 0)
@@ -336,7 +337,7 @@ public class ACRAReportView extends Composite
 
   public void clearData()
   {
-    captionPanelCenter.setCaptionText(constants.acraReportViewLabelReport());
+    captionPanelCenter.setText(constants.acraReportViewLabelReport());
     textStackTrace.setText("");
     textRawStackTrace.setText("");
     nvlBuild.clearData();
@@ -458,6 +459,8 @@ public class ACRAReportView extends Composite
       public void onSuccess(Void result)
       {
         beio.fixed = true;
+        beio.lookedAt = true;
+        checkLookedAt.setValue(true);
         stopLoading();
 
       }
@@ -544,7 +547,7 @@ public class ACRAReportView extends Composite
   public void showACRAReport(BasicErrorInfoShared beio)
   {
     mSelectedBasicErrorInfo = beio;
-    captionPanelCenter.setCaptionText(constants.acraReportViewLabelTitle(beio.REPORT_ID));
+    captionPanelCenter.setText(constants.acraReportViewLabelTitle(beio.REPORT_ID));
     clearData();
     remoteService.getACRALog(beio.REPORT_ID, mGetACRALogCallback);
 

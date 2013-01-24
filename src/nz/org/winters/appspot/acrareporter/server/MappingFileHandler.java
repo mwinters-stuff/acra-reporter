@@ -67,7 +67,8 @@ public class MappingFileHandler extends HttpServlet
 
   public static String convertStreamToString(java.io.InputStream is)
   {
-    java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
+    java.util.Scanner s = new java.util.Scanner(is);
+    s.useDelimiter("\\A");
     try
     {
       return s.hasNext() ? s.next() : "";
@@ -95,7 +96,7 @@ public class MappingFileHandler extends HttpServlet
       if (apppackage == null || apppackage.isEmpty())
       {
         response.getWriter().println("FAIL NO PACKAGE");
-        log.warning("no package");
+        log.severe("no package");
         return;
       }
 
@@ -103,15 +104,15 @@ public class MappingFileHandler extends HttpServlet
       if (version == null || apppackage.isEmpty())
       {
         response.getWriter().println("FAIL NO VERSION");
-        log.warning("no version" + apppackage);
+        log.severe("no version" + apppackage);
         return;
       }
 
       AppPackage appPackage = ObjectifyService.ofy().load().type(AppPackage.class).filter("PACKAGE_NAME", apppackage).first().get();
       if (appPackage == null)
       {
-        response.getWriter().println("FAIL PACKAGE UNKNOWN");
-        log.warning("package unknown " + apppackage);
+        response.getWriter().println("FAIL PACKAGE UNKNOWN: " + apppackage);
+        log.severe("package unknown " + apppackage);
         return;
       }
 
@@ -129,7 +130,7 @@ public class MappingFileHandler extends HttpServlet
       if (!appUser.isSubscriptionPaid)
       {
         response.getWriter().println("FAIL SUBSCRIPTION NOT PAID");
-        log.warning("subscription unpaid " + appUser.EMailAddress + " - " + apppackage);
+        log.severe("subscription unpaid " + appUser.EMailAddress + " - " + apppackage);
         return;
       }
 

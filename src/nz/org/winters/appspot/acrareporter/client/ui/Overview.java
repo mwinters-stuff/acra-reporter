@@ -318,9 +318,9 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
     mPackageMonthGraphData.addColumn(ColumnType.DATE, "Date");
 
     mPackageMonthGraphData.addColumn(ColumnType.NUMBER, "Reports");
-    mPackageMonthGraphData.addColumn(ColumnType.NUMBER, "Fixed");
     mPackageMonthGraphData.addColumn(ColumnType.NUMBER, "Looked At");
     mPackageMonthGraphData.addColumn(ColumnType.NUMBER, "Not Fixed");
+    mPackageMonthGraphData.addColumn(ColumnType.NUMBER, "Fixed");
     mPackageMonthGraphData.addColumn(ColumnType.NUMBER, "New");
     return mPackageMonthGraphData;
   }
@@ -404,9 +404,9 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
             DailyCountsShared data = result.get(i);
             mPackageMonthGraphData.setValue(i, 0, data.date);
             mPackageMonthGraphData.setValue(i, 1, data.Reports);
-            mPackageMonthGraphData.setValue(i, 2, data.Fixed);
-            mPackageMonthGraphData.setValue(i, 3, data.LookedAt);
-            mPackageMonthGraphData.setValue(i, 4, data.NotFixedReports());
+            mPackageMonthGraphData.setValue(i, 2, data.LookedAt);
+            mPackageMonthGraphData.setValue(i, 3, data.NotFixedReports());
+            mPackageMonthGraphData.setValue(i, 4, data.Fixed);
             mPackageMonthGraphData.setValue(i, 5, data.NewReports());
           }
           mShortDateFormat.format(mPackageMonthGraphData, 0);

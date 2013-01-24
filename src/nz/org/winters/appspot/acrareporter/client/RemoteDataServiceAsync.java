@@ -22,6 +22,7 @@ import nz.org.winters.appspot.acrareporter.shared.AppPackageShared;
 import nz.org.winters.appspot.acrareporter.shared.AppUserShared;
 import nz.org.winters.appspot.acrareporter.shared.BasicErrorInfoShared;
 import nz.org.winters.appspot.acrareporter.shared.DailyCountsShared;
+import nz.org.winters.appspot.acrareporter.shared.ErrorListFilter;
 import nz.org.winters.appspot.acrareporter.shared.LoginInfo;
 import nz.org.winters.appspot.acrareporter.shared.MappingFileShared;
 
@@ -38,7 +39,7 @@ public interface RemoteDataServiceAsync
 
   void getPackages(LoginInfo user,AsyncCallback<List<AppPackageShared>> callback);
 
-  void getBasicErrorInfo(String apppackage, AsyncCallback<List<BasicErrorInfoShared>> callback);
+  void getBasicErrorInfo(String apppackage, ErrorListFilter elf, AsyncCallback<List<BasicErrorInfoShared>> callback);
 
   void getACRALog(String REPORT_ID, AsyncCallback<ACRALogShared> callback);
 

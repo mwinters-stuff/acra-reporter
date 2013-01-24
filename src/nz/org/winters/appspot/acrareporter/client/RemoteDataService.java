@@ -22,6 +22,7 @@ import nz.org.winters.appspot.acrareporter.shared.AppPackageShared;
 import nz.org.winters.appspot.acrareporter.shared.AppUserShared;
 import nz.org.winters.appspot.acrareporter.shared.BasicErrorInfoShared;
 import nz.org.winters.appspot.acrareporter.shared.DailyCountsShared;
+import nz.org.winters.appspot.acrareporter.shared.ErrorListFilter;
 import nz.org.winters.appspot.acrareporter.shared.LoginInfo;
 import nz.org.winters.appspot.acrareporter.shared.MappingFileShared;
 
@@ -41,7 +42,7 @@ public interface RemoteDataService extends RemoteService
   List<AppPackageShared> getPackages(LoginInfo user) throws IllegalArgumentException;
 
   AppPackageShared getPackage(String PACKAGE_NAME) throws IllegalArgumentException;
-  List<BasicErrorInfoShared> getBasicErrorInfo(String PACKAGE_NAME) throws IllegalArgumentException;
+  List<BasicErrorInfoShared> getBasicErrorInfo(String apppackage, ErrorListFilter elf);
   
   ACRALogShared getACRALog(String REPORT_ID) throws IllegalArgumentException;
 

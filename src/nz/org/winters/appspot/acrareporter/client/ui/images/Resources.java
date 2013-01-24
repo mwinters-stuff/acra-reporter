@@ -15,6 +15,9 @@ public interface Resources extends ClientBundle
   
   @Source("ajax-loader.gif")
   public ImageResource loaderImage();
+  
+  @Source("refresh.png")
+  public ImageResource refresh();
 //  @Source("left_arrow.png")
 //  public ImageResource leftArrow();
 //  @Source("right_arrow.png")

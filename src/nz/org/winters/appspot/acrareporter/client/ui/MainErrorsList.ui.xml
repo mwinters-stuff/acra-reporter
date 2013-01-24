@@ -7,8 +7,10 @@
 	<ui:style>
 
 	</ui:style>
-	<g:CaptionPanel captionText="Errors">
-		<g:VerticalPanel width="100%" height="100%">
+		<g:VerticalPanel width="100%" height="100%" styleName="errorlistouter">
+			<g:Cell horizontalAlignment="ALIGN_CENTER">
+				<g:Label text="Errors" horizontalAlignment="ALIGN_CENTER" styleName="gwt-LabelInvertTop"/>
+			</g:Cell>
 			<g:Cell width="100%" height="38" horizontalAlignment="ALIGN_CENTER">
 				<g:HorizontalPanel horizontalAlignment="ALIGN_CENTER"
 					verticalAlignment="ALIGN_MIDDLE" spacing="4" ui:field="checkMultiSelect">
@@ -25,12 +27,24 @@
 								<g:MenuItem ui:field="miErrorsDeleteSelected" ><ui:msg>Delete Selected</ui:msg></g:MenuItem>
 							</g:MenuBar>
 						</g:MenuItem>
-						<g:MenuItem ui:field="miReload" ><ui:msg>Reload</ui:msg></g:MenuItem>
 					</g:MenuBar>
+					<g:PushButton ui:field="buttonRefresh">
+					
+					</g:PushButton>
 				</g:HorizontalPanel>
 			</g:Cell>
 			<g:Cell verticalAlignment="ALIGN_TOP" width="100%" height="100%">
 				<p1:DataGrid width="100%" height="100%" ui:field="dataGrid" />
+			</g:Cell>
+			<g:Cell verticalAlignment="ALIGN_BOTTOM" horizontalAlignment="ALIGN_CENTER"
+				height="">
+				<g:HorizontalPanel verticalAlignment="ALIGN_MIDDLE" spacing="4">
+					<g:Cell verticalAlignment="ALIGN_MIDDLE">
+						<g:Label wordWrap="false"><ui:msg>Show</ui:msg></g:Label>
+					</g:Cell>
+					<g:ListBox ui:field="comboShow" selectedIndex="1"/>
+					
+				</g:HorizontalPanel>
 			</g:Cell>
 			<g:Cell verticalAlignment="ALIGN_BOTTOM" horizontalAlignment="ALIGN_CENTER"
 				height="31">
@@ -38,6 +52,5 @@
 			</g:Cell>
 
 		</g:VerticalPanel>
-	</g:CaptionPanel>
 
 </ui:UiBinder> 

@@ -26,13 +26,15 @@ import nz.org.winters.appspot.acrareporter.client.RemoteDataServiceAsync;
 import nz.org.winters.appspot.acrareporter.client.ui.images.Resources;
 import nz.org.winters.appspot.acrareporter.shared.AppPackageShared;
 import nz.org.winters.appspot.acrareporter.shared.BasicErrorInfoShared;
+import nz.org.winters.appspot.acrareporter.shared.ErrorListFilter;
 import nz.org.winters.appspot.acrareporter.shared.LoginInfo;
 
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.i18n.client.Constants;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -51,6 +53,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.MenuItem;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
@@ -61,10 +64,12 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.google.gwt.user.client.ui.PushButton;
 
 public class MainErrorsList extends Composite implements Handler
 {
-  public interface CallbackShowReport{
+  public interface CallbackShowReport
+  {
     public void showReport(BasicErrorInfoShared basicErrorInfo);
   }
 
@@ -97,11 +102,12 @@ public class MainErrorsList extends Composite implements Handler
   @UiField
   MenuItem                                              miReportsEMailSelected;
   @UiField
-  MenuItem                                              miReload;
-  @UiField
   MenuItem                                              miErrorsDeleteSelected;
   @UiField
   CheckBox                                              checkErrorsMultiSelect;
+  @UiField
+  ListBox                                               comboShow;
+  @UiField(provided=true) PushButton buttonRefresh = new PushButton(new Image(Resources.INSTANCE.refresh()));
 
   private final RemoteDataServiceAsync                  remoteService = GWT.create(RemoteDataService.class);
 
@@ -112,13 +118,13 @@ public class MainErrorsList extends Composite implements Handler
   private static MainErrorsListUiBinder                 uiBinder      = GWT.create(MainErrorsListUiBinder.class);
   private ListProvider                                  dataProvider  = new ListProvider();
 
-  private CallbackShowReport mCallbackShowReport ;
+  private CallbackShowReport                            mCallbackShowReport;
 
   private String                                        packageName;
 
-  private LoginInfo mLoginInfo;
+  private LoginInfo                                     mLoginInfo;
 
-  private AppPackageShared mAppPackageShared;
+  private AppPackageShared                              mAppPackageShared;
 
   interface MainErrorsListUiBinder extends UiBinder<Widget, MainErrorsList>
   {
@@ -138,6 +144,12 @@ public class MainErrorsList extends Composite implements Handler
     simplePager = new SimplePager(TextLocation.CENTER, pagerResources, false, 0, true);
     initWidget(uiBinder.createAndBindUi(this));
 
+    comboShow.addItem(constants.errorListShowNew());
+    comboShow.addItem(constants.errorListShowAll());
+    comboShow.addItem(constants.errorListShowNotFixed());
+    comboShow.addItem(constants.errorListShowLookedAt());
+    comboShow.addItem(constants.errorListShowFixed());
+    comboShow.setItemSelected(0, true);
     // dataGrid = new DataGrid<BasicErrorInfoShared>();
     // dataGrid.setWidth("100%");
     dataGrid.setAutoHeaderRefreshDisabled(true);
@@ -184,7 +196,7 @@ public class MainErrorsList extends Composite implements Handler
 
   private void setupMenus()
   {
-    popupActions.setEnabled(false);
+    popupActions.setVisible(false);
     miErrorsAllEMailed.setScheduledCommand(new Command()
     {
 
@@ -331,16 +343,7 @@ public class MainErrorsList extends Composite implements Handler
       }
     });
 
-    miReload.setScheduledCommand(new Command()
-    {
-
-      @Override
-      public void execute()
-      {
-        refreshList();
-
-      }
-    });
+  
 
     miErrorsDeleteSelected.setScheduledCommand(new Command()
     {
@@ -404,7 +407,8 @@ public class MainErrorsList extends Composite implements Handler
   {
     startLoading();
     dataProvider.startLoading();
-    remoteService.getBasicErrorInfo(packageName, mGetBasicErrorCallback);
+    ErrorListFilter elf = ErrorListFilter.values()[comboShow.getSelectedIndex()];
+    remoteService.getBasicErrorInfo(packageName, elf, mGetBasicErrorCallback);
   }
 
   AsyncCallback<List<BasicErrorInfoShared>> mGetBasicErrorCallback = new AsyncCallback<List<BasicErrorInfoShared>>()
@@ -433,7 +437,7 @@ public class MainErrorsList extends Composite implements Handler
 
   private void initTableColumns(final SelectionModel<BasicErrorInfoShared> selectionModel, ListHandler<BasicErrorInfoShared> sortHandler)
   {
-   
+
     Column<BasicErrorInfoShared, String> userCrashDateColumn = new Column<BasicErrorInfoShared, String>(new TextCell())
     {
       @Override
@@ -489,11 +493,11 @@ public class MainErrorsList extends Composite implements Handler
     if (checkErrorsMultiSelect.getValue())
     {
       dataGrid.setSelectionModel(multipleSelectionModel, DefaultSelectionEventManager.<BasicErrorInfoShared> createDefaultManager());
-      popupActions.setEnabled(true);
+      popupActions.setVisible(true);
 
     } else
     {
-      popupActions.setEnabled(false);
+      popupActions.setVisible(false);
       dataGrid.setSelectionModel(singleSelectionModel, DefaultSelectionEventManager.<BasicErrorInfoShared> createDefaultManager());
     }
   }
@@ -534,4 +538,12 @@ public class MainErrorsList extends Composite implements Handler
     }
   }
 
+  @UiHandler("comboShow")
+  void onComboShowChange(ChangeEvent event) {
+    refreshList();
+  }
+  @UiHandler("buttonRefresh")
+  void onButtonRefreshClick(ClickEvent event) {
+    refreshList();
+  }
 }

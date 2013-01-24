@@ -31,7 +31,7 @@
 					<g:VerticalPanel height="100%">
 						<g:Cell height="100%">
 							<g:Label horizontalAlignment="ALIGN_RIGHT"
-								width="130px"><ui:mg>Message:</ui:mg></g:Label>
+								width="130px"><ui:msg>Message:</ui:msg></g:Label>
 						</g:Cell>
 					</g:VerticalPanel>
 				</g:customCell>

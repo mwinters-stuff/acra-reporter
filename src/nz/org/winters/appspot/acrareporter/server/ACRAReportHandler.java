@@ -97,7 +97,7 @@ public class ACRAReportHandler extends HttpServlet
         if (appPackage == null)
         {
           response.getWriter().println("FAIL PACKAGE UNKNOWN");
-          log.warning("package unknown " + acraLog.PACKAGE_NAME);
+          log.severe("package unknown " + acraLog.PACKAGE_NAME);
           return;
         }
 
@@ -130,7 +130,7 @@ public class ACRAReportHandler extends HttpServlet
         if (appUser.isUser && !appUser.isSubscriptionPaid)
         {
           response.getWriter().println("FAIL SUBSCRIPTION NOT PAID");
-          log.warning("subscription unpaid " + appUser.EMailAddress + " - " + acraLog.PACKAGE_NAME);
+          log.severe("subscription unpaid " + appUser.EMailAddress + " - " + acraLog.PACKAGE_NAME);
           return;
         }
 

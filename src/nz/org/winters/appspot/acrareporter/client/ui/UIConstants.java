@@ -34,6 +34,22 @@ public interface UIConstants extends Messages
   @Key("errorlist.grid.version")
   String errorListGridVersion();
 
+  @Key("errorlist.show.all")
+  String errorListShowAll();
+
+  @Key("errorlist.show.new")
+  String errorListShowNew();
+
+  @Key("errorlist.show.lookedat")
+  String errorListShowLookedAt();
+
+  @Key("errorlist.show.notfixed")
+  String errorListShowNotFixed();
+
+  @Key("errorlist.show.fixed")
+  String errorListShowFixed();
+    
+  
   @Key("errorlist.confirm.delete")
   String errorListConfirmDelete();
 
@@ -120,6 +136,7 @@ public interface UIConstants extends Messages
   
   @Key("signup.alert.authpassword")
   String signupAleryAuthPassword();
-  
+
+
 
 }

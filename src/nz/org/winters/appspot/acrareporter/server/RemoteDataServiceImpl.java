@@ -43,6 +43,7 @@ import nz.org.winters.appspot.acrareporter.shared.AppUserShared;
 import nz.org.winters.appspot.acrareporter.shared.BasicErrorInfoShared;
 import nz.org.winters.appspot.acrareporter.shared.Configuration;
 import nz.org.winters.appspot.acrareporter.shared.DailyCountsShared;
+import nz.org.winters.appspot.acrareporter.shared.ErrorListFilter;
 import nz.org.winters.appspot.acrareporter.shared.LoginInfo;
 import nz.org.winters.appspot.acrareporter.shared.MappingFileShared;
 import nz.org.winters.appspot.acrareporter.shared.Utils;
@@ -125,9 +126,30 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
   }
 
   @Override
-  public List<BasicErrorInfoShared> getBasicErrorInfo(String apppackage) throws IllegalArgumentException
+  public List<BasicErrorInfoShared> getBasicErrorInfo(String apppackage, ErrorListFilter elf) throws IllegalArgumentException
   {
-    List<BasicErrorInfo> list = ObjectifyService.ofy().load().type(BasicErrorInfo.class).filter("PACKAGE_NAME", apppackage).list();// .order("Timestamp desc").list();
+    List<BasicErrorInfo> list;
+    switch(elf)
+    {
+      case elfFixed:
+        list = ObjectifyService.ofy().load().type(BasicErrorInfo.class).filter("PACKAGE_NAME", apppackage).filter("fixed",true).list();
+        break;
+      case elfLookedAt:
+        list = ObjectifyService.ofy().load().type(BasicErrorInfo.class).filter("PACKAGE_NAME", apppackage).filter("lookedAt",true).list();
+        break;
+      case elfNew:
+        list = ObjectifyService.ofy().load().type(BasicErrorInfo.class).filter("PACKAGE_NAME", apppackage).filter("fixed",false).filter("lookedAt",false).list();
+        break;
+      case elfNotFixed:
+        list = ObjectifyService.ofy().load().type(BasicErrorInfo.class).filter("PACKAGE_NAME", apppackage).filter("fixed",false).list();
+        break;
+      case elfAll:
+      default:
+        list = ObjectifyService.ofy().load().type(BasicErrorInfo.class).filter("PACKAGE_NAME", apppackage).list();// .order("Timestamp desc").list();
+        break;
+      
+    }
+    
     ArrayList<BasicErrorInfoShared> result = new ArrayList<BasicErrorInfoShared>();
 
     for (BasicErrorInfo beo : list)
@@ -166,23 +188,13 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
     AppUser user = getAppUser(bei.Owner);
     AppPackage ap = getAppPackage(bei.PACKAGE_NAME);
 
+    DailyCounts counts = DailyCounts.getDate(getOwnerId(user),bei.Timestamp);
+
+    counts.incDeleted();
     ap.Totals.incDeleted();
     user.Totals.incDeleted();
-    DailyCounts counts = DailyCounts.getToday(getOwnerId(user));
-    counts.incDeleted();
+
     counts.save();
-
-    if (bei.lookedAt)
-    {
-      ap.Totals.decLookedAt();
-      user.Totals.decLookedAt();
-    }
-    if (bei.fixed)
-    {
-      ap.Totals.decFixed();
-      user.Totals.decFixed();
-    }
-
     ap.save();
     user.save();
   }
@@ -199,8 +211,8 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
         bei.save();
         AppUser user = getAppUser(bei.Owner);
         AppPackage ap = getAppPackage(bei.PACKAGE_NAME);
-        DailyCounts userCounts = DailyCounts.getToday(getOwnerId(user));
-        DailyCounts packageCounts = DailyCounts.getToday(bei.PACKAGE_NAME);
+        DailyCounts userCounts = DailyCounts.getDate(getOwnerId(user),bei.Timestamp);
+        DailyCounts packageCounts = DailyCounts.getDate(bei.PACKAGE_NAME,bei.Timestamp);
         if (state)
         {
           ap.Totals.incLookedAt();
@@ -234,8 +246,8 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
         bei.fixed = state;
         AppUser user = getAppUser(bei.Owner);
         AppPackage ap = getAppPackage(bei.PACKAGE_NAME);
-        DailyCounts userCounts = DailyCounts.getToday(getOwnerId(user));
-        DailyCounts packageCounts = DailyCounts.getToday(bei.PACKAGE_NAME);
+        DailyCounts userCounts = DailyCounts.getDate(getOwnerId(user),bei.Timestamp);
+        DailyCounts packageCounts = DailyCounts.getDate(bei.PACKAGE_NAME,bei.Timestamp);
         if (state)
         {
           ap.Totals.incFixed();
@@ -258,14 +270,7 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
           user.Totals.incLookedAt();
           userCounts.incLookedAt();
           packageCounts.incLookedAt();
-        } else if (!state && bei.lookedAt)
-        {
-          bei.lookedAt = false;
-          ap.Totals.decLookedAt();
-          user.Totals.decLookedAt();
-          userCounts.decLookedAt();
-          packageCounts.decLookedAt();
-        }
+        } 
 
         bei.save();
         ap.save();
@@ -479,9 +484,7 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
     ArrayList<Long> idsACRA = new ArrayList<Long>();
     Long owner = 0L;
     String packageName = "";
-    int fixed = 0;
-    int lookedAt = 0;
-
+  
     for (String report_id : reportIds)
     {
       BasicErrorInfo beo = ObjectifyService.ofy().load().type(BasicErrorInfo.class).filter("REPORT_ID", report_id).first().get();
@@ -489,15 +492,16 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
       owner = beo.Owner;
       packageName = beo.PACKAGE_NAME;
 
-      if (beo.fixed)
-      {
-        fixed = fixed + 1;
-      }
-      if (beo.lookedAt)
-      {
-        lookedAt = lookedAt + 1;
-      }
+   
+      DailyCounts userCounts = DailyCounts.getDate(owner,beo.Timestamp);
+      DailyCounts packageCounts = DailyCounts.getDate(beo.PACKAGE_NAME,beo.Timestamp);
 
+      userCounts.incDeleted();
+      packageCounts.incDeleted();
+
+      userCounts.save();
+      packageCounts.save();
+  
       idsBasic.add(beo.id);
       idsACRA.add(acra.id);
     }
@@ -511,26 +515,9 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
       AppUser appUser = getAppUser(owner);
 
       appPackage.Totals.Deleted = appPackage.Totals.Deleted + reportIds.size();
-      appPackage.Totals.Reports = appPackage.Totals.Deleted - reportIds.size();
-      appPackage.Totals.Fixed = appPackage.Totals.Fixed + fixed;
-      appPackage.Totals.LookedAt = appPackage.Totals.LookedAt + fixed;
-
       appPackage.save();
-
       appUser.Totals.Deleted = appUser.Totals.Deleted + reportIds.size();
-      appUser.Totals.Reports = appUser.Totals.Deleted - reportIds.size();
-      appUser.Totals.Fixed = appUser.Totals.Fixed + fixed;
-      appUser.Totals.LookedAt = appUser.Totals.LookedAt + fixed;
-
       appUser.save();
-      DailyCounts userCounts = DailyCounts.getToday(owner);
-      DailyCounts packageCounts = DailyCounts.getToday(appPackage.PACKAGE_NAME);
-
-      userCounts.incDeletedToday(reportIds.size());
-      packageCounts.incDeletedToday(reportIds.size());
-
-      userCounts.save();
-      packageCounts.save();
 
     }
 
@@ -707,7 +694,7 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
   public List<DailyCountsShared> getPackageLastMonthDailyCounts(LoginInfo loginInfo, String PACKAGE_NAME) throws IllegalArgumentException
   {
     List<DailyCountsShared> result = new ArrayList<DailyCountsShared>();
-    AppUser user = getAppUser(loginInfo);
+    //AppUser user = getAppUser(loginInfo);
     Calendar monthback = GregorianCalendar.getInstance();
     monthback.set(Calendar.HOUR, 0);
     monthback.set(Calendar.MINUTE, 0);
