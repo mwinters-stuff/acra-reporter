@@ -2,6 +2,7 @@ package nz.org.winters.appspot.acrareporter.shared;
 
 import java.io.Serializable;
 
+import com.google.gson.annotations.Expose;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 /*
@@ -27,9 +28,13 @@ public class Counts implements Serializable, IsSerializable {
    */
 	private static final long serialVersionUID = 7132720948917830809L;
 
+  @Expose
 	public int Reports = 0;
+  @Expose
 	public int Fixed = 0;
+  @Expose
 	public int LookedAt = 0;
+  @Expose
 	public int Deleted = 0;
 
 	public Counts() {
@@ -92,12 +97,15 @@ public class Counts implements Serializable, IsSerializable {
 
 	public int NewReports()
 	{
-	  return Reports - LookedAt;
+	  int v = Reports - LookedAt - Deleted;
+    return v < 0 ? 0 : v;  
 	}
 	
 	public int NotFixedReports()
 	{
-	  return Reports - Fixed;
+	  int v = Reports - Fixed - Deleted;
+	  return v < 0 ? 0 : v;  
+	      
 	}
 	
 	public void clear() {

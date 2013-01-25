@@ -90,6 +90,18 @@
 	</servlet-mapping>
 
 
+
+	<servlet>
+		<servlet-name>androidServlet</servlet-name>
+		<servlet-class>nz.org.winters.appspot.acrareporter.server.AndroidInterface</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>androidServlet</servlet-name>
+		<url-pattern>/_aif</url-pattern>
+	</servlet-mapping>
+		
+	
 	<filter>
 		<filter-name>ObjectifyFilter</filter-name>
 		<filter-class>com.googlecode.objectify.ObjectifyFilter</filter-class>

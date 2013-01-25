@@ -70,6 +70,18 @@
 				</g:row>
 			</g:Grid>
 		</g:CaptionPanel>
+			<g:CaptionPanel captionText="Android App Interface">
+			<g:Grid cellSpacing="4">
+				<g:row>
+					<g:customCell>
+						<g:Label text="API Key:" horizontalAlignment="ALIGN_RIGHT" />
+					</g:customCell>
+					<g:customCell>
+						<g:TextBox ui:field="textAndroidAPIKey" visibleLength="50" />
+					</g:customCell>
+				</g:row>
+			</g:Grid>
+		</g:CaptionPanel>
 		<g:CaptionPanel captionText="Goggle Analytics">
 			<g:Grid cellSpacing="4">
 				<g:row>

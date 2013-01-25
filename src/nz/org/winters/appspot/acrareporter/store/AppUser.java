@@ -41,6 +41,7 @@ public class AppUser
   public String AnalyticsTrackingId;
   public String AuthString;
   
+  public String AndroidKey;
   
   public boolean isSuperDude = false;
   public boolean isUser = true;
@@ -72,6 +73,7 @@ public class AppUser
     shared.isSuperDude = isSuperDude;
     shared.AuthString = AuthString;
     shared.adminAppUserId = adminAppUserId;
+    shared.AndroidKey = AndroidKey;
     
     String[] auths = ServerOnlyUtils.decodeAuthString(AuthString);
     if (auths != null)
@@ -102,6 +104,7 @@ public class AppUser
     shared.AuthString = ServerOnlyUtils.encodeAuthString(shared.AuthUsername, shared.AuthPassword);
     AuthString = shared.AuthString;
     adminAppUserId = shared.adminAppUserId;
+    AndroidKey = shared.AndroidKey;
   }
 
   @Override

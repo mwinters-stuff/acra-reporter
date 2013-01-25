@@ -55,6 +55,7 @@ import nz.org.winters.appspot.acrareporter.store.DailyCounts;
 import nz.org.winters.appspot.acrareporter.store.MappingFile;
 import nz.org.winters.appspot.acrareporter.store.RegisterDataStores;
 
+import com.gargoylesoftware.htmlunit.TextUtil;
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.googlecode.objectify.ObjectifyService;
@@ -395,6 +396,18 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
     AppUser appUser = ObjectifyService.ofy().load().type(AppUser.class).id(appUserShared.id).get();
     if (appUser != null)
     {
+      
+      if(!Utils.isEmpty(appUserShared.AndroidKey))
+      {
+        AppUser other =ObjectifyService.ofy().load().type(AppUser.class).filter("AndroidKey",appUserShared.AndroidKey).first().get();
+        if(other != null)
+        {
+          if(other.id != appUser.id)
+          {
+            throw new IllegalArgumentException("Android API Key is already used by another user!");
+          }
+        }
+      }
       appUser.fromShared(appUserShared);
       appUser.save();
     }

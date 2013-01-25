@@ -126,7 +126,20 @@ public class DailyCounts extends Counts
 
     yesterday.add(Calendar.DAY_OF_MONTH, -daysBack);
     Date yd = removeTimeFromDate(yesterday.getTime());
-    return ObjectifyService.ofy().load().type(DailyCounts.class).filter("PACKAGE_NAME", null).filter("date", yd).list();
+    return ObjectifyService.ofy().load().type(DailyCounts.class).filter("PACKAGE_NAME", null).filter("date >=", yd).list();
+  }
+
+  public static List<DailyCounts> getUserDaysBack(Long owner, int daysBack)
+  {
+    Calendar yesterday = GregorianCalendar.getInstance();
+    yesterday.set(Calendar.HOUR, 0);
+    yesterday.set(Calendar.MINUTE, 0);
+    yesterday.set(Calendar.SECOND, 0);
+    yesterday.set(Calendar.MILLISECOND, 0);
+
+    yesterday.add(Calendar.DAY_OF_MONTH, -daysBack);
+    Date yd = removeTimeFromDate(yesterday.getTime());
+    return ObjectifyService.ofy().load().type(DailyCounts.class).filter("Owner",owner).filter("PACKAGE_NAME",null).filter("date >=", yd).list();
   }
 
   public static List<DailyCounts> getAllUsersYesterday()
@@ -153,9 +166,23 @@ public class DailyCounts extends Counts
     
     List<String> packageNames = ServerOnlyUtils.getPackageNames(owner);
     
-    return ObjectifyService.ofy().load().type(DailyCounts.class).filter("PACKAGE_NAME IN", packageNames).filter("date", yd).list();
+    return ObjectifyService.ofy().load().type(DailyCounts.class).filter("PACKAGE_NAME IN", packageNames).filter("date >=", yd).list();
   }
 
+  public static List<DailyCounts> getPackageDaysBack(String packageName, int daysBack)
+  {
+    Calendar yesterday = GregorianCalendar.getInstance();
+    yesterday.set(Calendar.HOUR, 0);
+    yesterday.set(Calendar.MINUTE, 0);
+    yesterday.set(Calendar.SECOND, 0);
+    yesterday.set(Calendar.MILLISECOND, 0);
+
+    yesterday.add(Calendar.DAY_OF_MONTH, -daysBack);
+    Date yd = removeTimeFromDate(yesterday.getTime());
+    
+    return ObjectifyService.ofy().load().type(DailyCounts.class).filter("PACKAGE_NAME", packageName).filter("date >=", yd).list();
+  }  
+  
   public void save()
   {
     ObjectifyService.ofy().save().entity(this);

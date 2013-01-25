@@ -1,4 +1,5 @@
 package nz.org.winters.appspot.acrareporter.client.ui;
+
 /*
  * Copyright 2013 Mathew Winters
 
@@ -6,14 +7,14 @@ package nz.org.winters.appspot.acrareporter.client.ui;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+ http://www.apache.org/licenses/LICENSE-2.0
 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 import nz.org.winters.appspot.acrareporter.client.RemoteDataServiceAsync;
 import nz.org.winters.appspot.acrareporter.shared.AppUserShared;
 import nz.org.winters.appspot.acrareporter.shared.Utils;
@@ -58,6 +59,8 @@ public class UserEdit extends Composite
   @UiField
   TextBox                         textTrackingID;
   @UiField
+  TextBox                         textAndroidAPIKey;
+  @UiField
   Button                          buttonOK;
   @UiField
   Button                          buttonCancel;
@@ -85,6 +88,7 @@ public class UserEdit extends Composite
 
     textAuthUsername.setText(appUserShared.AuthUsername);
     textAuthPassword.setText(appUserShared.AuthPassword);
+    textAndroidAPIKey.setText(appUserShared.AndroidKey);
 
     textTrackingID.setText(appUserShared.AnalyticsTrackingId);
 
@@ -108,60 +112,63 @@ public class UserEdit extends Composite
     textAuthPassword.setText("");
     textAuthUsername.setReadOnly(true);
     textAuthPassword.setReadOnly(true);
+    
+    textAndroidAPIKey.setText("");
 
     textTrackingID.setText("");
     textTrackingID.setReadOnly(true);
-  }  
+  }
+
   @UiHandler("buttonOK")
   void onButtonOKClick(ClickEvent event)
   {
-    if(Utils.isEmpty(textEMailAddress.getText()) && !textEMailAddress.isReadOnly())
+    if (Utils.isEmpty(textEMailAddress.getText()) && !textEMailAddress.isReadOnly())
     {
       Window.alert("Please enter email address!");
       textEMailAddress.setFocus(true);
       return;
     }
-    
-    if(Utils.isEmpty(textFirstName.getText()))
+
+    if (Utils.isEmpty(textFirstName.getText()))
     {
       Window.alert("Please enter first name!");
       textFirstName.setFocus(true);
       return;
     }
-    if(Utils.isEmpty(textLastName.getText()))
+    if (Utils.isEmpty(textLastName.getText()))
     {
       Window.alert("Please enter last name!");
       textLastName.setFocus(true);
 
       return;
     }
-    
-    if(Utils.isEmpty(textCity.getText()))
+
+    if (Utils.isEmpty(textCity.getText()))
     {
       Window.alert("Please enter town / city!");
       return;
     }
 
-    if(Utils.isEmpty(textCountry.getText()))
+    if (Utils.isEmpty(textCountry.getText()))
     {
       Window.alert("Please enter Country!");
       return;
     }
-    
-    if(Utils.isEmpty(textAuthUsername.getText()) && !textAuthUsername.isReadOnly())
+
+    if (Utils.isEmpty(textAuthUsername.getText()) && !textAuthUsername.isReadOnly())
     {
       Window.alert("Please enter Authentication Username!");
       textAuthUsername.setFocus(true);
       return;
     }
 
-    if(Utils.isEmpty(textAuthPassword.getText()) && !textAuthPassword.isReadOnly())
+    if (Utils.isEmpty(textAuthPassword.getText()) && !textAuthPassword.isReadOnly())
     {
       Window.alert("Please enter Authentication Password!");
       textAuthPassword.setFocus(true);
       return;
-    }    
-    
+    }
+
     appUserShared.EMailAddress = textEMailAddress.getText();
     appUserShared.FirstName = textFirstName.getText();
     appUserShared.LastName = textLastName.getText();
@@ -170,6 +177,7 @@ public class UserEdit extends Composite
 
     appUserShared.AuthUsername = textAuthUsername.getText();
     appUserShared.AuthPassword = textAuthPassword.getText();
+    appUserShared.AndroidKey = textAndroidAPIKey.getText();
 
     appUserShared.AnalyticsTrackingId = textTrackingID.getText();
 
@@ -243,7 +251,7 @@ public class UserEdit extends Composite
         if (ok)
         {
           appUserShared.adminAppUserId = adminAppUserShared.id;
-          
+
           remoteService.addAppUser(appUserShared, new AsyncCallback<Void>()
           {
 

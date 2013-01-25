@@ -20,6 +20,7 @@ import nz.org.winters.appspot.acrareporter.server.ServerOnlyUtils;
 import nz.org.winters.appspot.acrareporter.shared.AppPackageShared;
 import nz.org.winters.appspot.acrareporter.shared.Counts;
 
+import com.google.gson.annotations.Expose;
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
@@ -32,20 +33,28 @@ import com.googlecode.objectify.annotation.Unindex;
 public class AppPackage
 {
 
+  @Expose
   @Id
   public Long   id;
+  
+  @Expose
   @Index
   public Long   Owner;
 
+  @Expose
   @Index
   public String PACKAGE_NAME;
+
   public String EMailAddress;
   public String EMailSubject;
   public String EMailTemplate;
 
   public String AuthString;
+
+  @Expose
   public String AppName;
 
+  @Expose
   @Serialize
   @Unindex
   public Counts Totals = new Counts();
