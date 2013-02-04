@@ -805,7 +805,7 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
     appTotalsTable.addColumn(notFixedColumn, "Not Fixed");
     appTotalsTable.addColumn(lookedAtColumn, "Looked At");
     appTotalsTable.addColumn(fixedColumn, "Fixed");
-    appTotalsTable.addColumn(reportsColumn, "Deleted");
+    appTotalsTable.addColumn(deletedColumn, "Deleted");
     appTotalsTable.addColumn(reportsColumn, "Reports");
     appTotalsTable.addColumn(editColumn, "");
     appTotalsTable.addColumn(openColumn, "");
