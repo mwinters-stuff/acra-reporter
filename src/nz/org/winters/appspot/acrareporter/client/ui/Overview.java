@@ -5,7 +5,10 @@ import java.util.List;
 
 import nz.org.winters.appspot.acrareporter.client.RemoteDataService;
 import nz.org.winters.appspot.acrareporter.client.RemoteDataServiceAsync;
+import nz.org.winters.appspot.acrareporter.client.ui.MainErrorsList.ListProvider;
+import nz.org.winters.appspot.acrareporter.client.ui.images.Resources;
 import nz.org.winters.appspot.acrareporter.shared.AppPackageShared;
+import nz.org.winters.appspot.acrareporter.shared.BasicErrorInfoShared;
 import nz.org.winters.appspot.acrareporter.shared.DailyCountsShared;
 import nz.org.winters.appspot.acrareporter.shared.LoginInfo;
 
@@ -15,15 +18,20 @@ import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -49,9 +57,6 @@ import com.google.gwt.visualization.client.visualizations.corechart.Options;
 import com.google.gwt.visualization.client.visualizations.corechart.PieChart;
 import com.google.gwt.visualization.client.visualizations.corechart.PieChart.PieOptions;
 import com.google.gwt.visualization.client.visualizations.corechart.TextStyle;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
 
 public class Overview extends Composite implements ChangeHandler, AppPackageView.CallbackClosePackageView
 {
@@ -77,7 +82,8 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
   VerticalPanel                                     basePanel;
   @UiField
   ScrollPanel                                       overviewPanel;
-  @UiField Button buttonAddPackage;
+  @UiField
+  Button                                            buttonAddPackage;
 
   private final RemoteDataServiceAsync              remoteService  = GWT.create(RemoteDataService.class);
 
@@ -92,7 +98,7 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
   private DataTable                                 mPackageMonthGraphData;
   private List<AppPackageShared>                    mAppPackageShared;
   private DateFormat                                mShortDateFormat;
-  private ListDataProvider<AppPackageShared>        mPackageTableDataProvider;
+ 
 
   private int                                       browserWidth;
   private int                                       browserHeight;
@@ -107,7 +113,7 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
                                                                        return item == null ? null : item.id;
                                                                      }
                                                                    };
-
+  private AppPackageListProvider                              mPackageTableDataProvider   = new AppPackageListProvider();
 
   interface OverviewUiBinder extends UiBinder<Widget, Overview>
   {
@@ -174,7 +180,7 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
 
         });
 
-       updateData();
+        updateData();
 
       }
 
@@ -187,7 +193,7 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
   private void updateData()
   {
     updateTotalsGraph();
-    updateTotalsMonthGraph();    
+    updateTotalsMonthGraph();
   }
 
   // report pie chart
@@ -329,6 +335,8 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
 
   private void updateTotalsGraph()
   {
+    mPackageTableDataProvider.startLoading();
+
     remoteService.getPackageGraphDataTotals(loginInfo, new AsyncCallback<List<AppPackageShared>>()
     {
 
@@ -337,6 +345,18 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
       {
         mAppPackageShared = result;
         loadTotalsGraphData();
+
+        mPackageTableDataProvider.stopLoading(result);
+        appTotalsTable.getColumnSortList().clear();
+        appTotalsTable.getColumnSortList().push(appTotalsTable.getColumn(1));
+        
+        ColumnSortEvent.fire(appTotalsTable, appTotalsTable.getColumnSortList());
+        
+        if (!result.isEmpty())
+        {
+          appTotalsTable.getSelectionModel().setSelected(result.get(0), true);
+        }
+
       }
 
       @Override
@@ -451,13 +471,9 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
 
     mTotalGraphData.addRows(mAppPackageShared.size());
     // mPackageTableData.addRows(mAppPackageShared.size());
-
-    List<AppPackageShared> tableList = mPackageTableDataProvider.getList();
-    tableList.clear();
     for (int i = 0; i < mAppPackageShared.size(); i++)
     {
       AppPackageShared data = mAppPackageShared.get(i);
-      tableList.add(data);
 
       mTotalGraphData.setValue(i, 0, data.AppName);
 
@@ -484,13 +500,6 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
     }
     mPackageTotalsGraph.draw(mTotalGraphData, createTotalReportOptions());
 
-    appTotalsTable.getColumnSortList().clear();
-    appTotalsTable.getColumnSortList().push(appTotalsTable.getColumn(1));
-
-    if (!tableList.isEmpty())
-    {
-      appTotalsTable.getSelectionModel().setSelected(tableList.get(0), true);
-    }
   }
 
   private void editPackage(AppPackageShared packagedata)
@@ -522,13 +531,13 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
 
     overviewPanel.setVisible(false);
     basePanel.remove(overviewPanel);
-    basePanel.add(new AppPackageView(loginInfo, packagedata,this));
+    basePanel.add(new AppPackageView(loginInfo, packagedata, this));
 
   }
 
   private void createPackageTableColumns()
   {
-    mPackageTableDataProvider = new ListDataProvider<AppPackageShared>();
+    
     ListHandler<AppPackageShared> columnSortHandler = new ListHandler<AppPackageShared>(mPackageTableDataProvider.getList());
     mPackageTableDataProvider.addDataDisplay(appTotalsTable);
     panelAppGrid.setWidth((int) ((double) browserWidth * 0.5) + "px");
@@ -537,6 +546,7 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
 
     appTotalsTable.setAutoHeaderRefreshDisabled(true);
     appTotalsTable.setEmptyTableWidget(new Label("No Apps"));
+    appTotalsTable.setLoadingIndicator(new Image(Resources.INSTANCE.loaderImage()));
 
     // Create name column.
     Column<AppPackageShared, String> nameColumn = new Column<AppPackageShared, String>(new TextCell())
@@ -601,6 +611,19 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
     };
     fixedColumn.setSortable(true);
     fixedColumn.setHorizontalAlignment(Column.ALIGN_RIGHT);
+
+    Column<AppPackageShared, String> deletedColumn = new Column<AppPackageShared, String>(new TextCell())
+    {
+      @Override
+      public String getValue(AppPackageShared data)
+      {
+
+        return Integer.toString(data.Totals.Deleted);
+      }
+
+    };
+    deletedColumn.setSortable(true);
+    deletedColumn.setHorizontalAlignment(Column.ALIGN_RIGHT);
 
     Column<AppPackageShared, String> reportsColumn = new Column<AppPackageShared, String>(new TextCell())
     {
@@ -758,6 +781,22 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
         return -1;
       }
     });
+    columnSortHandler.setComparator(deletedColumn, new Comparator<AppPackageShared>()
+    {
+      public int compare(AppPackageShared o1, AppPackageShared o2)
+      {
+        if (o1 == o2)
+        {
+          return 0;
+        }
+
+        if (o1 != null && o2 != null)
+        {
+          return new Integer(o1.Totals.Deleted).compareTo(o2.Totals.Deleted);
+        }
+        return -1;
+      }
+    });
 
     appTotalsTable.addColumnSortHandler(columnSortHandler);
 
@@ -766,6 +805,7 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
     appTotalsTable.addColumn(notFixedColumn, "Not Fixed");
     appTotalsTable.addColumn(lookedAtColumn, "Looked At");
     appTotalsTable.addColumn(fixedColumn, "Fixed");
+    appTotalsTable.addColumn(reportsColumn, "Deleted");
     appTotalsTable.addColumn(reportsColumn, "Reports");
     appTotalsTable.addColumn(editColumn, "");
     appTotalsTable.addColumn(openColumn, "");
@@ -775,6 +815,7 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
     appTotalsTable.setColumnWidth(notFixedColumn, numWidth);
     appTotalsTable.setColumnWidth(lookedAtColumn, numWidth);
     appTotalsTable.setColumnWidth(fixedColumn, numWidth);
+    appTotalsTable.setColumnWidth(deletedColumn, numWidth);
     appTotalsTable.setColumnWidth(reportsColumn, numWidth);
     appTotalsTable.setColumnWidth(editColumn, "60px");
     appTotalsTable.setColumnWidth(openColumn, "85px");
@@ -800,18 +841,19 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
     AppLoadingView.getInstance().start();
     overviewPanel.setVisible(true);
     view.setVisible(false);
-    
+
     basePanel.remove(view);
     basePanel.add(overviewPanel);
 
     updateData();
-    
+
     AppLoadingView.getInstance().stop();
-    
+
   }
 
   @UiHandler("buttonAddPackage")
-  void onButtonAddPackageClick(ClickEvent event) {
+  void onButtonAddPackageClick(ClickEvent event)
+  {
     PackageEdit.doAddDialog(loginInfo, remoteService, new PackageEdit.DialogCallback()
     {
 
@@ -822,14 +864,37 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
         {
           mAppPackageShared.add(appPackageShared);
           loadTotalsGraphData();
-          
+
         }
       }
     });
-    
+
   }
+
   @UiHandler("buttonUsers")
-  void onButtonUsersClick(ClickEvent event) {
-    PopupUsers.showPopup(loginInfo, (Widget)event.getSource());
+  void onButtonUsersClick(ClickEvent event)
+  {
+    PopupUsers.showPopup(loginInfo, (Widget) event.getSource());
   }
+  
+  
+  
+
+  class AppPackageListProvider extends ListDataProvider<AppPackageShared>
+  {
+    public void startLoading()
+    {
+      super.updateRowCount(0, false);
+    }
+
+    public void stopLoading(List<AppPackageShared> list)
+    {
+      if (list != null)
+      {
+        setList(list);
+      }
+      super.updateRowCount(getList().size(), true);
+
+    }
+  }  
 }

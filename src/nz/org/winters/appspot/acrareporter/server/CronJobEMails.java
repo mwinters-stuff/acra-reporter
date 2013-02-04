@@ -44,6 +44,7 @@ import nz.org.winters.appspot.acrareporter.store.RegisterDataStores;
 public class CronJobEMails extends HttpServlet
 {
 
+  private static final String header = "Package                                                  New   Reports     Fixed Looked At   Deleted Not Fixed\r\n-------------------------------------------------- --------- --------- --------- ---------  -------- ---------\r\n"; 
   /**
    * 
    */
@@ -103,29 +104,29 @@ public class CronJobEMails extends HttpServlet
           String bodyText;
           try
           {
-            sb.append("Overall for " + count.dateString() + ": \r\n" + "      Reports: " + count.Reports + "\r\n" + "        Fixed: " + count.Fixed + "\r\n" + "    Looked At: " + count.LookedAt + "\r\n" + "      Deleted: " + count.Deleted + "\r\n" + "    Not Fixed: " + (count.Reports - count.Fixed) + "\r\n\r\n");
+            sb.append("Overall for " + count.dateString() + ": \r\n" + "          New: " + count.NewReports() + "\r\n" + "      Reports: " + count.Reports + "\r\n" + "        Fixed: " + count.Fixed + "\r\n" + "    Looked At: " + count.LookedAt + "\r\n" + "      Deleted: " + count.Deleted + "\r\n" + "    Not Fixed: " + (count.NotFixedReports()) + "\r\n\r\n");
 
             if(!packagesYesterday.isEmpty())
             {
               String datestr = packagesYesterday.get(0).dateString();
-              sb.append(datestr + " Package Totals\r\n" + "Package                                              Reports     Fixed Looked At   Deleted Not Fixed\r\n" + "-------------------------------------------------- --------- --------- ---------  -------- ---------\r\n");
+              sb.append(datestr + " Package Totals\r\n" + header);
   
               for (DailyCounts dailyPackage : packagesYesterday)
               {
-                formatter.format("%-50s %9d %9d %9d %9d %9d\r\n", dailyPackage.PACKAGE_NAME, dailyPackage.Reports, dailyPackage.Fixed, dailyPackage.LookedAt, dailyPackage.Deleted, dailyPackage.Reports - dailyPackage.Fixed);
+                formatter.format("%-50s %9d %9d %9d %9d %9d %9d\r\n", dailyPackage.PACKAGE_NAME, dailyPackage.NewReports(), dailyPackage.Reports, dailyPackage.Fixed, dailyPackage.LookedAt, dailyPackage.Deleted, dailyPackage.NotFixedReports());
               }
               // resp.getWriter().println("PACKAGE: " + sb.toString() );
   
               sb.append("\r\n\r\n");
             }
             
-            sb.append("Package Totals\r\n" + "Package                                              Reports     Fixed Looked At   Deleted Not Fixed\r\n" + "-------------------------------------------------- --------- --------- --------- --------- ---------\r\n");
+            sb.append("Package Totals\r\n" + header);
 
             // get each package and list totals.
             List<AppPackage> apppackages = getPackages(count.Owner);
             for (AppPackage apppackage : apppackages)
             {
-              formatter.format("%-50s %9d %9d %9d %9d %9d\r\n", apppackage.PACKAGE_NAME, apppackage.Totals.Reports, apppackage.Totals.Fixed, apppackage.Totals.LookedAt, apppackage.Totals.Deleted, apppackage.Totals.Reports - apppackage.Totals.Fixed);
+              formatter.format("%-50s %9d %9d %9d %9d %9d %9d\r\n", apppackage.PACKAGE_NAME, apppackage.Totals.NewReports(), apppackage.Totals.Reports, apppackage.Totals.Fixed, apppackage.Totals.LookedAt, apppackage.Totals.Deleted, apppackage.Totals.NotFixedReports());
             }
             // resp.getWriter().println("PACKAGE: " + sb.toString() );
             bodyText = sb.toString();
