@@ -62,7 +62,7 @@ public class AppPackageView extends Composite implements CallbackReloadPackageLi
     mACRAReportView = new ACRAReportView(this, loginInfo, appPackageShared);
     mMainErrorsList = new MainErrorsList(this, loginInfo, appPackageShared);
 
-    dockLayoutPanel.addWest(mMainErrorsList, 280);
+    dockLayoutPanel.addWest(mMainErrorsList, 300);
     dockLayoutPanel.add(mACRAReportView);
     labelTitle.setText(constants.appPackageLabelTitle(appPackageShared.AppName,appPackageShared.PACKAGE_NAME));
 

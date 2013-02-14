@@ -72,31 +72,8 @@ public class BasicErrorInfo
     shared.fixed = fixed;
 
     shared.emailed = emailed;
-    shared.crashDate = null;
-
-    SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
-    SimpleDateFormat df2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-    try
-    {
-      if (USER_CRASH_DATE.indexOf(':') > 0)
-      {
-        String x = USER_CRASH_DATE.replace("T", " ").replace(".000", " ");
-
-        int p = x.lastIndexOf(':');
-        String y = x.substring(0, p) + x.substring(p + 1);
-
-        shared.crashDate = df.parse(y);
-
-        shared.formatCrashDate = df2.format(shared.crashDate);
-      } else
-      {
-        shared.formatCrashDate = USER_CRASH_DATE;
-      }
-    } catch (ParseException e)
-    {
-      shared.formatCrashDate = USER_CRASH_DATE;
-    }
+  
+ 
 
     return shared;
   }

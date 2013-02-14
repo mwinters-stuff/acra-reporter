@@ -15,6 +15,8 @@ package nz.org.winters.appspot.acrareporter.client.ui;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import java.util.Date;
+
 import nz.org.winters.appspot.acrareporter.client.RemoteDataService;
 import nz.org.winters.appspot.acrareporter.client.RemoteDataServiceAsync;
 import nz.org.winters.appspot.acrareporter.shared.ACRALogShared;
@@ -25,13 +27,13 @@ import nz.org.winters.appspot.acrareporter.shared.Utils;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DisclosurePanel;
@@ -42,12 +44,11 @@ import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class ACRAReportView extends Composite
 {
   @UiField
-  Label                          captionPanelCenter;
+  Label                                 captionPanelCenter;
 
   @UiField
   TextArea                              textStackTrace;
@@ -272,8 +273,8 @@ public class ACRAReportView extends Composite
     textProduct.setText(result.PRODUCT);
     textAndroidVersion.setText(result.ANDROID_VERSION);
     textMemory.setText(result.TOTAL_MEM_SIZE + "/" + result.AVAILABLE_MEM_SIZE);
-    textUserAppStartDate.setText(result.USER_APP_START_DATE);
-    textUserCrashDate.setText(result.USER_CRASH_DATE);
+    textUserAppStartDate.setText(UIUtils.reportDateToLocal(result.USER_APP_START_DATE));
+    textUserCrashDate.setText(UIUtils.reportDateToLocal(result.USER_CRASH_DATE));
     textDeviceID.setText(result.DEVICE_ID);
     textUserIP.setText(result.USER_IP);
     textUserEMail.setText(result.USER_EMAIL);
@@ -291,6 +292,8 @@ public class ACRAReportView extends Composite
     stopLoading();
 
   }
+
+
 
   private void recurseAddItem(TreeItem current, String[] items, int itemIndex)
   {

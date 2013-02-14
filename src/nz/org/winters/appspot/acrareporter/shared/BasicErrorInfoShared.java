@@ -51,15 +51,15 @@ public class BasicErrorInfoShared implements Serializable, IsSerializable
   public Boolean fixed;
   public Boolean emailed;
   
-  public String formatCrashDate;
+//  public String formatCrashDate;
   
-  public Date crashDate;
+//  public Date crashDate;
 
   @Override
   public String toString()
   {
     return "BasicErrorInfoShared [id=" + id + ", Owner=" + Owner + ", Timestamp=" + Timestamp + ", APP_VERSION_NAME=" + APP_VERSION_NAME + ", PACKAGE_NAME=" + PACKAGE_NAME + ", REPORT_ID=" + REPORT_ID + ", ANDROID_VERSION=" + ANDROID_VERSION + ", USER_CRASH_DATE=" + USER_CRASH_DATE + ", lookedAt="
-        + lookedAt + ", fixed=" + fixed + ", emailed=" + emailed + ", formatCrashDate=" + formatCrashDate + ", crashDate=" + crashDate + "]";
+        + lookedAt + ", fixed=" + fixed + ", emailed=" + emailed +"]";
   }
   
 }

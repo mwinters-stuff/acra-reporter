@@ -17,6 +17,7 @@ package nz.org.winters.appspot.acrareporter.client.ui;
  */
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -31,7 +32,6 @@ import nz.org.winters.appspot.acrareporter.shared.LoginInfo;
 
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -55,6 +55,7 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.MenuItem;
+import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.ListDataProvider;
@@ -64,7 +65,6 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.google.gwt.user.client.ui.PushButton;
 
 public class MainErrorsList extends Composite implements Handler
 {
@@ -152,6 +152,7 @@ public class MainErrorsList extends Composite implements Handler
     comboShow.setItemSelected(0, true);
     // dataGrid = new DataGrid<BasicErrorInfoShared>();
     // dataGrid.setWidth("100%");
+    
     dataGrid.setAutoHeaderRefreshDisabled(true);
     dataGrid.setEmptyTableWidget(new Label(constants.gridEmpty()));
 
@@ -443,7 +444,7 @@ public class MainErrorsList extends Composite implements Handler
       @Override
       public String getValue(BasicErrorInfoShared object)
       { // 2012-12-02T18:07:33.000-06:00
-        return object.formatCrashDate;
+        return UIUtils.reportDateToLocal(object.USER_CRASH_DATE);
       }
     };
     userCrashDateColumn.setSortable(true);
@@ -452,9 +453,12 @@ public class MainErrorsList extends Composite implements Handler
       @Override
       public int compare(BasicErrorInfoShared o1, BasicErrorInfoShared o2)
       {
-        if (o1.crashDate != null && o2.crashDate != null)
+        Date d1 = UIUtils.reportDateToDate(o1.USER_CRASH_DATE);
+        Date d2 = UIUtils.reportDateToDate(o2.USER_CRASH_DATE);
+       
+        if (d1 != null && d2 != null)
         {
-          return o1.crashDate.compareTo(o2.crashDate);
+          return d1.compareTo(d2);
         } else
         {
           return o1.USER_CRASH_DATE.compareTo(o2.USER_CRASH_DATE);
