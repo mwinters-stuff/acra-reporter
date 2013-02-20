@@ -378,7 +378,12 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
   @Override
   public void addAppPackageShared(LoginInfo loginInfo, AppPackageShared appPackageShared) throws IllegalArgumentException
   {
-    AppPackage app = new AppPackage();
+    AppPackage app = ObjectifyService.ofy().load().type(AppPackage.class).filter("PACKAGE_NAME",appPackageShared.PACKAGE_NAME).first().get();
+    if (app != null)
+    {
+      throw new IllegalArgumentException("Package already exists");
+    }
+    app = new AppPackage();
     app.fromShared(appPackageShared);
     app.Owner = getOwnerId(getAppUser(loginInfo));
     app.save();
