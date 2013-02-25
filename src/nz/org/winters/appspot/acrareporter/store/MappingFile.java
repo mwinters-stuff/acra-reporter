@@ -37,7 +37,7 @@ public class MappingFile
   @Index public Long Owner;
   @Index protected String apppackage;
   @Index protected String version;
-  @Unindex public Date uploadDate;
+  @Index public Date uploadDate;
   
   @Unindex
   @Serialize(zip=true) public String mapping;

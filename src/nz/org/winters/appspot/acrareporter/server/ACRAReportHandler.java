@@ -145,18 +145,32 @@ public class ACRAReportHandler extends HttpServlet
         basicInfo.USER_CRASH_DATE = acraLog.USER_CRASH_DATE;
         basicInfo.Timestamp = acraLog.Timestamp;
 
-        basicInfo.save();
 
         // find mapping.
         MappingFile mapping = ObjectifyService.ofy().load().type(MappingFile.class).filter("apppackage", acraLog.PACKAGE_NAME).filter("version", acraLog.APP_VERSION_NAME).first().get();
         if (mapping != null)
         {
+          MappingFile mostRecentMapping = ObjectifyService.ofy().load().type(MappingFile.class).filter("apppackage", acraLog.PACKAGE_NAME).order("uploadDate").limit(1).first().get();
+          if(mostRecentMapping != null)
+          {
+            if(mostRecentMapping.getId() != mapping.getId())
+            {
+              // old version, lets write out message
+              response.getWriter().println("OLD VERSION");
+              if(appPackage.DiscardOldVersionReports)
+              {
+                return;
+              }
+            }
+          }
+        	
           acraLog.MAPPED_STACK_TRACE = StringReTrace.doReTrace(mapping.mapping, acraLog.STACK_TRACE);
         }
 
+        basicInfo.save();
         acraLog.save();
 
-        // incremenet counters.
+        // Increment counters.
         appUser.Totals.incReports();
         appUser.save();
 

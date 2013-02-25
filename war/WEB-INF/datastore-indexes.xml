@@ -31,4 +31,9 @@
         <property name="PACKAGE_NAME" direction="asc"/>
         <property name="date" direction="asc"/>
     </datastore-index>    
+    
+    <datastore-index kind="MappingFile" ancestor="false">
+        <property name="apppackage" direction="asc"/>
+        <property name="uploadDate" direction="asc"/>
+    </datastore-index>
 </datastore-indexes>

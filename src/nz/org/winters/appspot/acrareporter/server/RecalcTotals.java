@@ -13,6 +13,7 @@ import nz.org.winters.appspot.acrareporter.store.AppPackage;
 import nz.org.winters.appspot.acrareporter.store.AppUser;
 import nz.org.winters.appspot.acrareporter.store.BasicErrorInfo;
 import nz.org.winters.appspot.acrareporter.store.DailyCounts;
+import nz.org.winters.appspot.acrareporter.store.MappingFile;
 import nz.org.winters.appspot.acrareporter.store.RegisterDataStores;
 
 import com.googlecode.objectify.ObjectifyService;
@@ -46,6 +47,9 @@ public class RecalcTotals extends HttpServlet {
 				resp.getWriter().println("ERROR: User invalid");
 				return;
 			}
+
+			
+			
 			
 			user.Totals.clear();
 			
@@ -59,7 +63,10 @@ public class RecalcTotals extends HttpServlet {
 			
 			for(AppPackage appPackage: appPackages)
 			{
-				resp.getWriter().println("Package: " + appPackage.PACKAGE_NAME + " = " + appPackage.Totals.toString());
+	      List<MappingFile> maps = ObjectifyService.ofy().load().type(MappingFile.class).filter("apppackage",appPackage.PACKAGE_NAME).list();
+	      ObjectifyService.ofy().save().entities(maps);
+
+	      resp.getWriter().println("Package: " + appPackage.PACKAGE_NAME + " = " + appPackage.Totals.toString());
 				appPackage.Totals.clear();
 
 				dc = ObjectifyService.ofy().load().type(DailyCounts.class).filter("PACKAGE_NAME", appPackage.PACKAGE_NAME).list();

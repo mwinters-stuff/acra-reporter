@@ -50,6 +50,7 @@ public class AppPackage
   public String EMailTemplate;
 
   public String AuthString;
+  public boolean DiscardOldVersionReports;
 
   @Expose
   public String AppName;
@@ -82,6 +83,7 @@ public class AppPackage
     shared.Owner = Owner;
     shared.AuthUsername = "";
     shared.AuthPassword = "";
+    shared.DiscardOldVersionReports = DiscardOldVersionReports;
     shared.Totals.copy(Totals);
 
     String[] auths = ServerOnlyUtils.decodeAuthString(AuthString);
@@ -99,6 +101,7 @@ public class AppPackage
     EMailAddress = shared.EMailAddress;
     EMailSubject = shared.EMailSubject;
     EMailTemplate = shared.EMailTemplate;
+    DiscardOldVersionReports = shared.DiscardOldVersionReports;
 
     AppName = shared.AppName;
     // / Owner = shared.Owner;

@@ -36,6 +36,7 @@ public class AppPackageShared implements Serializable
   public String AppName;
   public Long Owner;
   public Counts Totals;
+  public boolean DiscardOldVersionReports;
   
   public AppPackageShared()
   {
