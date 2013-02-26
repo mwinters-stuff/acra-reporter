@@ -15,19 +15,16 @@ package nz.org.winters.appspot.acrareporter.client.ui;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import java.util.Date;
-
 import nz.org.winters.appspot.acrareporter.client.RemoteDataService;
 import nz.org.winters.appspot.acrareporter.client.RemoteDataServiceAsync;
-import nz.org.winters.appspot.acrareporter.shared.ACRALogShared;
-import nz.org.winters.appspot.acrareporter.shared.AppPackageShared;
-import nz.org.winters.appspot.acrareporter.shared.BasicErrorInfoShared;
 import nz.org.winters.appspot.acrareporter.shared.LoginInfo;
 import nz.org.winters.appspot.acrareporter.shared.Utils;
+import nz.org.winters.appspot.acrareporter.store.ACRALog;
+import nz.org.winters.appspot.acrareporter.store.AppPackage;
+import nz.org.winters.appspot.acrareporter.store.BasicErrorInfo;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -138,7 +135,7 @@ public class ACRAReportView extends Composite
   NameValueList                         nvlCrashConfiguration;
   NameValueList                         nvlDisplay;
   NameValueList                         nvlEnvironment;
-  NameValueList                         nvlSharedPreferences;
+  NameValueList                         nvlPreferences;
   NameValueList                         nvlSettingsSystem;
   NameValueList                         nvlSettingsSecure;
 
@@ -150,7 +147,7 @@ public class ACRAReportView extends Composite
 
   private NameValueList                 nvlSettingsGlobal;
 
-  private AppPackageShared              mAppPackageShared;
+  private AppPackage              mAppPackage;
 
   private static ACRAReportViewUiBinder uiBinder      = GWT.create(ACRAReportViewUiBinder.class);
 
@@ -163,12 +160,12 @@ public class ACRAReportView extends Composite
     public void reloadPackageList();
   }
 
-  public ACRAReportView(CallbackReloadPackageList callback, LoginInfo loginInfo, AppPackageShared appPackageShared)
+  public ACRAReportView(CallbackReloadPackageList callback, LoginInfo loginInfo, AppPackage appPackage)
   {
     mLoginInfo = loginInfo;
 
     mCallbackReloadPackageList = callback;
-    mAppPackageShared = appPackageShared;
+    mAppPackage = appPackage;
 
     initWidget(uiBinder.createAndBindUi(this));
 
@@ -187,8 +184,8 @@ public class ACRAReportView extends Composite
     nvlEnvironment = new NameValueList();
     tabEnvironment.add(nvlEnvironment);
 
-    nvlSharedPreferences = new NameValueList();
-    tabSharedPreferences.add(nvlSharedPreferences);
+    nvlPreferences = new NameValueList();
+    tabSharedPreferences.add(nvlPreferences);
 
     nvlSettingsSystem = new NameValueList();
     tabSettingsSystem.add(nvlSettingsSystem);
@@ -200,11 +197,11 @@ public class ACRAReportView extends Composite
     tabSettingsGlobal.add(nvlSettingsGlobal);
   }
 
-  AsyncCallback<ACRALogShared> mGetACRALogCallback = new AsyncCallback<ACRALogShared>()
+  AsyncCallback<ACRALog> mGetACRALogCallback = new AsyncCallback<ACRALog>()
                                                    {
 
                                                      @Override
-                                                     public void onSuccess(ACRALogShared result)
+                                                     public void onSuccess(ACRALog result)
                                                      {
                                                        populateValues(result);
                                                      }
@@ -218,14 +215,14 @@ public class ACRAReportView extends Composite
                                                      }
                                                    };
 
-  private BasicErrorInfoShared mSelectedBasicErrorInfo;
+  private BasicErrorInfo mSelectedBasicErrorInfo;
 
-  private ACRALogShared        mACRALog;
+  private ACRALog        mACRALog;
 
-  private void populateValues(ACRALogShared result)
+  private void populateValues(ACRALog result)
   {
     mACRALog = result;
-    BasicErrorInfoShared beio = mSelectedBasicErrorInfo;
+    BasicErrorInfo beio = mSelectedBasicErrorInfo;
     if (result == null)
     {
       stopLoading();
@@ -258,7 +255,7 @@ public class ACRAReportView extends Composite
     loadDeviceFeaturesTree(tabDeviceFeatures, result.DEVICE_FEATURES);
 
     nvlEnvironment.setData(result.ENVIRONMENT);
-    nvlSharedPreferences.setData(result.SHARED_PREFERENCES);
+    nvlPreferences.setData(result.SHARED_PREFERENCES);
     nvlSettingsSystem.setData(result.SETTINGS_SYSTEM);
     nvlSettingsSecure.setData(result.SETTINGS_SECURE);
     nvlSettingsGlobal.setData(result.SETTINGS_GLOBAL);
@@ -357,7 +354,7 @@ public class ACRAReportView extends Composite
     tabLogDropbox.setText("");
     tabDeviceFeatures.clear();
     nvlEnvironment.clearData();
-    nvlSharedPreferences.clearData();
+    nvlPreferences.clearData();
     nvlSettingsSystem.clearData();
     nvlSettingsSecure.clearData();
     nvlSettingsGlobal.clearData();
@@ -398,7 +395,7 @@ public class ACRAReportView extends Composite
 
     startLoading();
 
-    final BasicErrorInfoShared beio = mSelectedBasicErrorInfo;
+    final BasicErrorInfo beio = mSelectedBasicErrorInfo;
 
     remoteService.deleteReport(beio.REPORT_ID, new AsyncCallback<Void>()
     {
@@ -424,7 +421,7 @@ public class ACRAReportView extends Composite
   void onCheckLookedAtClick(ClickEvent event)
   {
     startLoading();
-    final BasicErrorInfoShared beio = mSelectedBasicErrorInfo;
+    final BasicErrorInfo beio = mSelectedBasicErrorInfo;
 
     remoteService.markReportLookedAt(beio.REPORT_ID, checkLookedAt.getValue(), new AsyncCallback<Void>()
     {
@@ -453,7 +450,7 @@ public class ACRAReportView extends Composite
   {
     startLoading();
 
-    final BasicErrorInfoShared beio = mSelectedBasicErrorInfo;
+    final BasicErrorInfo beio = mSelectedBasicErrorInfo;
 
     remoteService.markReportFixed(beio.REPORT_ID, checkFixed.getValue(), new AsyncCallback<Void>()
     {
@@ -482,7 +479,7 @@ public class ACRAReportView extends Composite
   void onCheckEMailedClick(ClickEvent event)
   {
     startLoading();
-    final BasicErrorInfoShared beio = mSelectedBasicErrorInfo;
+    final BasicErrorInfo beio = mSelectedBasicErrorInfo;
 
     remoteService.markReportEMailed(beio.REPORT_ID, checkEMailed.getValue(), new AsyncCallback<Void>()
     {
@@ -508,7 +505,7 @@ public class ACRAReportView extends Composite
   void onButtonReportRetraceClick(ClickEvent event)
   {
     startLoading();
-    final BasicErrorInfoShared beio = mSelectedBasicErrorInfo;
+    final BasicErrorInfo beio = mSelectedBasicErrorInfo;
 
     remoteService.retraceReport(beio.REPORT_ID, new AsyncCallback<Void>()
     {
@@ -531,7 +528,7 @@ public class ACRAReportView extends Composite
   @UiHandler("buttonReportEmail")
   void onButtonReportEmailClick(ClickEvent event)
   {
-    EMailTemplateSend.doDialog(mLoginInfo, mAppPackageShared, mACRALog, remoteService, new EMailTemplateSend.DialogCallback()
+    EMailTemplateSend.doDialog(mLoginInfo, mAppPackage, mACRALog, remoteService, new EMailTemplateSend.DialogCallback()
     {
 
       @Override
@@ -547,7 +544,7 @@ public class ACRAReportView extends Composite
     });
   }
 
-  public void showACRAReport(BasicErrorInfoShared beio)
+  public void showACRAReport(BasicErrorInfo beio)
   {
     mSelectedBasicErrorInfo = beio;
     captionPanelCenter.setText(constants.acraReportViewLabelTitle(beio.REPORT_ID));

@@ -5,12 +5,10 @@ import java.util.List;
 
 import nz.org.winters.appspot.acrareporter.client.RemoteDataService;
 import nz.org.winters.appspot.acrareporter.client.RemoteDataServiceAsync;
-import nz.org.winters.appspot.acrareporter.client.ui.MainErrorsList.ListProvider;
 import nz.org.winters.appspot.acrareporter.client.ui.images.Resources;
-import nz.org.winters.appspot.acrareporter.shared.AppPackageShared;
-import nz.org.winters.appspot.acrareporter.shared.BasicErrorInfoShared;
-import nz.org.winters.appspot.acrareporter.shared.DailyCountsShared;
 import nz.org.winters.appspot.acrareporter.shared.LoginInfo;
+import nz.org.winters.appspot.acrareporter.store.AppPackage;
+import nz.org.winters.appspot.acrareporter.store.DailyCounts;
 
 import com.google.gwt.ajaxloader.client.Properties;
 import com.google.gwt.cell.client.ActionCell;
@@ -77,7 +75,7 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
   @UiField
   VerticalPanel                                     panelAppGrid;
   @UiField(provided = true)
-  DataGrid<AppPackageShared>                        appTotalsTable = new DataGrid<AppPackageShared>();
+  DataGrid<AppPackage>                        appTotalsTable = new DataGrid<AppPackage>();
   @UiField
   VerticalPanel                                     basePanel;
   @UiField
@@ -96,7 +94,7 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
 
   private DataTable                                 mTotalsMonthGraphData;
   private DataTable                                 mPackageMonthGraphData;
-  private List<AppPackageShared>                    mAppPackageShared;
+  private List<AppPackage>                    mAppPackage;
   private DateFormat                                mShortDateFormat;
  
 
@@ -105,10 +103,10 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
 
   private TextStyle                                 mBoldTitleFont;
 
-  public static final ProvidesKey<AppPackageShared> KEY_PROVIDER   = new ProvidesKey<AppPackageShared>()
+  public static final ProvidesKey<AppPackage> KEY_PROVIDER   = new ProvidesKey<AppPackage>()
                                                                    {
                                                                      @Override
-                                                                     public Object getKey(AppPackageShared item)
+                                                                     public Object getKey(AppPackage item)
                                                                      {
                                                                        return item == null ? null : item.id;
                                                                      }
@@ -337,13 +335,13 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
   {
     mPackageTableDataProvider.startLoading();
 
-    remoteService.getPackageGraphDataTotals(loginInfo, new AsyncCallback<List<AppPackageShared>>()
+    remoteService.getPackageGraphDataTotals(loginInfo, new AsyncCallback<List<AppPackage>>()
     {
 
       @Override
-      public void onSuccess(List<AppPackageShared> result)
+      public void onSuccess(List<AppPackage> result)
       {
-        mAppPackageShared = result;
+        mAppPackage = result;
         loadTotalsGraphData();
 
         mPackageTableDataProvider.stopLoading(result);
@@ -371,7 +369,7 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
 
   private void updateTotalsMonthGraph()
   {
-    remoteService.getLastMonthDailyCounts(loginInfo, new AsyncCallback<List<DailyCountsShared>>()
+    remoteService.getLastMonthDailyCounts(loginInfo, new AsyncCallback<List<DailyCounts>>()
     {
 
       @Override
@@ -382,7 +380,7 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
       }
 
       @Override
-      public void onSuccess(List<DailyCountsShared> result)
+      public void onSuccess(List<DailyCounts> result)
       {
 
         mTotalsMonthGraphData.removeRows(0, mTotalsMonthGraphData.getNumberOfRows());
@@ -390,7 +388,7 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
         mTotalsMonthGraphData.addRows(result.size());
         for (int i = 0; i < result.size(); i++)
         {
-          DailyCountsShared data = result.get(i);
+          DailyCounts data = result.get(i);
           mTotalsMonthGraphData.setValue(i, 0, data.date);
           mTotalsMonthGraphData.setValue(i, 1, data.Reports);
           mTotalsMonthGraphData.setValue(i, 2, data.Fixed);
@@ -408,11 +406,11 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
   private void updateAppMonthGraph(final String packageName)
   {
 
-    remoteService.getPackageLastMonthDailyCounts(loginInfo, packageName, new AsyncCallback<List<DailyCountsShared>>()
+    remoteService.getPackageLastMonthDailyCounts(loginInfo, packageName, new AsyncCallback<List<DailyCounts>>()
     {
 
       @Override
-      public void onSuccess(List<DailyCountsShared> result)
+      public void onSuccess(List<DailyCounts> result)
       {
 
         mPackageMonthGraphData.removeRows(0, mPackageMonthGraphData.getNumberOfRows());
@@ -421,7 +419,7 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
           mPackageMonthGraphData.addRows(result.size());
           for (int i = 0; i < result.size(); i++)
           {
-            DailyCountsShared data = result.get(i);
+            DailyCounts data = result.get(i);
             mPackageMonthGraphData.setValue(i, 0, data.date);
             mPackageMonthGraphData.setValue(i, 1, data.Reports);
             mPackageMonthGraphData.setValue(i, 2, data.LookedAt);
@@ -446,8 +444,8 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
 
   protected String getAppName(String packageName)
   {
-    List<AppPackageShared> shared = mPackageTableDataProvider.getList();
-    for (AppPackageShared appPackage : shared)
+    List<AppPackage> packages  = mPackageTableDataProvider.getList();
+    for (AppPackage appPackage : packages)
     {
       if (appPackage.PACKAGE_NAME.equals(packageName))
       {
@@ -469,11 +467,11 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
     mTotalGraphData.removeRows(0, mTotalGraphData.getNumberOfRows());
     // mPackageTableData.removeRows(0, mPackageTableData.getNumberOfRows());
 
-    mTotalGraphData.addRows(mAppPackageShared.size());
-    // mPackageTableData.addRows(mAppPackageShared.size());
-    for (int i = 0; i < mAppPackageShared.size(); i++)
+    mTotalGraphData.addRows(mAppPackage.size());
+    // mPackageTableData.addRows(mAppPackage.size());
+    for (int i = 0; i < mAppPackage.size(); i++)
     {
-      AppPackageShared data = mAppPackageShared.get(i);
+      AppPackage data = mAppPackage.get(i);
 
       mTotalGraphData.setValue(i, 0, data.AppName);
 
@@ -502,14 +500,14 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
 
   }
 
-  private void editPackage(AppPackageShared packagedata)
+  private void editPackage(AppPackage packagedata)
   {
     // Window.alert(object.AppName);
     PackageEdit.doEditDialog(packagedata, remoteService, new PackageEdit.DialogCallback()
     {
 
       @Override
-      public void result(boolean ok, AppPackageShared appPackageShared)
+      public void result(boolean ok, AppPackage appPackage)
       {
         if (ok)
         {
@@ -519,7 +517,7 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
     });
   }
 
-  private void viewPackage(AppPackageShared packagedata)
+  private void viewPackage(AppPackage packagedata)
   {
 
     // RootLayoutPanel.get().clear();
@@ -538,7 +536,7 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
   private void createPackageTableColumns()
   {
     
-    ListHandler<AppPackageShared> columnSortHandler = new ListHandler<AppPackageShared>(mPackageTableDataProvider.getList());
+    ListHandler<AppPackage> columnSortHandler = new ListHandler<AppPackage>(mPackageTableDataProvider.getList());
     mPackageTableDataProvider.addDataDisplay(appTotalsTable);
     panelAppGrid.setWidth((int) ((double) browserWidth * 0.5) + "px");
     // panelAppGrid.setHeight("300px");
@@ -549,20 +547,20 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
     appTotalsTable.setLoadingIndicator(new Image(Resources.INSTANCE.loaderImage()));
 
     // Create name column.
-    Column<AppPackageShared, String> nameColumn = new Column<AppPackageShared, String>(new TextCell())
+    Column<AppPackage, String> nameColumn = new Column<AppPackage, String>(new TextCell())
     {
       @Override
-      public String getValue(AppPackageShared data)
+      public String getValue(AppPackage data)
       {
         return data.AppName;
       }
     };
     nameColumn.setSortable(true);
 
-    Column<AppPackageShared, String> newColumn = new Column<AppPackageShared, String>(new TextCell())
+    Column<AppPackage, String> newColumn = new Column<AppPackage, String>(new TextCell())
     {
       @Override
-      public String getValue(AppPackageShared data)
+      public String getValue(AppPackage data)
       {
 
         return Integer.toString(data.Totals.NewReports());
@@ -573,10 +571,10 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
     newColumn.setHorizontalAlignment(Column.ALIGN_RIGHT);
     newColumn.setDefaultSortAscending(false);
 
-    Column<AppPackageShared, String> notFixedColumn = new Column<AppPackageShared, String>(new TextCell())
+    Column<AppPackage, String> notFixedColumn = new Column<AppPackage, String>(new TextCell())
     {
       @Override
-      public String getValue(AppPackageShared data)
+      public String getValue(AppPackage data)
       {
 
         return Integer.toString(data.Totals.NotFixedReports());
@@ -586,10 +584,10 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
     notFixedColumn.setSortable(true);
     notFixedColumn.setHorizontalAlignment(Column.ALIGN_RIGHT);
 
-    Column<AppPackageShared, String> lookedAtColumn = new Column<AppPackageShared, String>(new TextCell())
+    Column<AppPackage, String> lookedAtColumn = new Column<AppPackage, String>(new TextCell())
     {
       @Override
-      public String getValue(AppPackageShared data)
+      public String getValue(AppPackage data)
       {
 
         return Integer.toString(data.Totals.LookedAt);
@@ -599,10 +597,10 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
     lookedAtColumn.setSortable(true);
     lookedAtColumn.setHorizontalAlignment(Column.ALIGN_RIGHT);
 
-    Column<AppPackageShared, String> fixedColumn = new Column<AppPackageShared, String>(new TextCell())
+    Column<AppPackage, String> fixedColumn = new Column<AppPackage, String>(new TextCell())
     {
       @Override
-      public String getValue(AppPackageShared data)
+      public String getValue(AppPackage data)
       {
 
         return Integer.toString(data.Totals.Fixed);
@@ -612,10 +610,10 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
     fixedColumn.setSortable(true);
     fixedColumn.setHorizontalAlignment(Column.ALIGN_RIGHT);
 
-    Column<AppPackageShared, String> deletedColumn = new Column<AppPackageShared, String>(new TextCell())
+    Column<AppPackage, String> deletedColumn = new Column<AppPackage, String>(new TextCell())
     {
       @Override
-      public String getValue(AppPackageShared data)
+      public String getValue(AppPackage data)
       {
 
         return Integer.toString(data.Totals.Deleted);
@@ -625,10 +623,10 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
     deletedColumn.setSortable(true);
     deletedColumn.setHorizontalAlignment(Column.ALIGN_RIGHT);
 
-    Column<AppPackageShared, String> reportsColumn = new Column<AppPackageShared, String>(new TextCell())
+    Column<AppPackage, String> reportsColumn = new Column<AppPackage, String>(new TextCell())
     {
       @Override
-      public String getValue(AppPackageShared data)
+      public String getValue(AppPackage data)
       {
 
         return Integer.toString(data.Totals.Reports);
@@ -639,22 +637,22 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
     reportsColumn.setSortable(true);
     reportsColumn.setHorizontalAlignment(Column.ALIGN_RIGHT);
 
-    ActionCell<AppPackageShared> actionEdit = new ActionCell<AppPackageShared>("Edit", new ActionCell.Delegate<AppPackageShared>()
+    ActionCell<AppPackage> actionEdit = new ActionCell<AppPackage>("Edit", new ActionCell.Delegate<AppPackage>()
     {
 
       @Override
-      public void execute(AppPackageShared object)
+      public void execute(AppPackage object)
       {
         editPackage(object);
       }
 
     });
 
-    Column<AppPackageShared, AppPackageShared> editColumn = new Column<AppPackageShared, AppPackageShared>(actionEdit)
+    Column<AppPackage, AppPackage> editColumn = new Column<AppPackage, AppPackage>(actionEdit)
     {
 
       @Override
-      public AppPackageShared getValue(AppPackageShared object)
+      public AppPackage getValue(AppPackage object)
       {
         return object;
       }
@@ -662,22 +660,22 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
     };
     editColumn.setHorizontalAlignment(Column.ALIGN_CENTER);
 
-    ActionCell<AppPackageShared> actionOpen = new ActionCell<AppPackageShared>("Open", new ActionCell.Delegate<AppPackageShared>()
+    ActionCell<AppPackage> actionOpen = new ActionCell<AppPackage>("Open", new ActionCell.Delegate<AppPackage>()
     {
 
       @Override
-      public void execute(AppPackageShared object)
+      public void execute(AppPackage object)
       {
         viewPackage(object);
       }
 
     });
 
-    Column<AppPackageShared, AppPackageShared> openColumn = new Column<AppPackageShared, AppPackageShared>(actionOpen)
+    Column<AppPackage, AppPackage> openColumn = new Column<AppPackage, AppPackage>(actionOpen)
     {
 
       @Override
-      public AppPackageShared getValue(AppPackageShared object)
+      public AppPackage getValue(AppPackage object)
       {
         return object;
       }
@@ -685,9 +683,9 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
     };
     openColumn.setHorizontalAlignment(Column.ALIGN_CENTER);
 
-    columnSortHandler.setComparator(nameColumn, new Comparator<AppPackageShared>()
+    columnSortHandler.setComparator(nameColumn, new Comparator<AppPackage>()
     {
-      public int compare(AppPackageShared o1, AppPackageShared o2)
+      public int compare(AppPackage o1, AppPackage o2)
       {
         if (o1 == o2)
         {
@@ -701,9 +699,9 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
         return -1;
       }
     });
-    columnSortHandler.setComparator(newColumn, new Comparator<AppPackageShared>()
+    columnSortHandler.setComparator(newColumn, new Comparator<AppPackage>()
     {
-      public int compare(AppPackageShared o1, AppPackageShared o2)
+      public int compare(AppPackage o1, AppPackage o2)
       {
         if (o1 == o2)
         {
@@ -717,9 +715,9 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
         return -1;
       }
     });
-    columnSortHandler.setComparator(notFixedColumn, new Comparator<AppPackageShared>()
+    columnSortHandler.setComparator(notFixedColumn, new Comparator<AppPackage>()
     {
-      public int compare(AppPackageShared o1, AppPackageShared o2)
+      public int compare(AppPackage o1, AppPackage o2)
       {
         if (o1 == o2)
         {
@@ -733,9 +731,9 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
         return -1;
       }
     });
-    columnSortHandler.setComparator(lookedAtColumn, new Comparator<AppPackageShared>()
+    columnSortHandler.setComparator(lookedAtColumn, new Comparator<AppPackage>()
     {
-      public int compare(AppPackageShared o1, AppPackageShared o2)
+      public int compare(AppPackage o1, AppPackage o2)
       {
         if (o1 == o2)
         {
@@ -749,9 +747,9 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
         return -1;
       }
     });
-    columnSortHandler.setComparator(fixedColumn, new Comparator<AppPackageShared>()
+    columnSortHandler.setComparator(fixedColumn, new Comparator<AppPackage>()
     {
-      public int compare(AppPackageShared o1, AppPackageShared o2)
+      public int compare(AppPackage o1, AppPackage o2)
       {
         if (o1 == o2)
         {
@@ -765,9 +763,9 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
         return -1;
       }
     });
-    columnSortHandler.setComparator(reportsColumn, new Comparator<AppPackageShared>()
+    columnSortHandler.setComparator(reportsColumn, new Comparator<AppPackage>()
     {
-      public int compare(AppPackageShared o1, AppPackageShared o2)
+      public int compare(AppPackage o1, AppPackage o2)
       {
         if (o1 == o2)
         {
@@ -781,9 +779,9 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
         return -1;
       }
     });
-    columnSortHandler.setComparator(deletedColumn, new Comparator<AppPackageShared>()
+    columnSortHandler.setComparator(deletedColumn, new Comparator<AppPackage>()
     {
-      public int compare(AppPackageShared o1, AppPackageShared o2)
+      public int compare(AppPackage o1, AppPackage o2)
       {
         if (o1 == o2)
         {
@@ -821,15 +819,15 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
     appTotalsTable.setColumnWidth(openColumn, "85px");
 
     // appTotalsTable.addColumn(, "Actions");
-    final SingleSelectionModel<AppPackageShared> singleSelectionModel = new SingleSelectionModel<AppPackageShared>(KEY_PROVIDER);
-    appTotalsTable.setSelectionModel(singleSelectionModel, DefaultSelectionEventManager.<AppPackageShared> createDefaultManager());
+    final SingleSelectionModel<AppPackage> singleSelectionModel = new SingleSelectionModel<AppPackage>(KEY_PROVIDER);
+    appTotalsTable.setSelectionModel(singleSelectionModel, DefaultSelectionEventManager.<AppPackage> createDefaultManager());
     singleSelectionModel.addSelectionChangeHandler(new Handler()
     {
 
       @Override
       public void onSelectionChange(SelectionChangeEvent event)
       {
-        AppPackageShared appPackage = singleSelectionModel.getSelectedObject();
+        AppPackage appPackage = singleSelectionModel.getSelectedObject();
         updateAppMonthGraph(appPackage.PACKAGE_NAME);
       }
     });
@@ -858,11 +856,11 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
     {
 
       @Override
-      public void result(boolean ok, AppPackageShared appPackageShared)
+      public void result(boolean ok, AppPackage appPackage)
       {
         if (ok)
         {
-          mAppPackageShared.add(appPackageShared);
+          mAppPackage.add(appPackage);
           loadTotalsGraphData();
 
         }
@@ -880,14 +878,14 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
   
   
 
-  class AppPackageListProvider extends ListDataProvider<AppPackageShared>
+  class AppPackageListProvider extends ListDataProvider<AppPackage>
   {
     public void startLoading()
     {
       super.updateRowCount(0, false);
     }
 
-    public void stopLoading(List<AppPackageShared> list)
+    public void stopLoading(List<AppPackage> list)
     {
       if (list != null)
       {

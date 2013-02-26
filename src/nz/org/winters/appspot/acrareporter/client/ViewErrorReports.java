@@ -58,7 +58,7 @@ public class ViewErrorReports implements EntryPoint
   //
   // }
 
-  private final RemoteDataServiceAsync remoteService = GWT.create(RemoteDataService.class);
+ // private final RemoteDataServiceAsync remoteService = GWT.create(RemoteDataService.class);
 
   private LoginInfo                    loginInfo     = null;
 
@@ -158,10 +158,10 @@ public class ViewErrorReports implements EntryPoint
     });
   }
 
-  private void doLogout()
-  {
-    Window.Location.replace(loginInfo.getLogoutUrl());
-  }
+//  private void doLogout()
+//  {
+//    Window.Location.replace(loginInfo.getLogoutUrl());
+//  }
 
   private void loadFrontPage()
   {

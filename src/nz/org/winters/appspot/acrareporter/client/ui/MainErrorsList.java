@@ -25,10 +25,10 @@ import java.util.Set;
 import nz.org.winters.appspot.acrareporter.client.RemoteDataService;
 import nz.org.winters.appspot.acrareporter.client.RemoteDataServiceAsync;
 import nz.org.winters.appspot.acrareporter.client.ui.images.Resources;
-import nz.org.winters.appspot.acrareporter.shared.AppPackageShared;
-import nz.org.winters.appspot.acrareporter.shared.BasicErrorInfoShared;
 import nz.org.winters.appspot.acrareporter.shared.ErrorListFilter;
 import nz.org.winters.appspot.acrareporter.shared.LoginInfo;
+import nz.org.winters.appspot.acrareporter.store.AppPackage;
+import nz.org.winters.appspot.acrareporter.store.BasicErrorInfo;
 
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
@@ -70,15 +70,15 @@ public class MainErrorsList extends Composite implements Handler
 {
   public interface CallbackShowReport
   {
-    public void showReport(BasicErrorInfoShared basicErrorInfo);
+    public void showReport(BasicErrorInfo basicErrorInfo);
   }
 
   private UIConstants                                   constants     = (UIConstants) GWT.create(UIConstants.class);
 
-  public static final ProvidesKey<BasicErrorInfoShared> KEY_PROVIDER  = new ProvidesKey<BasicErrorInfoShared>()
+  public static final ProvidesKey<BasicErrorInfo> KEY_PROVIDER  = new ProvidesKey<BasicErrorInfo>()
                                                                       {
                                                                         @Override
-                                                                        public Object getKey(BasicErrorInfoShared item)
+                                                                        public Object getKey(BasicErrorInfo item)
                                                                         {
                                                                           return item == null ? null : item.id;
                                                                         }
@@ -87,7 +87,7 @@ public class MainErrorsList extends Composite implements Handler
   SimplePager                                           simplePager;
 
   @UiField
-  DataGrid<BasicErrorInfoShared>                        dataGrid;
+  DataGrid<BasicErrorInfo>                        dataGrid;
 
   @UiField
   HorizontalPanel                                       checkMultiSelect;
@@ -111,9 +111,9 @@ public class MainErrorsList extends Composite implements Handler
 
   private final RemoteDataServiceAsync                  remoteService = GWT.create(RemoteDataService.class);
 
-  private ListHandler<BasicErrorInfoShared>             sortHandler;
-  private SingleSelectionModel<BasicErrorInfoShared>    singleSelectionModel;
-  private MultiSelectionModel<BasicErrorInfoShared>     multipleSelectionModel;
+  private ListHandler<BasicErrorInfo>             sortHandler;
+  private SingleSelectionModel<BasicErrorInfo>    singleSelectionModel;
+  private MultiSelectionModel<BasicErrorInfo>     multipleSelectionModel;
 
   private static MainErrorsListUiBinder                 uiBinder      = GWT.create(MainErrorsListUiBinder.class);
   private ListProvider                                  dataProvider  = new ListProvider();
@@ -124,16 +124,16 @@ public class MainErrorsList extends Composite implements Handler
 
   private LoginInfo                                     mLoginInfo;
 
-  private AppPackageShared                              mAppPackageShared;
+  private AppPackage                              mAppPackage;
 
   interface MainErrorsListUiBinder extends UiBinder<Widget, MainErrorsList>
   {
   }
 
-  public MainErrorsList(CallbackShowReport callback, LoginInfo loginInfo, AppPackageShared appPackageShared)
+  public MainErrorsList(CallbackShowReport callback, LoginInfo loginInfo, AppPackage appPackage)
   {
     mLoginInfo = loginInfo;
-    mAppPackageShared = appPackageShared;
+    mAppPackage = appPackage;
     mCallbackShowReport = callback;
     init();
   }
@@ -150,26 +150,26 @@ public class MainErrorsList extends Composite implements Handler
     comboShow.addItem(constants.errorListShowLookedAt());
     comboShow.addItem(constants.errorListShowFixed());
     comboShow.setItemSelected(0, true);
-    // dataGrid = new DataGrid<BasicErrorInfoShared>();
+    // dataGrid = new DataGrid<BasicErrorInfo>();
     // dataGrid.setWidth("100%");
     
     dataGrid.setAutoHeaderRefreshDisabled(true);
     dataGrid.setEmptyTableWidget(new Label(constants.gridEmpty()));
 
-    sortHandler = new ListHandler<BasicErrorInfoShared>(dataProvider.getList());
+    sortHandler = new ListHandler<BasicErrorInfo>(dataProvider.getList());
     dataGrid.addColumnSortHandler(sortHandler);
     dataGrid.setRowStyles(mGridRowStyles);
 
     simplePager.setDisplay(dataGrid);
 
-    singleSelectionModel = new SingleSelectionModel<BasicErrorInfoShared>(KEY_PROVIDER);
-    multipleSelectionModel = new MultiSelectionModel<BasicErrorInfoShared>(KEY_PROVIDER);
+    singleSelectionModel = new SingleSelectionModel<BasicErrorInfo>(KEY_PROVIDER);
+    multipleSelectionModel = new MultiSelectionModel<BasicErrorInfo>(KEY_PROVIDER);
 
-    dataGrid.setSelectionModel(singleSelectionModel, DefaultSelectionEventManager.<BasicErrorInfoShared> createDefaultManager());
+    dataGrid.setSelectionModel(singleSelectionModel, DefaultSelectionEventManager.<BasicErrorInfo> createDefaultManager());
 
     initTableColumns(singleSelectionModel, sortHandler);
 
-    dataProvider.setList(new ArrayList<BasicErrorInfoShared>());
+    dataProvider.setList(new ArrayList<BasicErrorInfo>());
     sortHandler.setList(dataProvider.getList());
     dataProvider.addDataDisplay(dataGrid);
 
@@ -205,8 +205,8 @@ public class MainErrorsList extends Composite implements Handler
       public void execute()
       {
         startLoading();
-        final Set<BasicErrorInfoShared> selected = multipleSelectionModel.getSelectedSet();
-        Iterator<BasicErrorInfoShared> iter = selected.iterator();
+        final Set<BasicErrorInfo> selected = multipleSelectionModel.getSelectedSet();
+        Iterator<BasicErrorInfo> iter = selected.iterator();
         ArrayList<String> reportIds = new ArrayList<String>();
         while (iter.hasNext())
         {
@@ -218,7 +218,7 @@ public class MainErrorsList extends Composite implements Handler
           @Override
           public void onSuccess(Void result)
           {
-            Iterator<BasicErrorInfoShared> iter = selected.iterator();
+            Iterator<BasicErrorInfo> iter = selected.iterator();
             while (iter.hasNext())
             {
               iter.next().emailed = true;
@@ -243,8 +243,8 @@ public class MainErrorsList extends Composite implements Handler
       public void execute()
       {
         startLoading();
-        final Set<BasicErrorInfoShared> selected = multipleSelectionModel.getSelectedSet();
-        Iterator<BasicErrorInfoShared> iter = selected.iterator();
+        final Set<BasicErrorInfo> selected = multipleSelectionModel.getSelectedSet();
+        Iterator<BasicErrorInfo> iter = selected.iterator();
         ArrayList<String> reportIds = new ArrayList<String>();
         while (iter.hasNext())
         {
@@ -256,7 +256,7 @@ public class MainErrorsList extends Composite implements Handler
           @Override
           public void onSuccess(Void result)
           {
-            Iterator<BasicErrorInfoShared> iter = selected.iterator();
+            Iterator<BasicErrorInfo> iter = selected.iterator();
             while (iter.hasNext())
             {
               iter.next().fixed = true;
@@ -281,8 +281,8 @@ public class MainErrorsList extends Composite implements Handler
       public void execute()
       {
         startLoading();
-        final Set<BasicErrorInfoShared> selected = multipleSelectionModel.getSelectedSet();
-        Iterator<BasicErrorInfoShared> iter = selected.iterator();
+        final Set<BasicErrorInfo> selected = multipleSelectionModel.getSelectedSet();
+        Iterator<BasicErrorInfo> iter = selected.iterator();
         ArrayList<String> reportIds = new ArrayList<String>();
         while (iter.hasNext())
         {
@@ -294,7 +294,7 @@ public class MainErrorsList extends Composite implements Handler
           @Override
           public void onSuccess(Void result)
           {
-            Iterator<BasicErrorInfoShared> iter = selected.iterator();
+            Iterator<BasicErrorInfo> iter = selected.iterator();
             while (iter.hasNext())
             {
               iter.next().lookedAt = true;
@@ -319,15 +319,15 @@ public class MainErrorsList extends Composite implements Handler
       @Override
       public void execute()
       {
-        final Set<BasicErrorInfoShared> selected = multipleSelectionModel.getSelectedSet();
-        Iterator<BasicErrorInfoShared> iter = selected.iterator();
+        final Set<BasicErrorInfo> selected = multipleSelectionModel.getSelectedSet();
+        Iterator<BasicErrorInfo> iter = selected.iterator();
         ArrayList<String> reportIds = new ArrayList<String>();
         while (iter.hasNext())
         {
           reportIds.add(iter.next().REPORT_ID);
         }
 
-        EMailTemplateSend.doDialog(mLoginInfo, mAppPackageShared, reportIds, remoteService, new EMailTemplateSend.DialogCallback()
+        EMailTemplateSend.doDialog(mLoginInfo, mAppPackage, reportIds, remoteService, new EMailTemplateSend.DialogCallback()
         {
 
           @Override
@@ -357,8 +357,8 @@ public class MainErrorsList extends Composite implements Handler
         if (!Window.confirm(constants.errorListConfirmDelete()))
           return;
 
-        final Set<BasicErrorInfoShared> selected = multipleSelectionModel.getSelectedSet();
-        Iterator<BasicErrorInfoShared> iter = selected.iterator();
+        final Set<BasicErrorInfo> selected = multipleSelectionModel.getSelectedSet();
+        Iterator<BasicErrorInfo> iter = selected.iterator();
         ArrayList<String> ids = new ArrayList<String>();
         startLoading();
         while (iter.hasNext())
@@ -393,7 +393,7 @@ public class MainErrorsList extends Composite implements Handler
   {
     startLoading();
 
-    BasicErrorInfoShared beio = singleSelectionModel.getSelectedObject();
+    BasicErrorInfo beio = singleSelectionModel.getSelectedObject();
     mCallbackShowReport.showReport(beio);
 
   }
@@ -412,11 +412,11 @@ public class MainErrorsList extends Composite implements Handler
     remoteService.getBasicErrorInfo(packageName, elf, mGetBasicErrorCallback);
   }
 
-  AsyncCallback<List<BasicErrorInfoShared>> mGetBasicErrorCallback = new AsyncCallback<List<BasicErrorInfoShared>>()
+  AsyncCallback<List<BasicErrorInfo>> mGetBasicErrorCallback = new AsyncCallback<List<BasicErrorInfo>>()
                                                                    {
 
                                                                      @Override
-                                                                     public void onSuccess(List<BasicErrorInfoShared> result)
+                                                                     public void onSuccess(List<BasicErrorInfo> result)
                                                                      {
                                                                        dataProvider.stopLoading(result);
                                                                        stopLoading();
@@ -436,22 +436,22 @@ public class MainErrorsList extends Composite implements Handler
                                                                      }
                                                                    };
 
-  private void initTableColumns(final SelectionModel<BasicErrorInfoShared> selectionModel, ListHandler<BasicErrorInfoShared> sortHandler)
+  private void initTableColumns(final SelectionModel<BasicErrorInfo> selectionModel, ListHandler<BasicErrorInfo> sortHandler)
   {
 
-    Column<BasicErrorInfoShared, String> userCrashDateColumn = new Column<BasicErrorInfoShared, String>(new TextCell())
+    Column<BasicErrorInfo, String> userCrashDateColumn = new Column<BasicErrorInfo, String>(new TextCell())
     {
       @Override
-      public String getValue(BasicErrorInfoShared object)
+      public String getValue(BasicErrorInfo object)
       { // 2012-12-02T18:07:33.000-06:00
         return UIUtils.reportDateToLocal(object.USER_CRASH_DATE);
       }
     };
     userCrashDateColumn.setSortable(true);
-    sortHandler.setComparator(userCrashDateColumn, new Comparator<BasicErrorInfoShared>()
+    sortHandler.setComparator(userCrashDateColumn, new Comparator<BasicErrorInfo>()
     {
       @Override
-      public int compare(BasicErrorInfoShared o1, BasicErrorInfoShared o2)
+      public int compare(BasicErrorInfo o1, BasicErrorInfo o2)
       {
         Date d1 = UIUtils.reportDateToDate(o1.USER_CRASH_DATE);
         Date d2 = UIUtils.reportDateToDate(o2.USER_CRASH_DATE);
@@ -469,19 +469,19 @@ public class MainErrorsList extends Composite implements Handler
     dataGrid.setColumnWidth(userCrashDateColumn, 150, Unit.PX);
 
     // AppVersionName
-    Column<BasicErrorInfoShared, String> appVersionNameColumn = new Column<BasicErrorInfoShared, String>(new TextCell())
+    Column<BasicErrorInfo, String> appVersionNameColumn = new Column<BasicErrorInfo, String>(new TextCell())
     {
       @Override
-      public String getValue(BasicErrorInfoShared object)
+      public String getValue(BasicErrorInfo object)
       {
         return object.APP_VERSION_NAME;
       }
     };
     appVersionNameColumn.setSortable(true);
-    sortHandler.setComparator(appVersionNameColumn, new Comparator<BasicErrorInfoShared>()
+    sortHandler.setComparator(appVersionNameColumn, new Comparator<BasicErrorInfo>()
     {
       @Override
-      public int compare(BasicErrorInfoShared o1, BasicErrorInfoShared o2)
+      public int compare(BasicErrorInfo o1, BasicErrorInfo o2)
       {
         return o1.APP_VERSION_NAME.compareTo(o2.APP_VERSION_NAME);
       }
@@ -496,21 +496,21 @@ public class MainErrorsList extends Composite implements Handler
   {
     if (checkErrorsMultiSelect.getValue())
     {
-      dataGrid.setSelectionModel(multipleSelectionModel, DefaultSelectionEventManager.<BasicErrorInfoShared> createDefaultManager());
+      dataGrid.setSelectionModel(multipleSelectionModel, DefaultSelectionEventManager.<BasicErrorInfo> createDefaultManager());
       popupActions.setVisible(true);
 
     } else
     {
       popupActions.setVisible(false);
-      dataGrid.setSelectionModel(singleSelectionModel, DefaultSelectionEventManager.<BasicErrorInfoShared> createDefaultManager());
+      dataGrid.setSelectionModel(singleSelectionModel, DefaultSelectionEventManager.<BasicErrorInfo> createDefaultManager());
     }
   }
 
-  RowStyles<BasicErrorInfoShared> mGridRowStyles = new RowStyles<BasicErrorInfoShared>()
+  RowStyles<BasicErrorInfo> mGridRowStyles = new RowStyles<BasicErrorInfo>()
                                                  {
 
                                                    @Override
-                                                   public String getStyleNames(BasicErrorInfoShared row, int rowIndex)
+                                                   public String getStyleNames(BasicErrorInfo row, int rowIndex)
                                                    {
                                                      if (!row.fixed && !row.lookedAt)
                                                      {
@@ -524,14 +524,14 @@ public class MainErrorsList extends Composite implements Handler
                                                    }
                                                  };
 
-  class ListProvider extends ListDataProvider<BasicErrorInfoShared>
+  class ListProvider extends ListDataProvider<BasicErrorInfo>
   {
     public void startLoading()
     {
       super.updateRowCount(0, false);
     }
 
-    public void stopLoading(List<BasicErrorInfoShared> list)
+    public void stopLoading(List<BasicErrorInfo> list)
     {
       if (list != null)
       {
@@ -546,6 +546,7 @@ public class MainErrorsList extends Composite implements Handler
   void onComboShowChange(ChangeEvent event) {
     refreshList();
   }
+  
   @UiHandler("buttonRefresh")
   void onButtonRefreshClick(ClickEvent event) {
     refreshList();

@@ -16,8 +16,8 @@ package nz.org.winters.appspot.acrareporter.client.ui;
  * limitations under the License.
  */
 import nz.org.winters.appspot.acrareporter.client.RemoteDataServiceAsync;
-import nz.org.winters.appspot.acrareporter.shared.AppUserShared;
 import nz.org.winters.appspot.acrareporter.shared.Utils;
+import nz.org.winters.appspot.acrareporter.store.AppUser;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -37,7 +37,7 @@ public class UserEdit extends Composite
 {
   public interface DialogCallback
   {
-    public void result(boolean ok, AppUserShared appUserShared);
+    public void result(boolean ok, AppUser appUser);
   }
 
   private static UserEditUiBinder uiBinder = GWT.create(UserEditUiBinder.class);
@@ -66,38 +66,38 @@ public class UserEdit extends Composite
   Button                          buttonCancel;
   private DialogCallback          callback;
 
-  private AppUserShared           appUserShared;
+  private AppUser           appUser;
 
   interface UserEditUiBinder extends UiBinder<Widget, UserEdit>
   {
   }
 
-  public UserEdit(AppUserShared appUserShared, DialogCallback callback)
+  public UserEdit(AppUser appUser, DialogCallback callback)
   {
     this.callback = callback;
-    this.appUserShared = appUserShared;
+    this.appUser = appUser;
     initWidget(uiBinder.createAndBindUi(this));
 
-    textEMailAddress.setText(appUserShared.EMailAddress);
+    textEMailAddress.setText(appUser.EMailAddress);
     textEMailAddress.setReadOnly(true);
 
-    textFirstName.setText(appUserShared.FirstName);
-    textLastName.setText(appUserShared.LastName);
-    textCity.setText(appUserShared.City);
-    textCountry.setText(appUserShared.Country);
+    textFirstName.setText(appUser.FirstName);
+    textLastName.setText(appUser.LastName);
+    textCity.setText(appUser.City);
+    textCountry.setText(appUser.Country);
 
-    textAuthUsername.setText(appUserShared.AuthUsername);
-    textAuthPassword.setText(appUserShared.AuthPassword);
-    textAndroidAPIKey.setText(appUserShared.AndroidKey);
+    textAuthUsername.setText(appUser.AuthUsername);
+    textAuthPassword.setText(appUser.AuthPassword);
+    textAndroidAPIKey.setText(appUser.AndroidKey);
 
-    textTrackingID.setText(appUserShared.AnalyticsTrackingId);
+    textTrackingID.setText(appUser.AnalyticsTrackingId);
 
   }
 
   public UserEdit(DialogCallback callback)
   {
     this.callback = callback;
-    this.appUserShared = new AppUserShared();
+    this.appUser = new AppUser();
     initWidget(uiBinder.createAndBindUi(this));
 
     textEMailAddress.setText("");
@@ -169,42 +169,42 @@ public class UserEdit extends Composite
       return;
     }
 
-    appUserShared.EMailAddress = textEMailAddress.getText();
-    appUserShared.FirstName = textFirstName.getText();
-    appUserShared.LastName = textLastName.getText();
-    appUserShared.City = textCity.getText();
-    appUserShared.Country = textCountry.getText();
+    appUser.EMailAddress = textEMailAddress.getText();
+    appUser.FirstName = textFirstName.getText();
+    appUser.LastName = textLastName.getText();
+    appUser.City = textCity.getText();
+    appUser.Country = textCountry.getText();
 
-    appUserShared.AuthUsername = textAuthUsername.getText();
-    appUserShared.AuthPassword = textAuthPassword.getText();
-    appUserShared.AndroidKey = textAndroidAPIKey.getText();
+    appUser.AuthUsername = textAuthUsername.getText();
+    appUser.AuthPassword = textAuthPassword.getText();
+    appUser.AndroidKey = textAndroidAPIKey.getText();
 
-    appUserShared.AnalyticsTrackingId = textTrackingID.getText();
+    appUser.AnalyticsTrackingId = textTrackingID.getText();
 
-    callback.result(true, appUserShared);
+    callback.result(true, appUser);
   }
 
   @UiHandler("buttonCancel")
   void onButtonCancelClick(ClickEvent event)
   {
-    callback.result(false, appUserShared);
+    callback.result(false, appUser);
   }
 
-  public static void doEditDialog(AppUserShared appUserShared, final RemoteDataServiceAsync remoteService)
+  public static void doEditDialog(AppUser appUser, final RemoteDataServiceAsync remoteService)
   {
     final DialogBox dialogBox = new DialogBox();
     dialogBox.setText("Edit User Information");
 
     // Create a table to layout the content
-    UserEdit pet = new UserEdit(appUserShared, new UserEdit.DialogCallback()
+    UserEdit pet = new UserEdit(appUser, new UserEdit.DialogCallback()
     {
 
       @Override
-      public void result(boolean ok, AppUserShared appUserShared)
+      public void result(boolean ok, AppUser appUser)
       {
         if (ok)
         {
-          remoteService.writeAppUserShared(appUserShared, new AsyncCallback<Void>()
+          remoteService.writeAppUser(appUser, new AsyncCallback<Void>()
           {
 
             @Override
@@ -236,7 +236,7 @@ public class UserEdit extends Composite
 
   }
 
-  public static void doAddDialog(final AppUserShared adminAppUserShared, final RemoteDataServiceAsync remoteService)
+  public static void doAddDialog(final AppUser adminAppUser, final RemoteDataServiceAsync remoteService)
   {
     final DialogBox dialogBox = new DialogBox();
     dialogBox.setText("Add New User");
@@ -246,13 +246,13 @@ public class UserEdit extends Composite
     {
 
       @Override
-      public void result(boolean ok, AppUserShared appUserShared)
+      public void result(boolean ok, AppUser appUser)
       {
         if (ok)
         {
-          appUserShared.adminAppUserId = adminAppUserShared.id;
+          appUser.adminAppUserId = adminAppUser.id;
 
-          remoteService.addAppUser(appUserShared, new AsyncCallback<Void>()
+          remoteService.addAppUser(appUser, new AsyncCallback<Void>()
           {
 
             @Override

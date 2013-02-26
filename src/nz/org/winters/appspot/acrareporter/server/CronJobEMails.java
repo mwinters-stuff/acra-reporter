@@ -39,7 +39,6 @@ import nz.org.winters.appspot.acrareporter.shared.Utils;
 import nz.org.winters.appspot.acrareporter.store.AppPackage;
 import nz.org.winters.appspot.acrareporter.store.AppUser;
 import nz.org.winters.appspot.acrareporter.store.DailyCounts;
-import nz.org.winters.appspot.acrareporter.store.RegisterDataStores;
 
 public class CronJobEMails extends HttpServlet
 {
@@ -77,7 +76,7 @@ public class CronJobEMails extends HttpServlet
 
     // resp.getWriter().println("NUM DAILY COUNTS: " + counts.size());
     // get todays daily counts
-    List<DailyCounts> counts = DailyCounts.getAllUsersDaysBack(daysBack);
+    List<DailyCounts> counts = DailyCountsGetters.getAllUsersDaysBack(daysBack);
 
     for (DailyCounts count : counts)
     {
@@ -90,7 +89,7 @@ public class CronJobEMails extends HttpServlet
         try
         {
           // resp.getWriter().println("SEND MESSAGE");
-          List<DailyCounts> packagesYesterday = DailyCounts.getAllUserPackagesDaysBack(user.id,daysBack);
+          List<DailyCounts> packagesYesterday = DailyCountsGetters.getAllUserPackagesDaysBack(user.id,daysBack);
 
           Properties props = new Properties();
           Session session = Session.getInstance(props, null);

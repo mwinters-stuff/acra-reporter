@@ -17,14 +17,14 @@ package nz.org.winters.appspot.acrareporter.client;
 import java.util.List;
 import java.util.Map;
 
-import nz.org.winters.appspot.acrareporter.shared.ACRALogShared;
-import nz.org.winters.appspot.acrareporter.shared.AppPackageShared;
-import nz.org.winters.appspot.acrareporter.shared.AppUserShared;
-import nz.org.winters.appspot.acrareporter.shared.BasicErrorInfoShared;
-import nz.org.winters.appspot.acrareporter.shared.DailyCountsShared;
 import nz.org.winters.appspot.acrareporter.shared.ErrorListFilter;
 import nz.org.winters.appspot.acrareporter.shared.LoginInfo;
-import nz.org.winters.appspot.acrareporter.shared.MappingFileShared;
+import nz.org.winters.appspot.acrareporter.store.ACRALog;
+import nz.org.winters.appspot.acrareporter.store.AppPackage;
+import nz.org.winters.appspot.acrareporter.store.AppUser;
+import nz.org.winters.appspot.acrareporter.store.BasicErrorInfo;
+import nz.org.winters.appspot.acrareporter.store.DailyCounts;
+import nz.org.winters.appspot.acrareporter.store.MappingFile;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
@@ -39,12 +39,12 @@ public interface RemoteDataService extends RemoteService
   String retrace(Long mappingId, String error) throws IllegalArgumentException;
   
   Map<Long,String> getMaps(LoginInfo user) throws IllegalArgumentException;
-  List<AppPackageShared> getPackages(LoginInfo user) throws IllegalArgumentException;
+  List<AppPackage> getPackages(LoginInfo user) throws IllegalArgumentException;
 
-  AppPackageShared getPackage(String PACKAGE_NAME) throws IllegalArgumentException;
-  List<BasicErrorInfoShared> getBasicErrorInfo(String apppackage, ErrorListFilter elf);
+  AppPackage getPackage(String PACKAGE_NAME) throws IllegalArgumentException;
+  List<BasicErrorInfo> getBasicErrorInfo(String apppackage, ErrorListFilter elf);
   
-  ACRALogShared getACRALog(String REPORT_ID) throws IllegalArgumentException;
+  ACRALog getACRALog(String REPORT_ID) throws IllegalArgumentException;
 
   void deleteReport(String REPORT_ID) throws IllegalArgumentException;
   void markReportLookedAt(String REPORT_ID, boolean state) throws IllegalArgumentException;
@@ -58,14 +58,14 @@ public interface RemoteDataService extends RemoteService
   void deleteReports(List<String> reportIds)throws IllegalArgumentException;
   
   
-  void writeAppPackageShared(AppPackageShared appPackageShared) throws IllegalArgumentException;
-  void addAppPackageShared(LoginInfo user, AppPackageShared appPackageShared) throws IllegalArgumentException;
+  void writeAppPackage(AppPackage appPackage) throws IllegalArgumentException;
+  void addAppPackage(LoginInfo user, AppPackage appPackage) throws IllegalArgumentException;
 
-  void writeAppUserShared(AppUserShared appUserShared) throws IllegalArgumentException;
-  void addAppUserShared(LoginInfo user, AppUserShared appUserShared) throws IllegalArgumentException;
-  void addAppUser(AppUserShared appUserShared) throws IllegalArgumentException;
+  void writeAppUser(AppUser appUser) throws IllegalArgumentException;
+  void addAppUser(LoginInfo user, AppUser appUser) throws IllegalArgumentException;
+  void addAppUser(AppUser appUser) throws IllegalArgumentException;
   
-  List<MappingFileShared> getMappingFiles(String PACKAGE_NAME) throws IllegalArgumentException;
+  List<MappingFile> getMappingFiles(String PACKAGE_NAME) throws IllegalArgumentException;
   
   void retraceReport(String REPORT_ID) throws IllegalArgumentException;
   
@@ -76,8 +76,8 @@ public interface RemoteDataService extends RemoteService
   
   String findEMailAddresses(List<String> reportIds)  throws IllegalArgumentException;
   
-  List<AppPackageShared> getPackageGraphDataTotals(LoginInfo user) throws IllegalArgumentException;
-  List<DailyCountsShared> getLastMonthDailyCounts(LoginInfo user) throws IllegalArgumentException;
-  List<DailyCountsShared> getPackageLastMonthDailyCounts(LoginInfo user, String PACKAGE_NAME) throws IllegalArgumentException;
+  List<AppPackage> getPackageGraphDataTotals(LoginInfo user) throws IllegalArgumentException;
+  List<DailyCounts> getLastMonthDailyCounts(LoginInfo user) throws IllegalArgumentException;
+  List<DailyCounts> getPackageLastMonthDailyCounts(LoginInfo user, String PACKAGE_NAME) throws IllegalArgumentException;
   
 }

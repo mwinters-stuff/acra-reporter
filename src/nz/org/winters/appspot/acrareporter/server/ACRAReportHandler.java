@@ -34,7 +34,6 @@ import nz.org.winters.appspot.acrareporter.store.AppUser;
 import nz.org.winters.appspot.acrareporter.store.BasicErrorInfo;
 import nz.org.winters.appspot.acrareporter.store.DailyCounts;
 import nz.org.winters.appspot.acrareporter.store.MappingFile;
-import nz.org.winters.appspot.acrareporter.store.RegisterDataStores;
 
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.apphosting.api.ApiProxy.OverQuotaException;
@@ -167,23 +166,23 @@ public class ACRAReportHandler extends HttpServlet
           acraLog.MAPPED_STACK_TRACE = StringReTrace.doReTrace(mapping.mapping, acraLog.STACK_TRACE);
         }
 
-        basicInfo.save();
-        acraLog.save();
+        ObjectifyService.ofy().save().entity(basicInfo);
+        ObjectifyService.ofy().save().entity(acraLog);
 
         // Increment counters.
         appUser.Totals.incReports();
-        appUser.save();
+        ObjectifyService.ofy().save().entity(appUser);
 
         appPackage.Totals.incReports();
-        appPackage.save();
+        ObjectifyService.ofy().save().entity(appPackage);
 
-        DailyCounts counts = DailyCounts.getToday(appUser.id);
+        DailyCounts counts = DailyCountsGetters.getToday(appUser.id);
         counts.incReports();
-        counts.save();
+        ObjectifyService.ofy().save().entity(counts);
 
-        counts = DailyCounts.getToday(acraLog.PACKAGE_NAME);
+        counts = DailyCountsGetters.getToday(acraLog.PACKAGE_NAME);
         counts.incReports();
-        counts.save();
+        ObjectifyService.ofy().save().entity(counts);
 
         // analytics.
         if (SystemProperty.environment.value() == SystemProperty.Environment.Value.Production)

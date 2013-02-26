@@ -30,7 +30,6 @@ import nz.org.winters.appspot.acrareporter.shared.Utils;
 import nz.org.winters.appspot.acrareporter.store.AppPackage;
 import nz.org.winters.appspot.acrareporter.store.AppUser;
 import nz.org.winters.appspot.acrareporter.store.MappingFile;
-import nz.org.winters.appspot.acrareporter.store.RegisterDataStores;
 
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.apphosting.api.ApiProxy.OverQuotaException;
@@ -157,7 +156,7 @@ public class MappingFileHandler extends HttpServlet
       MappingFile mapping = new MappingFile(appUser, apppackage, version);
       mapping.add(data);
 
-      mapping.save();
+      ObjectifyService.ofy().save().entity(mapping);
 
       if (SystemProperty.environment.value() == SystemProperty.Environment.Value.Production)
       {

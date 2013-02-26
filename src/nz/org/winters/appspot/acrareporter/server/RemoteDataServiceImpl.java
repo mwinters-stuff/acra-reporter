@@ -37,15 +37,9 @@ import javax.mail.internet.MimeMessage;
 import nz.org.winters.appspot.acrareporter.client.RemoteDataService;
 import nz.org.winters.appspot.acrareporter.server.jgoogleanalytics.FocusPoint;
 import nz.org.winters.appspot.acrareporter.server.jgoogleanalytics.JGoogleAnalyticsTracker;
-import nz.org.winters.appspot.acrareporter.shared.ACRALogShared;
-import nz.org.winters.appspot.acrareporter.shared.AppPackageShared;
-import nz.org.winters.appspot.acrareporter.shared.AppUserShared;
-import nz.org.winters.appspot.acrareporter.shared.BasicErrorInfoShared;
 import nz.org.winters.appspot.acrareporter.shared.Configuration;
-import nz.org.winters.appspot.acrareporter.shared.DailyCountsShared;
 import nz.org.winters.appspot.acrareporter.shared.ErrorListFilter;
 import nz.org.winters.appspot.acrareporter.shared.LoginInfo;
-import nz.org.winters.appspot.acrareporter.shared.MappingFileShared;
 import nz.org.winters.appspot.acrareporter.shared.Utils;
 import nz.org.winters.appspot.acrareporter.store.ACRALog;
 import nz.org.winters.appspot.acrareporter.store.AppPackage;
@@ -53,9 +47,7 @@ import nz.org.winters.appspot.acrareporter.store.AppUser;
 import nz.org.winters.appspot.acrareporter.store.BasicErrorInfo;
 import nz.org.winters.appspot.acrareporter.store.DailyCounts;
 import nz.org.winters.appspot.acrareporter.store.MappingFile;
-import nz.org.winters.appspot.acrareporter.store.RegisterDataStores;
 
-import com.gargoylesoftware.htmlunit.TextUtil;
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.googlecode.objectify.ObjectifyService;
@@ -110,65 +102,59 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
   }
 
   @Override
-  public List<AppPackageShared> getPackages(LoginInfo loginInfo) throws IllegalArgumentException
+  public List<AppPackage> getPackages(LoginInfo loginInfo) throws IllegalArgumentException
   {
     AppUser appUser = getAppUser(loginInfo);
     long ownerId = getOwnerId(appUser);
 
     List<AppPackage> list = ObjectifyService.ofy().load().type(AppPackage.class).filter("Owner", ownerId).order("PACKAGE_NAME").list();
-    // AppPackageShared[] result = new AppPackageShared[list.size()];
-    ArrayList<AppPackageShared> result = new ArrayList<AppPackageShared>();
 
-    for (AppPackage app : list)
+    for (AppPackage p : list)
     {
-      result.add(app.toShared());
+      String[] auths = ServerOnlyUtils.decodeAuthString(p.AuthString);
+      if (auths != null)
+      {
+        p.AuthUsername = auths[0];
+        p.AuthPassword = auths[1];
+      }
     }
-    return result;
+
+    return new ArrayList<AppPackage>(list);
   }
 
   @Override
-  public List<BasicErrorInfoShared> getBasicErrorInfo(String apppackage, ErrorListFilter elf) throws IllegalArgumentException
+  public List<BasicErrorInfo> getBasicErrorInfo(String apppackage, ErrorListFilter elf) throws IllegalArgumentException
   {
     List<BasicErrorInfo> list;
-    switch(elf)
+    switch (elf)
     {
       case elfFixed:
-        list = ObjectifyService.ofy().load().type(BasicErrorInfo.class).filter("PACKAGE_NAME", apppackage).filter("fixed",true).list();
+        list = ObjectifyService.ofy().load().type(BasicErrorInfo.class).filter("PACKAGE_NAME", apppackage).filter("fixed", true).list();
         break;
       case elfLookedAt:
-        list = ObjectifyService.ofy().load().type(BasicErrorInfo.class).filter("PACKAGE_NAME", apppackage).filter("lookedAt",true).list();
+        list = ObjectifyService.ofy().load().type(BasicErrorInfo.class).filter("PACKAGE_NAME", apppackage).filter("lookedAt", true).list();
         break;
       case elfNew:
-        list = ObjectifyService.ofy().load().type(BasicErrorInfo.class).filter("PACKAGE_NAME", apppackage).filter("fixed",false).filter("lookedAt",false).list();
+        list = ObjectifyService.ofy().load().type(BasicErrorInfo.class).filter("PACKAGE_NAME", apppackage).filter("fixed", false).filter("lookedAt", false).list();
         break;
       case elfNotFixed:
-        list = ObjectifyService.ofy().load().type(BasicErrorInfo.class).filter("PACKAGE_NAME", apppackage).filter("fixed",false).list();
+        list = ObjectifyService.ofy().load().type(BasicErrorInfo.class).filter("PACKAGE_NAME", apppackage).filter("fixed", false).list();
         break;
       case elfAll:
       default:
         list = ObjectifyService.ofy().load().type(BasicErrorInfo.class).filter("PACKAGE_NAME", apppackage).list();// .order("Timestamp desc").list();
         break;
-      
-    }
-    
-    ArrayList<BasicErrorInfoShared> result = new ArrayList<BasicErrorInfoShared>();
 
-    for (BasicErrorInfo beo : list)
-    {
-      result.add(beo.toShared());
     }
-    return result;
+
+    return new ArrayList<BasicErrorInfo>(list);
   }
 
   @Override
-  public ACRALogShared getACRALog(String REPORT_ID) throws IllegalArgumentException
+  public ACRALog getACRALog(String REPORT_ID) throws IllegalArgumentException
   {
     ACRALog log = ObjectifyService.ofy().load().type(ACRALog.class).filter("REPORT_ID", REPORT_ID).first().get();
-    if (log != null)
-    {
-      return log.toShared();
-    }
-    return null;
+    return log;
   }
 
   @Override
@@ -189,15 +175,15 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
     AppUser user = getAppUser(bei.Owner);
     AppPackage ap = getAppPackage(bei.PACKAGE_NAME);
 
-    DailyCounts counts = DailyCounts.getDate(getOwnerId(user),bei.Timestamp);
+    DailyCounts counts = DailyCountsGetters.getDate(getOwnerId(user), bei.Timestamp);
 
     counts.incDeleted();
     ap.Totals.incDeleted();
     user.Totals.incDeleted();
 
-    counts.save();
-    ap.save();
-    user.save();
+    ObjectifyService.ofy().save().entity(counts);
+    ObjectifyService.ofy().save().entity(ap);
+    ObjectifyService.ofy().save().entity(user);
   }
 
   @Override
@@ -209,11 +195,11 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
       if (bei.lookedAt != state)
       {
         bei.lookedAt = state;
-        bei.save();
+
         AppUser user = getAppUser(bei.Owner);
         AppPackage ap = getAppPackage(bei.PACKAGE_NAME);
-        DailyCounts userCounts = DailyCounts.getDate(getOwnerId(user),bei.Timestamp);
-        DailyCounts packageCounts = DailyCounts.getDate(bei.PACKAGE_NAME,bei.Timestamp);
+        DailyCounts userCounts = DailyCountsGetters.getDate(getOwnerId(user), bei.Timestamp);
+        DailyCounts packageCounts = DailyCountsGetters.getDate(bei.PACKAGE_NAME, bei.Timestamp);
         if (state)
         {
           ap.Totals.incLookedAt();
@@ -227,10 +213,11 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
           userCounts.decLookedAt();
           packageCounts.decLookedAt();
         }
-        ap.save();
-        user.save();
-        userCounts.save();
-        packageCounts.save();
+        ObjectifyService.ofy().save().entity(bei);
+        ObjectifyService.ofy().save().entity(ap);
+        ObjectifyService.ofy().save().entity(user);
+        ObjectifyService.ofy().save().entity(userCounts);
+        ObjectifyService.ofy().save().entity(packageCounts);
       }
     }
 
@@ -247,8 +234,8 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
         bei.fixed = state;
         AppUser user = getAppUser(bei.Owner);
         AppPackage ap = getAppPackage(bei.PACKAGE_NAME);
-        DailyCounts userCounts = DailyCounts.getDate(getOwnerId(user),bei.Timestamp);
-        DailyCounts packageCounts = DailyCounts.getDate(bei.PACKAGE_NAME,bei.Timestamp);
+        DailyCounts userCounts = DailyCountsGetters.getDate(getOwnerId(user), bei.Timestamp);
+        DailyCounts packageCounts = DailyCountsGetters.getDate(bei.PACKAGE_NAME, bei.Timestamp);
         if (state)
         {
           ap.Totals.incFixed();
@@ -271,13 +258,13 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
           user.Totals.incLookedAt();
           userCounts.incLookedAt();
           packageCounts.incLookedAt();
-        } 
+        }
 
-        bei.save();
-        ap.save();
-        user.save();
-        userCounts.save();
-        packageCounts.save();
+        ObjectifyService.ofy().save().entity(bei);
+        ObjectifyService.ofy().save().entity(ap);
+        ObjectifyService.ofy().save().entity(user);
+        ObjectifyService.ofy().save().entity(userCounts);
+        ObjectifyService.ofy().save().entity(packageCounts);
 
       }
     }
@@ -296,7 +283,7 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
       if (mapping != null)
       {
         acraLog.MAPPED_STACK_TRACE = StringReTrace.doReTrace(mapping.mapping, acraLog.STACK_TRACE);
-        acraLog.save();
+        ObjectifyService.ofy().save().entity(acraLog);
       } else
       {
         throw new IllegalArgumentException("No Maching Mapping");
@@ -315,19 +302,25 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
     if (bei != null)
     {
       bei.emailed = state;
-      bei.save();
+      ObjectifyService.ofy().save().entity(bei);
 
     }
 
   }
 
   @Override
-  public AppPackageShared getPackage(String PACKAGE_NAME) throws IllegalArgumentException
+  public AppPackage getPackage(String PACKAGE_NAME) throws IllegalArgumentException
   {
     AppPackage app = ObjectifyService.ofy().load().type(AppPackage.class).filter("PACKAGE_NAME", PACKAGE_NAME).first().get();
     if (app != null)
     {
-      return app.toShared();
+      String[] auths = ServerOnlyUtils.decodeAuthString(app.AuthString);
+      if (auths != null)
+      {
+        app.AuthUsername = auths[0];
+        app.AuthPassword = auths[1];
+      }
+      return app;
     }
     throw new IllegalArgumentException("Package not found " + PACKAGE_NAME);
   }
@@ -364,29 +357,28 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
   }
 
   @Override
-  public void writeAppPackageShared(AppPackageShared appPackageShared) throws IllegalArgumentException
+  public void writeAppPackage(AppPackage appPackage) throws IllegalArgumentException
   {
-    AppPackage app = ObjectifyService.ofy().load().type(AppPackage.class).id(appPackageShared.id).get();
+    AppPackage app = ObjectifyService.ofy().load().type(AppPackage.class).id(appPackage.id).get();
     if (app != null)
     {
-      app.fromShared(appPackageShared);
-      app.save();
+      appPackage.AuthString = ServerOnlyUtils.encodeAuthString(appPackage.AuthUsername,appPackage.AuthPassword);
+      ObjectifyService.ofy().save().entity(appPackage);
     }
 
   }
 
   @Override
-  public void addAppPackageShared(LoginInfo loginInfo, AppPackageShared appPackageShared) throws IllegalArgumentException
+  public void addAppPackage(LoginInfo loginInfo, AppPackage appPackage) throws IllegalArgumentException
   {
-    AppPackage app = ObjectifyService.ofy().load().type(AppPackage.class).filter("PACKAGE_NAME",appPackageShared.PACKAGE_NAME).first().get();
+    AppPackage app = ObjectifyService.ofy().load().type(AppPackage.class).filter("PACKAGE_NAME", appPackage.PACKAGE_NAME).first().get();
     if (app != null)
     {
       throw new IllegalArgumentException("Package already exists");
     }
-    app = new AppPackage();
-    app.fromShared(appPackageShared);
-    app.Owner = getOwnerId(getAppUser(loginInfo));
-    app.save();
+    appPackage.Owner = getOwnerId(getAppUser(loginInfo));
+    appPackage.AuthString = ServerOnlyUtils.encodeAuthString(appPackage.AuthUsername,appPackage.AuthPassword);
+    ObjectifyService.ofy().save().entity(appPackage);
 
   }
 
@@ -396,31 +388,32 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
   }
 
   @Override
-  public void writeAppUserShared(AppUserShared appUserShared) throws IllegalArgumentException
+  public void writeAppUser(AppUser appUserIn) throws IllegalArgumentException
   {
-    AppUser appUser = ObjectifyService.ofy().load().type(AppUser.class).id(appUserShared.id).get();
+    AppUser appUser = ObjectifyService.ofy().load().type(AppUser.class).id(appUserIn.id).get();
     if (appUser != null)
     {
-      
-      if(!Utils.isEmpty(appUserShared.AndroidKey))
+
+      if (!Utils.isEmpty(appUserIn.AndroidKey))
       {
-        AppUser other =ObjectifyService.ofy().load().type(AppUser.class).filter("AndroidKey",appUserShared.AndroidKey).first().get();
-        if(other != null)
+        AppUser other = ObjectifyService.ofy().load().type(AppUser.class).filter("AndroidKey", appUserIn.AndroidKey).first().get();
+        if (other != null)
         {
-          if(other.id != appUser.id)
+          if (other.id != appUser.id)
           {
             throw new IllegalArgumentException("Android API Key is already used by another user!");
           }
         }
       }
-      appUser.fromShared(appUserShared);
-      appUser.save();
+      appUserIn.AuthString = ServerOnlyUtils.encodeAuthString(appUserIn.AuthUsername,appUserIn.AuthPassword);
+
+      ObjectifyService.ofy().save().entity(appUserIn);
     }
 
   }
 
   @Override
-  public void addAppUserShared(LoginInfo user, AppUserShared appUserShared) throws IllegalArgumentException
+  public void addAppUser(LoginInfo user, AppUser appUserIn) throws IllegalArgumentException
   {
     AppUser appUser = ObjectifyService.ofy().load().type(AppUser.class).filter("EMailAddress", user.getEmailAddress()).first().get();
     if (appUser != null)
@@ -428,25 +421,22 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
       throw new IllegalArgumentException(user.getEmailAddress() + " is already a user!");
     }
 
-    AppUser ap = new AppUser();
+    appUserIn.isUser = true;
+    appUserIn.isSubscriptionPaid = true;
+    appUserIn.AuthString = ServerOnlyUtils.encodeAuthString(appUserIn.AuthUsername,appUserIn.AuthPassword);
 
-    ap.fromShared(appUserShared);
-
-    ap.isUser = true;
-    ap.isSubscriptionPaid = true;
-
-    ap.save();
+    ObjectifyService.ofy().save().entity(appUserIn);
 
     try
     {
       Properties props = new Properties();
       Session session = Session.getInstance(props, null);
       Message msg = new MimeMessage(session);
-      msg.setReplyTo(new InternetAddress[] { new InternetAddress(ap.EMailAddress, ap.FirstName + " " + ap.LastName) });
+      msg.setReplyTo(new InternetAddress[] { new InternetAddress(appUserIn.EMailAddress, appUserIn.FirstName + " " + appUserIn.LastName) });
       msg.setFrom(new InternetAddress(Configuration.defaultSenderEMailAddress, Configuration.defaultSenderName));
       msg.addRecipient(Message.RecipientType.TO, new InternetAddress(Configuration.sendNewUsersEMailAddress));
-      msg.setSubject("New User Signed Up - " + ap.EMailAddress);
-      msg.setText("First Name: " + ap.FirstName + "\r\n" + "Last Name: " + ap.LastName + "\r\n" + "City: " + ap.City + "\r\n" + "Country: " + ap.Country + "\r\n");
+      msg.setSubject("New User Signed Up - " + appUserIn.EMailAddress);
+      msg.setText("First Name: " + appUserIn.FirstName + "\r\n" + "Last Name: " + appUserIn.LastName + "\r\n" + "City: " + appUserIn.City + "\r\n" + "Country: " + appUserIn.Country + "\r\n");
 
       Transport.send(msg);
     } catch (Exception e)
@@ -467,17 +457,10 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
   }
 
   @Override
-  public List<MappingFileShared> getMappingFiles(String PACKAGE_NAME) throws IllegalArgumentException
+  public List<MappingFile> getMappingFiles(String PACKAGE_NAME) throws IllegalArgumentException
   {
-    ArrayList<MappingFileShared> result = new ArrayList<MappingFileShared>();
-
     List<MappingFile> list = ObjectifyService.ofy().load().type(MappingFile.class).filter("apppackage", PACKAGE_NAME).order("version").list();
-
-    for (MappingFile map : list)
-    {
-      result.add(map.toShared());
-    }
-    return result;
+    return new ArrayList<MappingFile>(list);
   }
 
   @Override
@@ -491,7 +474,7 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
   {
     MappingFile mf = ObjectifyService.ofy().load().type(MappingFile.class).id(id).get();
     mf.setVersion(version);
-    mf.save();
+    ObjectifyService.ofy().save().entity(mf);
 
   }
 
@@ -502,7 +485,7 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
     ArrayList<Long> idsACRA = new ArrayList<Long>();
     Long owner = 0L;
     String packageName = "";
-  
+
     for (String report_id : reportIds)
     {
       BasicErrorInfo beo = ObjectifyService.ofy().load().type(BasicErrorInfo.class).filter("REPORT_ID", report_id).first().get();
@@ -510,16 +493,15 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
       owner = beo.Owner;
       packageName = beo.PACKAGE_NAME;
 
-   
-      DailyCounts userCounts = DailyCounts.getDate(owner,beo.Timestamp);
-      DailyCounts packageCounts = DailyCounts.getDate(beo.PACKAGE_NAME,beo.Timestamp);
+      DailyCounts userCounts = DailyCountsGetters.getDate(owner, beo.Timestamp);
+      DailyCounts packageCounts = DailyCountsGetters.getDate(beo.PACKAGE_NAME, beo.Timestamp);
 
       userCounts.incDeleted();
       packageCounts.incDeleted();
 
-      userCounts.save();
-      packageCounts.save();
-  
+      ObjectifyService.ofy().save().entity(userCounts);
+      ObjectifyService.ofy().save().entity(packageCounts);
+
       idsBasic.add(beo.id);
       idsACRA.add(acra.id);
     }
@@ -533,9 +515,9 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
       AppUser appUser = getAppUser(owner);
 
       appPackage.Totals.Deleted = appPackage.Totals.Deleted + reportIds.size();
-      appPackage.save();
+      ObjectifyService.ofy().save().entity(appPackage);
       appUser.Totals.Deleted = appUser.Totals.Deleted + reportIds.size();
-      appUser.save();
+      ObjectifyService.ofy().save().entity(appUser);
 
     }
 
@@ -606,22 +588,19 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
   }
 
   @Override
-  public void addAppUser(AppUserShared appUserShared) throws IllegalArgumentException
+  public void addAppUser(AppUser appUserIn) throws IllegalArgumentException
   {
-    AppUser appUser = ObjectifyService.ofy().load().type(AppUser.class).filter("EMailAddress", appUserShared.EMailAddress).first().get();
+    AppUser appUser = ObjectifyService.ofy().load().type(AppUser.class).filter("EMailAddress", appUserIn.EMailAddress).first().get();
     if (appUser != null)
     {
-      throw new IllegalArgumentException(appUserShared.EMailAddress + " is already a user!");
+      throw new IllegalArgumentException(appUser.EMailAddress + " is already a user!");
     }
 
-    AppUser ap = new AppUser();
+    appUserIn.isUser = true;
+    appUserIn.isSubscriptionPaid = true;
+    appUserIn.AuthString = ServerOnlyUtils.encodeAuthString(appUserIn.AuthUsername,appUserIn.AuthPassword);
 
-    ap.fromShared(appUserShared);
-
-    ap.isUser = true;
-    ap.isSubscriptionPaid = true;
-
-    ap.save();
+    ObjectifyService.ofy().save().entity(appUserIn);
 
     // analytics.
     if (Configuration.gaTrackingID != null && SystemProperty.environment.value() == SystemProperty.Environment.Value.Production)
@@ -635,6 +614,17 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
 
   }
 
+  // public long getOwnerId(AppUser appUser)
+  // {
+  // if (Configuration.appUserMode == Configuration.UserMode.umMultipleSameApps)
+  // {
+  // return appUser.adminAppUserId != null && appUser.adminAppUserId > 0 ?
+  // appUser.adminAppUserId : appUser.id;
+  //
+  // }
+  // return appUser.id;
+  // }
+
   public long getOwnerId(AppUser appUser)
   {
     if (Configuration.appUserMode == Configuration.UserMode.umMultipleSameApps)
@@ -645,50 +635,40 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
     return appUser.id;
   }
 
-  public long getOwnerId(AppUserShared appUser)
-  {
-    if (Configuration.appUserMode == Configuration.UserMode.umMultipleSameApps)
-    {
-      return appUser.adminAppUserId != null && appUser.adminAppUserId > 0 ? appUser.adminAppUserId : appUser.id;
-
-    }
-    return appUser.id;
-  }
-
   @Override
-  public List<AppPackageShared> getPackageGraphDataTotals(LoginInfo loginInfo) throws IllegalArgumentException
+  public List<AppPackage> getPackageGraphDataTotals(LoginInfo loginInfo) throws IllegalArgumentException
   {
     AppUser appUser = getAppUser(loginInfo);
     long ownerId = getOwnerId(appUser);
 
     List<AppPackage> list = ObjectifyService.ofy().load().type(AppPackage.class).filter("Owner", ownerId).order("PACKAGE_NAME").list();
-    // AppPackageShared[] result = new AppPackageShared[list.size()];
-    List<AppPackageShared> result = new ArrayList<AppPackageShared>();
+    // AppPackage[] result = new AppPackage[list.size()];
 
-    for (AppPackage app : list)
-    {
-
-      result.add(app.toShared());
-
-    }
-    
-    Collections.sort(result, new Comparator<AppPackageShared>()
+    Collections.sort(list, new Comparator<AppPackage>()
     {
 
       @Override
-      public int compare(AppPackageShared o1, AppPackageShared o2)
+      public int compare(AppPackage o1, AppPackage o2)
       {
-        return (o1.Totals.NewReports() >o2.Totals.NewReports() ? -1 : (o1.Totals.NewReports()==o2.Totals.NewReports() ? 0 : 1));
+        return (o1.Totals.NewReports() > o2.Totals.NewReports() ? -1 : (o1.Totals.NewReports() == o2.Totals.NewReports() ? 0 : 1));
       }
     });
 
-    return result;
+    for (AppPackage p : list)
+    {
+      String[] auths = ServerOnlyUtils.decodeAuthString(p.AuthString);
+      if (auths != null)
+      {
+        p.AuthUsername = auths[0];
+        p.AuthPassword = auths[1];
+      }
+    }    
+    return new ArrayList<AppPackage>(list);
   }
 
   @Override
-  public List<DailyCountsShared> getLastMonthDailyCounts(LoginInfo loginInfo) throws IllegalArgumentException
+  public List<DailyCounts> getLastMonthDailyCounts(LoginInfo loginInfo) throws IllegalArgumentException
   {
-    List<DailyCountsShared> result = new ArrayList<DailyCountsShared>();
     AppUser user = getAppUser(loginInfo);
     Calendar monthback = GregorianCalendar.getInstance();
     monthback.set(Calendar.HOUR, 0);
@@ -697,22 +677,17 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
     monthback.set(Calendar.MILLISECOND, 0);
 
     monthback.add(Calendar.MONTH, -1);
-    Date monthbackdate = DailyCounts.removeTimeFromDate(monthback.getTime());
+    Date monthbackdate = DailyCountsGetters.removeTimeFromDate(monthback.getTime());
 
     List<DailyCounts> counts = ObjectifyService.ofy().load().type(DailyCounts.class).filter("Owner", user.id).filter("PACKAGE_NAME", null).filter("date >=", monthbackdate).list();
 
-    for (DailyCounts count : counts)
-    {
-      result.add(count.toShared());
-    }
-    return result;
+    return new ArrayList<DailyCounts>(counts);
   }
 
   @Override
-  public List<DailyCountsShared> getPackageLastMonthDailyCounts(LoginInfo loginInfo, String PACKAGE_NAME) throws IllegalArgumentException
+  public List<DailyCounts> getPackageLastMonthDailyCounts(LoginInfo loginInfo, String PACKAGE_NAME) throws IllegalArgumentException
   {
-    List<DailyCountsShared> result = new ArrayList<DailyCountsShared>();
-    //AppUser user = getAppUser(loginInfo);
+    // AppUser user = getAppUser(loginInfo);
     Calendar monthback = GregorianCalendar.getInstance();
     monthback.set(Calendar.HOUR, 0);
     monthback.set(Calendar.MINUTE, 0);
@@ -720,15 +695,11 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
     monthback.set(Calendar.MILLISECOND, 0);
 
     monthback.add(Calendar.MONTH, -1);
-    Date monthbackdate = DailyCounts.removeTimeFromDate(monthback.getTime());
+    Date monthbackdate = DailyCountsGetters.removeTimeFromDate(monthback.getTime());
 
     List<DailyCounts> counts = ObjectifyService.ofy().load().type(DailyCounts.class).filter("PACKAGE_NAME", PACKAGE_NAME).filter("date >=", monthbackdate).list();
 
-    for (DailyCounts count : counts)
-    {
-      result.add(count.toShared());
-    }
-    return result;
+    return new ArrayList<DailyCounts>(counts);
   }
 
 }

@@ -45,9 +45,13 @@ public class ServerOnlyUtils
   
   public static String encodeAuthString(String username, String password)
   {
-    String auths = username + ":" + password;
-    byte[] auth = Base64.encodeBase64(auths.getBytes());
-    return new String(auth);
+    if(!isEmpty(username) && !isEmpty(password))
+    {
+      String auths = username + ":" + password;
+      byte[] auth = Base64.encodeBase64(auths.getBytes());
+      return new String(auth);
+    }
+    return null;
   }
   
   public static boolean isEmpty(String in)

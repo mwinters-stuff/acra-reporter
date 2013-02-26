@@ -1,4 +1,4 @@
-package nz.org.winters.appspot.acrareporter.store;
+package nz.org.winters.appspot.acrareporter.server;
 /*
  * Copyright 2013 Mathew Winters
 
@@ -14,6 +14,13 @@ package nz.org.winters.appspot.acrareporter.store;
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
+
+import nz.org.winters.appspot.acrareporter.store.ACRALog;
+import nz.org.winters.appspot.acrareporter.store.AppPackage;
+import nz.org.winters.appspot.acrareporter.store.AppUser;
+import nz.org.winters.appspot.acrareporter.store.BasicErrorInfo;
+import nz.org.winters.appspot.acrareporter.store.DailyCounts;
+import nz.org.winters.appspot.acrareporter.store.MappingFile;
 
 // helper to register the datastore files.
 import com.googlecode.objectify.ObjectifyService;

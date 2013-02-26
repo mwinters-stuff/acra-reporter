@@ -1,7 +1,6 @@
 package nz.org.winters.appspot.acrareporter.server;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServlet;
@@ -14,7 +13,6 @@ import nz.org.winters.appspot.acrareporter.store.AppUser;
 import nz.org.winters.appspot.acrareporter.store.BasicErrorInfo;
 import nz.org.winters.appspot.acrareporter.store.DailyCounts;
 import nz.org.winters.appspot.acrareporter.store.MappingFile;
-import nz.org.winters.appspot.acrareporter.store.RegisterDataStores;
 
 import com.googlecode.objectify.ObjectifyService;
 
@@ -79,19 +77,19 @@ public class RecalcTotals extends HttpServlet {
 				List<BasicErrorInfo> basicErrorInfos = ObjectifyService.ofy().load().type(BasicErrorInfo.class).filter("PACKAGE_NAME", appPackage.PACKAGE_NAME).order("Timestamp").list();
 				for(BasicErrorInfo basicErrorInfo: basicErrorInfos)
 				{
-				  DailyCounts.getDate(user.id, basicErrorInfo.Timestamp);
-					if(userDaily == null || packageDaily == null || !packageDaily.date.equals(DailyCounts.removeTimeFromDate(basicErrorInfo.Timestamp)) || !userDaily.date.equals(DailyCounts.removeTimeFromDate(basicErrorInfo.Timestamp)))
+				  DailyCountsGetters.getDate(user.id, basicErrorInfo.Timestamp);
+					if(userDaily == null || packageDaily == null || !packageDaily.date.equals(DailyCountsGetters.removeTimeFromDate(basicErrorInfo.Timestamp)) || !userDaily.date.equals(DailyCountsGetters.removeTimeFromDate(basicErrorInfo.Timestamp)))
 					{
 					  if(userDaily != null)
 					  {
-					    userDaily.save();
+					    ObjectifyService.ofy().save().entity(userDaily);
 					  }
 					  if(packageDaily != null)
 					  {
-					    packageDaily.save();
+					    ObjectifyService.ofy().save().entity(packageDaily);
 					  }
-	          userDaily = DailyCounts.getDate(user.id, basicErrorInfo.Timestamp);
-	          packageDaily = DailyCounts.getDate(basicErrorInfo.PACKAGE_NAME, basicErrorInfo.Timestamp);
+	          userDaily = DailyCountsGetters.getDate(user.id, basicErrorInfo.Timestamp);
+	          packageDaily = DailyCountsGetters.getDate(basicErrorInfo.PACKAGE_NAME, basicErrorInfo.Timestamp);
 					  
 					}
 					  
@@ -113,7 +111,7 @@ public class RecalcTotals extends HttpServlet {
 					if(basicErrorInfo.fixed && !basicErrorInfo.lookedAt)
 					{
 						basicErrorInfo.lookedAt = true;
-						basicErrorInfo.save();
+						ObjectifyService.ofy().save().entity(basicErrorInfo);
 					}
 					if(basicErrorInfo.lookedAt)
 					{
@@ -125,18 +123,18 @@ public class RecalcTotals extends HttpServlet {
 				}
         if(userDaily != null)
         {
-          userDaily.save();
+          ObjectifyService.ofy().save().entity(userDaily);
         }
         if(packageDaily != null)
         {
-          packageDaily.save();
+          ObjectifyService.ofy().save().entity(packageDaily);
         }
 				
 				resp.getWriter().println("Package: " + appPackage.PACKAGE_NAME + " = " + appPackage.Totals.toString());
 				
 			}
 			ObjectifyService.ofy().save().entities(appPackages);
-			user.save();
+			ObjectifyService.ofy().save().entity(user);
 			resp.getWriter().println("User: "+ user.Totals.toString());
 
 		} catch (Exception e) {

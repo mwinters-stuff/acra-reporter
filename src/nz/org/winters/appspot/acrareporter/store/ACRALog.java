@@ -16,22 +16,24 @@ package nz.org.winters.appspot.acrareporter.store;
 */
 
 // ACRA Log - this stores the error report.
+import java.io.Serializable;
 import java.util.Date;
 
-import nz.org.winters.appspot.acrareporter.shared.ACRALogShared;
-
-import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
-import com.googlecode.objectify.annotation.OnLoad;
 import com.googlecode.objectify.annotation.Serialize;
 import com.googlecode.objectify.annotation.Unindex;
 
 @Entity
 @Index
-public class ACRALog
+public class ACRALog implements Serializable
 {
+
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 4424179616125441981L;
 
   public ACRALog()
   {
@@ -144,56 +146,56 @@ public class ACRALog
   @Unindex
   public String USER_IP;
 
-  public ACRALogShared toShared()
-  {
-    ACRALogShared shared = new ACRALogShared();
-
-    shared.id = id;
-    shared.Timestamp = Timestamp;
-    shared.REPORT_ID = REPORT_ID;
-    shared.APP_VERSION_CODE = APP_VERSION_CODE;
-    shared.APP_VERSION_NAME = APP_VERSION_NAME;
-    shared.PACKAGE_NAME = PACKAGE_NAME;
-    shared.FILE_PATH = FILE_PATH;
-    shared.PHONE_MODEL = PHONE_MODEL;
-    shared.BRAND = BRAND;
-    shared.PRODUCT = PRODUCT;
-    shared.ANDROID_VERSION = ANDROID_VERSION;
-    shared.BUILD = BUILD;
-    shared.TOTAL_MEM_SIZE = TOTAL_MEM_SIZE;
-    shared.AVAILABLE_MEM_SIZE = AVAILABLE_MEM_SIZE;
-    shared.CUSTOM_DATA = CUSTOM_DATA;
-    shared.IS_SILENT = IS_SILENT;
-    shared.STACK_TRACE = STACK_TRACE;
-    shared.INITIAL_CONFIGURATION = INITIAL_CONFIGURATION;
-    shared.CRASH_CONFIGURATION = CRASH_CONFIGURATION;
-    shared.DISPLAY = DISPLAY;
-    shared.USER_COMMENT = USER_COMMENT;
-    shared.USER_EMAIL = USER_EMAIL;
-    shared.USER_APP_START_DATE = USER_APP_START_DATE;
-    shared.USER_CRASH_DATE = USER_CRASH_DATE;
-    shared.DUMPSYS_MEMINFO = DUMPSYS_MEMINFO;
-    shared.LOGCAT = LOGCAT;
-    shared.INSTALLATION_ID = INSTALLATION_ID;
-    shared.DEVICE_FEATURES = DEVICE_FEATURES;
-    shared.ENVIRONMENT = ENVIRONMENT;
-    shared.SHARED_PREFERENCES = SHARED_PREFERENCES;
-    shared.SETTINGS_SYSTEM = SETTINGS_SYSTEM;
-    shared.SETTINGS_SECURE = SETTINGS_SECURE;
-    shared.MAPPED_STACK_TRACE = MAPPED_STACK_TRACE;
-    shared.Owner = Owner;
-    
-    shared.APPLICATION_LOG = APPLICATION_LOG;
-    shared.DEVICE_ID = DEVICE_ID;
-    shared.DROPBOX = DROPBOX;
-    shared.EVENTSLOG = EVENTSLOG;
-    shared.MEDIA_CODEC_LIST = MEDIA_CODEC_LIST;
-    shared.RADIOLOG = RADIOLOG;
-    shared.SETTINGS_GLOBAL = SETTINGS_GLOBAL;
-    shared.THREAD_DETAILS = THREAD_DETAILS;
-    shared.USER_IP = USER_IP;
-    return shared;
-  }
+//  public ACRALogShared toShared()
+//  {
+//    ACRALogShared shared = new ACRALogShared();
+//
+//    shared.id = id;
+//    shared.Timestamp = Timestamp;
+//    shared.REPORT_ID = REPORT_ID;
+//    shared.APP_VERSION_CODE = APP_VERSION_CODE;
+//    shared.APP_VERSION_NAME = APP_VERSION_NAME;
+//    shared.PACKAGE_NAME = PACKAGE_NAME;
+//    shared.FILE_PATH = FILE_PATH;
+//    shared.PHONE_MODEL = PHONE_MODEL;
+//    shared.BRAND = BRAND;
+//    shared.PRODUCT = PRODUCT;
+//    shared.ANDROID_VERSION = ANDROID_VERSION;
+//    shared.BUILD = BUILD;
+//    shared.TOTAL_MEM_SIZE = TOTAL_MEM_SIZE;
+//    shared.AVAILABLE_MEM_SIZE = AVAILABLE_MEM_SIZE;
+//    shared.CUSTOM_DATA = CUSTOM_DATA;
+//    shared.IS_SILENT = IS_SILENT;
+//    shared.STACK_TRACE = STACK_TRACE;
+//    shared.INITIAL_CONFIGURATION = INITIAL_CONFIGURATION;
+//    shared.CRASH_CONFIGURATION = CRASH_CONFIGURATION;
+//    shared.DISPLAY = DISPLAY;
+//    shared.USER_COMMENT = USER_COMMENT;
+//    shared.USER_EMAIL = USER_EMAIL;
+//    shared.USER_APP_START_DATE = USER_APP_START_DATE;
+//    shared.USER_CRASH_DATE = USER_CRASH_DATE;
+//    shared.DUMPSYS_MEMINFO = DUMPSYS_MEMINFO;
+//    shared.LOGCAT = LOGCAT;
+//    shared.INSTALLATION_ID = INSTALLATION_ID;
+//    shared.DEVICE_FEATURES = DEVICE_FEATURES;
+//    shared.ENVIRONMENT = ENVIRONMENT;
+//    shared.SHARED_PREFERENCES = SHARED_PREFERENCES;
+//    shared.SETTINGS_SYSTEM = SETTINGS_SYSTEM;
+//    shared.SETTINGS_SECURE = SETTINGS_SECURE;
+//    shared.MAPPED_STACK_TRACE = MAPPED_STACK_TRACE;
+//    shared.Owner = Owner;
+//    
+//    shared.APPLICATION_LOG = APPLICATION_LOG;
+//    shared.DEVICE_ID = DEVICE_ID;
+//    shared.DROPBOX = DROPBOX;
+//    shared.EVENTSLOG = EVENTSLOG;
+//    shared.MEDIA_CODEC_LIST = MEDIA_CODEC_LIST;
+//    shared.RADIOLOG = RADIOLOG;
+//    shared.SETTINGS_GLOBAL = SETTINGS_GLOBAL;
+//    shared.THREAD_DETAILS = THREAD_DETAILS;
+//    shared.USER_IP = USER_IP;
+//    return shared;
+//  }
 
  
 
@@ -203,9 +205,9 @@ public class ACRALog
     return "ACRALog [id=" + id + ", Owner=" + Owner + ", Timestamp=" + Timestamp + ", REPORT_ID=" + REPORT_ID + ", APP_VERSION_NAME=" + APP_VERSION_NAME + ", PACKAGE_NAME=" + PACKAGE_NAME + "]";
   }
 
-  public void save()
-  {
-    ObjectifyService.ofy().save().entity(this);
-  }
+//  public void save()
+//  {
+//    ObjectifyService.ofy().save().entity(this);
+//  }
 
 }

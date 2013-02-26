@@ -16,9 +16,9 @@ package nz.org.winters.appspot.acrareporter.client.ui;
 */
 import nz.org.winters.appspot.acrareporter.client.RemoteDataService;
 import nz.org.winters.appspot.acrareporter.client.RemoteDataServiceAsync;
-import nz.org.winters.appspot.acrareporter.shared.AppUserShared;
 import nz.org.winters.appspot.acrareporter.shared.LoginInfo;
 import nz.org.winters.appspot.acrareporter.shared.Utils;
+import nz.org.winters.appspot.acrareporter.store.AppUser;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -135,7 +135,7 @@ public class SignUp extends Composite
       return;
     }
 
-    AppUserShared appUserShared = new AppUserShared();
+    AppUser appUserShared = new AppUser();
     
     appUserShared.EMailAddress = textEMailAddress.getText();
     appUserShared.FirstName = textFirstName.getText();
@@ -148,7 +148,7 @@ public class SignUp extends Composite
 
     appUserShared.AnalyticsTrackingId = textTrackingID.getText();
 
-    remoteService.addAppUserShared(loginInfo, appUserShared, new AsyncCallback<Void>()
+    remoteService.addAppUser(loginInfo, appUserShared, new AsyncCallback<Void>()
     {
       
       @Override

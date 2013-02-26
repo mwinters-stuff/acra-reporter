@@ -1,6 +1,8 @@
 package nz.org.winters.appspot.acrareporter.shared;
 
 import java.io.Serializable;
+
+import nz.org.winters.appspot.acrareporter.store.AppUser;
 /*
  * Copyright 2013 Mathew Winters
 
@@ -30,7 +32,7 @@ public class LoginInfo implements Serializable {
 	  private String nickname;
 	  private boolean useradmin;
 	  
-	  private AppUserShared appUserShared;
+	  private AppUser appUserShared;
 
 	  public boolean isLoggedIn() {
 	    return loggedIn;
@@ -80,12 +82,12 @@ public class LoginInfo implements Serializable {
 	    this.nickname = nickname;
 	  }
 
-    public AppUserShared getAppUserShared()
+    public AppUser getAppUserShared()
     {
       return appUserShared;
     }
 
-    public void setAppUserShared(AppUserShared appUserShared)
+    public void setAppUserShared(AppUser appUserShared)
     {
       this.appUserShared = appUserShared;
     }

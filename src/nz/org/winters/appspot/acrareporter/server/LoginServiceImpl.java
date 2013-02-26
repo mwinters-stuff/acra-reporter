@@ -19,7 +19,6 @@ import nz.org.winters.appspot.acrareporter.client.LoginService;
 import nz.org.winters.appspot.acrareporter.shared.Configuration;
 import nz.org.winters.appspot.acrareporter.shared.LoginInfo;
 import nz.org.winters.appspot.acrareporter.store.AppUser;
-import nz.org.winters.appspot.acrareporter.store.RegisterDataStores;
 
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
@@ -40,6 +39,19 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
 
   private static final long serialVersionUID = 4769899395757286696L;
 
+  private void decodeAuthString(AppUser user)
+  {
+    if (user != null)
+    {
+      String[] auths = ServerOnlyUtils.decodeAuthString(user.AuthString);
+      if (auths != null)
+      {
+        user.AuthUsername = auths[0];
+        user.AuthPassword = auths[1];
+      }
+    }
+  }
+
   @Override
   public LoginInfo login(String requestUri)
   {
@@ -54,12 +66,13 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
     {
       loginInfo.setEmailAddress(user.getEmail());
       loginInfo.setNickname(user.getNickname());
-      
+
       if (userService.isUserLoggedIn())
       { // && userService.isUserAdmin()
         loginInfo.setUserAdmin(userService.isUserAdmin());
         AppUser appUser = ObjectifyService.ofy().load().type(AppUser.class).filter("EMailAddress", user.getEmail()).first().get();
-        loginInfo.setAppUserShared(appUser == null ? null : appUser.toShared());
+        loginInfo.setAppUserShared(appUser == null ? null : appUser);
+        decodeAuthString(appUser);
 
         if (Configuration.appUserMode == Configuration.UserMode.umSingle)
         {
@@ -70,6 +83,7 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
               appUser = ObjectifyService.ofy().load().type(AppUser.class).first().get();
               if (appUser != null)
               {
+                decodeAuthString(appUser);
                 if (!appUser.EMailAddress.equals(user.getEmail()))
                 {
                   // not the administator.
@@ -87,7 +101,7 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
               appUser.isSubscriptionPaid = true;
               appUser.isSuperDude = true;
               appUser.isUser = true;
-              appUser.save();
+              ObjectifyService.ofy().save().entity(appUser);
               loginInfo.setLoggedIn(true);
             } else
             {
@@ -114,9 +128,9 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
               appUser.isSubscriptionPaid = true;
               appUser.isSuperDude = true;
               appUser.isUser = true;
-              appUser.save();
+              ObjectifyService.ofy().save().entity(appUser);
             }
-            loginInfo.setAppUserShared(appUser.toShared());
+            loginInfo.setAppUserShared(appUser);
             loginInfo.setLoggedIn(true);
           } else
           {
@@ -127,7 +141,6 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
         {
           loginInfo.setLoggedIn(true);
         }
-
 
       }
     } else

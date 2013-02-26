@@ -18,22 +18,23 @@ package nz.org.winters.appspot.acrareporter.store;
 
 // basic information about an error, smaller class to be query friendly
 // and improve performance..
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.io.Serializable;
 import java.util.Date;
-
-import nz.org.winters.appspot.acrareporter.shared.BasicErrorInfoShared;
 
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
-import com.googlecode.objectify.annotation.OnLoad;
 
 @Entity
 @Index
-public class BasicErrorInfo
+public class BasicErrorInfo implements Serializable
 {
+
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 2177572067786785505L;
 
   public BasicErrorInfo()
   {
@@ -57,26 +58,26 @@ public class BasicErrorInfo
   public Boolean fixed;
   public Boolean emailed;
 
-  public BasicErrorInfoShared toShared()
-  {
-    BasicErrorInfoShared shared = new BasicErrorInfoShared();
-    shared.id = id;
-    shared.Owner = Owner;
-    shared.Timestamp = Timestamp;
-    shared.APP_VERSION_NAME = APP_VERSION_NAME;
-    shared.PACKAGE_NAME = PACKAGE_NAME;
-    shared.REPORT_ID = REPORT_ID;
-    shared.ANDROID_VERSION = ANDROID_VERSION;
-    shared.USER_CRASH_DATE = USER_CRASH_DATE;
-    shared.lookedAt = lookedAt;
-    shared.fixed = fixed;
-
-    shared.emailed = emailed;
-  
- 
-
-    return shared;
-  }
+//  public BasicErrorInfoShared toShared()
+//  {
+//    BasicErrorInfoShared shared = new BasicErrorInfoShared();
+//    shared.id = id;
+//    shared.Owner = Owner;
+//    shared.Timestamp = Timestamp;
+//    shared.APP_VERSION_NAME = APP_VERSION_NAME;
+//    shared.PACKAGE_NAME = PACKAGE_NAME;
+//    shared.REPORT_ID = REPORT_ID;
+//    shared.ANDROID_VERSION = ANDROID_VERSION;
+//    shared.USER_CRASH_DATE = USER_CRASH_DATE;
+//    shared.lookedAt = lookedAt;
+//    shared.fixed = fixed;
+//
+//    shared.emailed = emailed;
+//  
+// 
+//
+//    return shared;
+//  }
 
 
   @Override
@@ -85,9 +86,9 @@ public class BasicErrorInfo
     return "BasicErrorInfo [id=" + id + ", Owner=" + Owner + ", Timestamp=" + Timestamp + ", APP_VERSION_NAME=" + APP_VERSION_NAME + ", PACKAGE_NAME=" + PACKAGE_NAME + ", REPORT_ID=" + REPORT_ID + ", ANDROID_VERSION=" + ANDROID_VERSION + ", USER_CRASH_DATE=" + USER_CRASH_DATE + ", lookedAt="
         + lookedAt + ", fixed=" + fixed + ", emailed=" + emailed + "]";
   }
-  public void save()
-  {
-    ObjectifyService.ofy().save().entity(this);
-  }
+//  public void save()
+//  {
+//    ObjectifyService.ofy().save().entity(this);
+//  }
 
 }

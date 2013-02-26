@@ -17,11 +17,9 @@ package nz.org.winters.appspot.acrareporter.store;
 */
 
 // MappingFile storage.
+import java.io.Serializable;
 import java.util.Date;
 
-import nz.org.winters.appspot.acrareporter.shared.MappingFileShared;
-
-import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
@@ -30,13 +28,19 @@ import com.googlecode.objectify.annotation.Unindex;
 
 @Entity
 @Index
-public class MappingFile 
+public class MappingFile  implements Serializable
 {
 
-  @Id protected Long id;
+  /**
+   * 
+   */
+  private static final long serialVersionUID = -8691879167151824926L;
+  @Id
+  public Long id;
   @Index public Long Owner;
   @Index protected String apppackage;
-  @Index protected String version;
+  @Index
+  public String version;
   @Index public Date uploadDate;
   
   @Unindex
@@ -98,31 +102,31 @@ public class MappingFile
     this.mapping = mapping;
   }
   
-  public MappingFileShared toShared()
-  {
-    MappingFileShared shared = new MappingFileShared();
-    
-    shared.id = id;
-    shared.Owner = Owner;
-    shared.version = version;
-    shared.apppackage = apppackage;
-    shared.uploadDate = uploadDate;
-    return shared;
-  }
-  
-  public void fromShared(MappingFileShared shared)
-  {
-    version = shared.version;
-  }
+//  public MappingFileShared toShared()
+//  {
+//    MappingFileShared shared = new MappingFileShared();
+//    
+//    shared.id = id;
+//    shared.Owner = Owner;
+//    shared.version = version;
+//    shared.apppackage = apppackage;
+//    shared.uploadDate = uploadDate;
+//    return shared;
+//  }
+//  
+//  public void fromShared(MappingFileShared shared)
+//  {
+//    version = shared.version;
+//  }
 
   @Override
   public String toString()
   {
     return "MappingFile [id=" + id + ", Owner=" + Owner + ", apppackage=" + apppackage + ", version=" + version + ", uploadDate=" + uploadDate + "]";
   }
-  public void save()
-  {
-    ObjectifyService.ofy().save().entity(this);
-  }
+//  public void save()
+//  {
+//    ObjectifyService.ofy().save().entity(this);
+//  }
   
 }

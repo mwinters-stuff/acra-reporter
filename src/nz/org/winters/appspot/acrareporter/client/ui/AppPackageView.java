@@ -4,9 +4,9 @@ import nz.org.winters.appspot.acrareporter.client.RemoteDataService;
 import nz.org.winters.appspot.acrareporter.client.RemoteDataServiceAsync;
 import nz.org.winters.appspot.acrareporter.client.ui.ACRAReportView.CallbackReloadPackageList;
 import nz.org.winters.appspot.acrareporter.client.ui.MainErrorsList.CallbackShowReport;
-import nz.org.winters.appspot.acrareporter.shared.AppPackageShared;
-import nz.org.winters.appspot.acrareporter.shared.BasicErrorInfoShared;
 import nz.org.winters.appspot.acrareporter.shared.LoginInfo;
+import nz.org.winters.appspot.acrareporter.store.AppPackage;
+import nz.org.winters.appspot.acrareporter.store.BasicErrorInfo;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -32,10 +32,10 @@ public class AppPackageView extends Composite implements CallbackReloadPackageLi
 
   private MainErrorsList                mMainErrorsList;
   private ACRAReportView                mACRAReportView;
-  protected BasicErrorInfoShared        mSelectedBasicErrorInfo;
+  protected BasicErrorInfo        mSelectedBasicErrorInfo;
 
   private LoginInfo                     mLoginInfo;
-  private AppPackageShared              mAppPackageShared;
+  private AppPackage              mAppPackage;
 
   private UIConstants                   constants     = (UIConstants) GWT.create(UIConstants.class);
 
@@ -52,22 +52,22 @@ public class AppPackageView extends Composite implements CallbackReloadPackageLi
   {
   }
 
-  public AppPackageView(LoginInfo loginInfo, AppPackageShared appPackageShared, CallbackClosePackageView callbackClose)
+  public AppPackageView(LoginInfo loginInfo, AppPackage appPackage, CallbackClosePackageView callbackClose)
   {
     mCallbackClosePackageView = callbackClose;
-    mAppPackageShared = appPackageShared;
+    mAppPackage = appPackage;
     mLoginInfo = loginInfo;
     initWidget(uiBinder.createAndBindUi(this));
 
-    mACRAReportView = new ACRAReportView(this, loginInfo, appPackageShared);
-    mMainErrorsList = new MainErrorsList(this, loginInfo, appPackageShared);
+    mACRAReportView = new ACRAReportView(this, loginInfo, appPackage);
+    mMainErrorsList = new MainErrorsList(this, loginInfo, appPackage);
 
     dockLayoutPanel.addWest(mMainErrorsList, 300);
     dockLayoutPanel.add(mACRAReportView);
-    labelTitle.setText(constants.appPackageLabelTitle(appPackageShared.AppName,appPackageShared.PACKAGE_NAME));
+    labelTitle.setText(constants.appPackageLabelTitle(appPackage.AppName,appPackage.PACKAGE_NAME));
 
     mACRAReportView.clearData();
-    mMainErrorsList.setAppPackage(appPackageShared.PACKAGE_NAME);
+    mMainErrorsList.setAppPackage(appPackage.PACKAGE_NAME);
   }
 
   public void clearData()
@@ -95,7 +95,7 @@ public class AppPackageView extends Composite implements CallbackReloadPackageLi
   }
 
   @Override
-  public void showReport(BasicErrorInfoShared basicErrorInfo)
+  public void showReport(BasicErrorInfo basicErrorInfo)
   {
     mACRAReportView.showACRAReport(basicErrorInfo);
 
@@ -110,7 +110,7 @@ public class AppPackageView extends Composite implements CallbackReloadPackageLi
   @UiHandler("buttonMapFiles")
   void onButtonMapFilesClick(ClickEvent event)
   {
-    MappingList.doDialog(mAppPackageShared.PACKAGE_NAME, new MappingList.DialogCallback()
+    MappingList.doDialog(mAppPackage.PACKAGE_NAME, new MappingList.DialogCallback()
     {
 
       @Override
@@ -124,15 +124,15 @@ public class AppPackageView extends Composite implements CallbackReloadPackageLi
   @UiHandler("buttonEditPackage")
   void onButtonEditPackageClick(ClickEvent event)
   {
-    PackageEdit.doEditDialog(mAppPackageShared, remoteService, new PackageEdit.DialogCallback()
+    PackageEdit.doEditDialog(mAppPackage, remoteService, new PackageEdit.DialogCallback()
     {
 
       @Override
-      public void result(boolean ok, AppPackageShared appPackageShared)
+      public void result(boolean ok, AppPackage appPackage)
       {
         if (ok)
         {
-          labelTitle.setText(constants.appPackageLabelTitle(appPackageShared.AppName,appPackageShared.PACKAGE_NAME));
+          labelTitle.setText(constants.appPackageLabelTitle(appPackage.AppName,appPackage.PACKAGE_NAME));
         }
       }
     });

@@ -17,14 +17,14 @@ package nz.org.winters.appspot.acrareporter.client;
 import java.util.List;
 import java.util.Map;
 
-import nz.org.winters.appspot.acrareporter.shared.ACRALogShared;
-import nz.org.winters.appspot.acrareporter.shared.AppPackageShared;
-import nz.org.winters.appspot.acrareporter.shared.AppUserShared;
-import nz.org.winters.appspot.acrareporter.shared.BasicErrorInfoShared;
-import nz.org.winters.appspot.acrareporter.shared.DailyCountsShared;
 import nz.org.winters.appspot.acrareporter.shared.ErrorListFilter;
 import nz.org.winters.appspot.acrareporter.shared.LoginInfo;
-import nz.org.winters.appspot.acrareporter.shared.MappingFileShared;
+import nz.org.winters.appspot.acrareporter.store.ACRALog;
+import nz.org.winters.appspot.acrareporter.store.AppPackage;
+import nz.org.winters.appspot.acrareporter.store.AppUser;
+import nz.org.winters.appspot.acrareporter.store.BasicErrorInfo;
+import nz.org.winters.appspot.acrareporter.store.DailyCounts;
+import nz.org.winters.appspot.acrareporter.store.MappingFile;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
@@ -37,11 +37,11 @@ public interface RemoteDataServiceAsync
 
   void retrace(Long mappingId, String error, AsyncCallback<String> callback);
 
-  void getPackages(LoginInfo user,AsyncCallback<List<AppPackageShared>> callback);
+  void getPackages(LoginInfo user,AsyncCallback<List<AppPackage>> callback);
 
-  void getBasicErrorInfo(String apppackage, ErrorListFilter elf, AsyncCallback<List<BasicErrorInfoShared>> callback);
+  void getBasicErrorInfo(String apppackage, ErrorListFilter elf, AsyncCallback<List<BasicErrorInfo>> callback);
 
-  void getACRALog(String REPORT_ID, AsyncCallback<ACRALogShared> callback);
+  void getACRALog(String REPORT_ID, AsyncCallback<ACRALog> callback);
 
   void deleteReport(String REPORT_ID, AsyncCallback<Void> callback);
 
@@ -53,7 +53,7 @@ public interface RemoteDataServiceAsync
 
   void markReportEMailed(String REPORT_ID, boolean state, AsyncCallback<Void> callback);
 
-  void getPackage(String PACKAGE_NAME, AsyncCallback<AppPackageShared> callback);
+  void getPackage(String PACKAGE_NAME, AsyncCallback<AppPackage> callback);
 
   void markReportsLookedAt(List<String> reportIds, boolean state, AsyncCallback<Void> callback);
 
@@ -61,15 +61,15 @@ public interface RemoteDataServiceAsync
 
   void markReportsFixed(List<String> reportIds, boolean state, AsyncCallback<Void> callback);
 
-  void writeAppPackageShared(AppPackageShared appPackageShared, AsyncCallback<Void> callback);
+  void writeAppPackage(AppPackage appPackage, AsyncCallback<Void> callback);
 
-  void addAppPackageShared(LoginInfo user,AppPackageShared appPackageShared, AsyncCallback<Void> callback);
+  void addAppPackage(LoginInfo user,AppPackage appPackage, AsyncCallback<Void> callback);
 
-  void writeAppUserShared(AppUserShared appUserShared, AsyncCallback<Void> callback);
+  void writeAppUser(AppUser appUser, AsyncCallback<Void> callback);
 
-  void addAppUserShared(LoginInfo user, AppUserShared appUserShared, AsyncCallback<Void> callback);
+  void addAppUser(LoginInfo user, AppUser appUser, AsyncCallback<Void> callback);
 
-  void getMappingFiles(String PACKAGE_NAME, AsyncCallback<List<MappingFileShared>> callback);
+  void getMappingFiles(String PACKAGE_NAME, AsyncCallback<List<MappingFile>> callback);
 
   void deleteMappings(List<Long> ids, AsyncCallback<Void> callback);
 
@@ -81,13 +81,13 @@ public interface RemoteDataServiceAsync
 
   void findEMailAddresses(List<String> reportIds, AsyncCallback<String> callback);
 
-  void addAppUser(AppUserShared appUserShared, AsyncCallback<Void> callback);
+  void addAppUser(AppUser appUser, AsyncCallback<Void> callback);
 
-  void getPackageGraphDataTotals(LoginInfo user, AsyncCallback<List<AppPackageShared>> callback);
+  void getPackageGraphDataTotals(LoginInfo user, AsyncCallback<List<AppPackage>> callback);
 
-  void getLastMonthDailyCounts(LoginInfo user, AsyncCallback<List<DailyCountsShared>> callback);
+  void getLastMonthDailyCounts(LoginInfo user, AsyncCallback<List<DailyCounts>> callback);
 
-  void getPackageLastMonthDailyCounts(LoginInfo user, String PACKAGE_NAME, AsyncCallback<List<DailyCountsShared>> callback);
+  void getPackageLastMonthDailyCounts(LoginInfo user, String PACKAGE_NAME, AsyncCallback<List<DailyCounts>> callback);
 
 
 }

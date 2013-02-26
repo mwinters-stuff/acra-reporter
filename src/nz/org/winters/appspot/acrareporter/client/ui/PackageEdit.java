@@ -15,8 +15,8 @@ package nz.org.winters.appspot.acrareporter.client.ui;
  * limitations under the License.
 */
 import nz.org.winters.appspot.acrareporter.client.RemoteDataServiceAsync;
-import nz.org.winters.appspot.acrareporter.shared.AppPackageShared;
 import nz.org.winters.appspot.acrareporter.shared.LoginInfo;
+import nz.org.winters.appspot.acrareporter.store.AppPackage;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -38,7 +38,7 @@ public class PackageEdit extends Composite
   private static UIConstants                   constants     = (UIConstants) GWT.create(UIConstants.class);
   public interface DialogCallback
   {
-    public void result(boolean ok, AppPackageShared appPackageShared);
+    public void result(boolean ok, AppPackage appPackage);
   }
 
   private static PackageEmailTemplateUiBinder uiBinder = GWT.create(PackageEmailTemplateUiBinder.class);
@@ -63,7 +63,7 @@ public class PackageEdit extends Composite
   @UiField
   Button                                      buttonCancel;
   private DialogCallback                      callback;
-  private AppPackageShared                    appPackageShared;
+  private AppPackage                    appPackage;
 
   interface PackageEmailTemplateUiBinder extends UiBinder<Widget, PackageEdit>
   {
@@ -72,15 +72,15 @@ public class PackageEdit extends Composite
   public PackageEdit(DialogCallback callback)
   {
     initWidget(uiBinder.createAndBindUi(this));
-    this.appPackageShared = new AppPackageShared();
+    this.appPackage = new AppPackage();
     this.callback = callback;
 
   }
 
-  public PackageEdit(AppPackageShared aps, DialogCallback callback)
+  public PackageEdit(AppPackage aps, DialogCallback callback)
   {
     initWidget(uiBinder.createAndBindUi(this));
-    this.appPackageShared = aps;
+    this.appPackage = aps;
     this.callback = callback;
     textEMailAddress.setText(aps.EMailAddress);
     textSubject.setText(aps.EMailSubject);
@@ -97,41 +97,41 @@ public class PackageEdit extends Composite
   @UiHandler("buttonOK")
   void onButtonOKClick(ClickEvent event)
   {
-    appPackageShared.EMailAddress = textEMailAddress.getText();
-    appPackageShared.EMailSubject = textSubject.getText();
-    appPackageShared.EMailTemplate = textTemplate.getText();
-    appPackageShared.AppName = textAppName.getText();
-    appPackageShared.PACKAGE_NAME = textPackage.getText();
+    appPackage.EMailAddress = textEMailAddress.getText();
+    appPackage.EMailSubject = textSubject.getText();
+    appPackage.EMailTemplate = textTemplate.getText();
+    appPackage.AppName = textAppName.getText();
+    appPackage.PACKAGE_NAME = textPackage.getText();
 
-    appPackageShared.AuthPassword = textAuthPassword.getText();
-    appPackageShared.AuthUsername = textAuthUsername.getText();
-    appPackageShared.DiscardOldVersionReports = checkDisallowOldReports.getValue();
+    appPackage.AuthPassword = textAuthPassword.getText();
+    appPackage.AuthUsername = textAuthUsername.getText();
+    appPackage.DiscardOldVersionReports = checkDisallowOldReports.getValue();
 
-    callback.result(true, appPackageShared);
+    callback.result(true, appPackage);
   }
 
   @UiHandler("buttonCancel")
   void onButtonCancelClick(ClickEvent event)
   {
-    callback.result(false, appPackageShared);
+    callback.result(false, appPackage);
   }
 
-  public static void doEditDialog(AppPackageShared appPackageShared, final RemoteDataServiceAsync remoteService, final DialogCallback callback)
+  public static void doEditDialog(AppPackage appPackage, final RemoteDataServiceAsync remoteService, final DialogCallback callback)
   {
 
     final DialogBox dialogBox = new DialogBox();
-    dialogBox.setText(constants.packageEditLabelEdit(appPackageShared.PACKAGE_NAME));
+    dialogBox.setText(constants.packageEditLabelEdit(appPackage.PACKAGE_NAME));
 
     // Create a table to layout the content
-    PackageEdit pet = new PackageEdit(appPackageShared, new PackageEdit.DialogCallback()
+    PackageEdit pet = new PackageEdit(appPackage, new PackageEdit.DialogCallback()
     {
 
       @Override
-      public void result(boolean ok, final AppPackageShared appPackageShared)
+      public void result(boolean ok, final AppPackage appPackage)
       {
         if (ok)
         {
-          remoteService.writeAppPackageShared(appPackageShared, new AsyncCallback<Void>()
+          remoteService.writeAppPackage(appPackage, new AsyncCallback<Void>()
           {
 
             @Override
@@ -144,7 +144,7 @@ public class PackageEdit extends Composite
             public void onSuccess(Void result)
             {
               dialogBox.hide();
-              callback.result(true, appPackageShared);
+              callback.result(true, appPackage);
 
             }
 
@@ -174,11 +174,11 @@ public class PackageEdit extends Composite
     {
 
       @Override
-      public void result(boolean ok, final AppPackageShared appPackageShared)
+      public void result(boolean ok, final AppPackage appPackage)
       {
         if (ok)
         {
-          remoteService.addAppPackageShared(loginInfo, appPackageShared, new AsyncCallback<Void>()
+          remoteService.addAppPackage(loginInfo, appPackage, new AsyncCallback<Void>()
           {
 
             @Override
@@ -191,7 +191,7 @@ public class PackageEdit extends Composite
             public void onSuccess(Void result)
             {
               dialogBox.hide();
-              callback.result(true, appPackageShared);
+              callback.result(true, appPackage);
 
             }
 

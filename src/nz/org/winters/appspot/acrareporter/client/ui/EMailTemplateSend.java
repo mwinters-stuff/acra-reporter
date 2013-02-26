@@ -19,10 +19,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import nz.org.winters.appspot.acrareporter.client.RemoteDataServiceAsync;
-import nz.org.winters.appspot.acrareporter.shared.ACRALogShared;
-import nz.org.winters.appspot.acrareporter.shared.AppPackageShared;
 import nz.org.winters.appspot.acrareporter.shared.LoginInfo;
 import nz.org.winters.appspot.acrareporter.shared.Utils;
+import nz.org.winters.appspot.acrareporter.store.ACRALog;
+import nz.org.winters.appspot.acrareporter.store.AppPackage;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -57,14 +57,14 @@ public class EMailTemplateSend extends Composite
   private DialogCallback                   mCallback;
   private RemoteDataServiceAsync           remoteService;
   private List<String>                     reportIds;
-  private AppPackageShared                 appPackage;
+  private AppPackage                 appPackage;
   private LoginInfo                        loginInfo;
 
   interface EMailTemplateSendUiBinder extends UiBinder<Widget, EMailTemplateSend>
   {
   }
 
-  public EMailTemplateSend(LoginInfo loginInfo, AppPackageShared appPackage, List<String> reportIds, RemoteDataServiceAsync remoteService, DialogCallback callback)
+  public EMailTemplateSend(LoginInfo loginInfo, AppPackage appPackage, List<String> reportIds, RemoteDataServiceAsync remoteService, DialogCallback callback)
   {
     mCallback = callback;
     this.reportIds = reportIds;
@@ -99,7 +99,7 @@ public class EMailTemplateSend extends Composite
     });
   }
 
-  public EMailTemplateSend(LoginInfo loginInfo, AppPackageShared appPackage, ACRALogShared acraLog, RemoteDataServiceAsync remoteService, DialogCallback callback)
+  public EMailTemplateSend(LoginInfo loginInfo, AppPackage appPackage, ACRALog acraLog, RemoteDataServiceAsync remoteService, DialogCallback callback)
   {
     mCallback = callback;
     this.remoteService = remoteService;
@@ -146,7 +146,7 @@ public class EMailTemplateSend extends Composite
     mCallback.result(false);
   }
 
-  public static void doDialog(LoginInfo loginInfo, AppPackageShared appPackage, List<String> reportIds, final RemoteDataServiceAsync remoteService, final DialogCallback callback)
+  public static void doDialog(LoginInfo loginInfo, AppPackage appPackage, List<String> reportIds, final RemoteDataServiceAsync remoteService, final DialogCallback callback)
   {
     final DialogBox dialogBox = new DialogBox();
     dialogBox.setText(constants.emailLabelSend(appPackage.AppName));
@@ -176,7 +176,7 @@ public class EMailTemplateSend extends Composite
 
   }
 
-  public static void doDialog(LoginInfo loginInfo, AppPackageShared appPackage, ACRALogShared acraLog, final RemoteDataServiceAsync remoteService, final DialogCallback callback)
+  public static void doDialog(LoginInfo loginInfo, AppPackage appPackage, ACRALog acraLog, final RemoteDataServiceAsync remoteService, final DialogCallback callback)
   {
     final DialogBox dialogBox = new DialogBox();
     dialogBox.setText(constants.emailLabelSend(appPackage.AppName));

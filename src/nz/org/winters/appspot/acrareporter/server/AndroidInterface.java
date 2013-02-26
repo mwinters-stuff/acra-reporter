@@ -30,7 +30,6 @@ import nz.org.winters.appspot.acrareporter.store.AppPackage;
 import nz.org.winters.appspot.acrareporter.store.AppUser;
 import nz.org.winters.appspot.acrareporter.store.BasicErrorInfo;
 import nz.org.winters.appspot.acrareporter.store.DailyCounts;
-import nz.org.winters.appspot.acrareporter.store.RegisterDataStores;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -169,7 +168,7 @@ public class AndroidInterface extends HttpServlet
 
   private void getDaily(HttpServletResponse response, AppUser appUser, int daysBack)  throws Exception
   {
-    List<DailyCounts> dailyCounts = DailyCounts.getUserDaysBack(appUser.id, daysBack);
+    List<DailyCounts> dailyCounts = DailyCountsGetters.getUserDaysBack(appUser.id, daysBack);
     Gson gson = new GsonBuilder().setVersion(GSON_VERSION).create();
     response.getWriter().println(gson.toJson(dailyCounts));
     
@@ -179,7 +178,7 @@ public class AndroidInterface extends HttpServlet
 
   private void getPackageDaily(HttpServletResponse response, String packageName, int daysBack)  throws Exception
   {
-    List<DailyCounts> dailyCounts = DailyCounts.getPackageDaysBack(packageName, daysBack);
+    List<DailyCounts> dailyCounts = DailyCountsGetters.getPackageDaysBack(packageName, daysBack);
     Gson gson = new GsonBuilder().setVersion(GSON_VERSION).create();
     response.getWriter().println(gson.toJson(dailyCounts));
     

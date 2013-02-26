@@ -22,7 +22,7 @@ import java.util.Set;
 
 import nz.org.winters.appspot.acrareporter.client.RemoteDataService;
 import nz.org.winters.appspot.acrareporter.client.RemoteDataServiceAsync;
-import nz.org.winters.appspot.acrareporter.shared.MappingFileShared;
+import nz.org.winters.appspot.acrareporter.store.MappingFile;
 
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.TextCell;
@@ -53,19 +53,19 @@ import com.google.gwt.view.client.SelectionModel;
 public class MappingList extends Composite
 {
   private static UIConstants                   constants     = (UIConstants) GWT.create(UIConstants.class);
-  public static final ProvidesKey<MappingFileShared> KEY_PROVIDER = new ProvidesKey<MappingFileShared>()
+  public static final ProvidesKey<MappingFile> KEY_PROVIDER = new ProvidesKey<MappingFile>()
                                                                   {
                                                                     @Override
-                                                                    public Object getKey(MappingFileShared item)
+                                                                    public Object getKey(MappingFile item)
                                                                     {
                                                                       return item == null ? null : item.id;
                                                                     }
                                                                   };
 
-  private final class getMappingsCallback implements AsyncCallback<List<MappingFileShared>>
+  private final class getMappingsCallback implements AsyncCallback<List<MappingFile>>
   {
     @Override
-    public void onSuccess(List<MappingFileShared> result)
+    public void onSuccess(List<MappingFile> result)
     {
       dataProvider.setList(result);
       sortHandler.setList(dataProvider.getList());
@@ -84,8 +84,8 @@ public class MappingList extends Composite
     public void closed();
   }
 
-  private ListHandler<MappingFileShared>         sortHandler;
-  private ListDataProvider<MappingFileShared>    dataProvider  = new ListDataProvider<MappingFileShared>();
+  private ListHandler<MappingFile>         sortHandler;
+  private ListDataProvider<MappingFile>    dataProvider  = new ListDataProvider<MappingFile>();
 
   private static MappingListUiBinder             uiBinder      = GWT.create(MappingListUiBinder.class);
   @UiField
@@ -97,11 +97,11 @@ public class MappingList extends Composite
   @UiField
   Button                                         buttonClose;
   @UiField(provided = true)
-  DataGrid<MappingFileShared>                    dataGrid      = new DataGrid<MappingFileShared>(KEY_PROVIDER);
+  DataGrid<MappingFile>                    dataGrid      = new DataGrid<MappingFile>(KEY_PROVIDER);
   private DialogCallback                         callback;
   private String                                 packageName;
   private final RemoteDataServiceAsync           remoteService = GWT.create(RemoteDataService.class);
-  private MultiSelectionModel<MappingFileShared> selectionModel;
+  private MultiSelectionModel<MappingFile> selectionModel;
 
   interface MappingListUiBinder extends UiBinder<Widget, MappingList>
   {
@@ -113,13 +113,13 @@ public class MappingList extends Composite
     this.callback = callback;
     initWidget(uiBinder.createAndBindUi(this));
 
-    sortHandler = new ListHandler<MappingFileShared>(dataProvider.getList());
+    sortHandler = new ListHandler<MappingFile>(dataProvider.getList());
     dataGrid.addColumnSortHandler(sortHandler);
-    selectionModel = new MultiSelectionModel<MappingFileShared>(KEY_PROVIDER);
-    dataGrid.setSelectionModel(selectionModel, DefaultSelectionEventManager.<MappingFileShared> createCheckboxManager());
+    selectionModel = new MultiSelectionModel<MappingFile>(KEY_PROVIDER);
+    dataGrid.setSelectionModel(selectionModel, DefaultSelectionEventManager.<MappingFile> createCheckboxManager());
     initTableColumns(selectionModel, sortHandler);
 
-    dataProvider.setList(new ArrayList<MappingFileShared>());
+    dataProvider.setList(new ArrayList<MappingFile>());
     sortHandler.setList(dataProvider.getList());
     remoteService.getMappingFiles(packageName, new getMappingsCallback());
 
@@ -131,13 +131,13 @@ public class MappingList extends Composite
 
   }
 
-  private void initTableColumns(final SelectionModel<MappingFileShared> selectionModel, ListHandler<MappingFileShared> sortHandler2)
+  private void initTableColumns(final SelectionModel<MappingFile> selectionModel, ListHandler<MappingFile> sortHandler2)
   {
     // selection check
-    Column<MappingFileShared, Boolean> checkColumn = new Column<MappingFileShared, Boolean>(new CheckboxCell(true, false))
+    Column<MappingFile, Boolean> checkColumn = new Column<MappingFile, Boolean>(new CheckboxCell(true, false))
     {
       @Override
-      public Boolean getValue(MappingFileShared object)
+      public Boolean getValue(MappingFile object)
       {
         // Get the value from the selection model.
         return selectionModel.isSelected(object);
@@ -147,10 +147,10 @@ public class MappingList extends Composite
     dataGrid.setColumnWidth(checkColumn, 40, Unit.PX);
 
     // Date
-    Column<MappingFileShared, String> uploadDateColumn = new Column<MappingFileShared, String>(new TextCell())
+    Column<MappingFile, String> uploadDateColumn = new Column<MappingFile, String>(new TextCell())
     {
       @Override
-      public String getValue(MappingFileShared object)
+      public String getValue(MappingFile object)
       {
         if (object.uploadDate != null)
         {
@@ -162,10 +162,10 @@ public class MappingList extends Composite
       }
     };
     uploadDateColumn.setSortable(true);
-    sortHandler.setComparator(uploadDateColumn, new Comparator<MappingFileShared>()
+    sortHandler.setComparator(uploadDateColumn, new Comparator<MappingFile>()
     {
       @Override
-      public int compare(MappingFileShared o1, MappingFileShared o2)
+      public int compare(MappingFile o1, MappingFile o2)
       {
         if (o1.uploadDate != null && o2.uploadDate != null)
           return o1.uploadDate.compareTo(o2.uploadDate);
@@ -176,19 +176,19 @@ public class MappingList extends Composite
     dataGrid.addColumn(uploadDateColumn,constants.mappingListGridDate());
     dataGrid.setColumnWidth(uploadDateColumn, 200, Unit.PX);
 
-    Column<MappingFileShared, String> versionColumn = new Column<MappingFileShared, String>(new TextCell())
+    Column<MappingFile, String> versionColumn = new Column<MappingFile, String>(new TextCell())
     {
       @Override
-      public String getValue(MappingFileShared object)
+      public String getValue(MappingFile object)
       { // 2012-12-02T18:07:33.000-06:00
         return object.version;
       }
     };
     versionColumn.setSortable(true);
-    sortHandler.setComparator(versionColumn, new Comparator<MappingFileShared>()
+    sortHandler.setComparator(versionColumn, new Comparator<MappingFile>()
     {
       @Override
-      public int compare(MappingFileShared o1, MappingFileShared o2)
+      public int compare(MappingFile o1, MappingFile o2)
       {
         return o1.version.compareTo(o2.version);
       }
@@ -242,8 +242,8 @@ public class MappingList extends Composite
         if (!Window.confirm(constants.mappingListConformDelete()))
           return;
 
-        final Set<MappingFileShared> selected = selectionModel.getSelectedSet();
-        Iterator<MappingFileShared> iter = selected.iterator();
+        final Set<MappingFile> selected = selectionModel.getSelectedSet();
+        Iterator<MappingFile> iter = selected.iterator();
         ArrayList<Long> ids = new ArrayList<Long>();
         while (iter.hasNext())
         {
@@ -295,7 +295,7 @@ public class MappingList extends Composite
       {
         if(selectionModel.getSelectedSet().isEmpty())
           return;
-       final MappingFileShared mfs = selectionModel.getSelectedSet().iterator().next();
+       final MappingFile mfs = selectionModel.getSelectedSet().iterator().next();
         
         InputDialog.doInput(constants.mappingListLabelEditMapping(), constants.mappingListGridVersion(), mfs.version, new InputDialog.DialogCallback()
         {
