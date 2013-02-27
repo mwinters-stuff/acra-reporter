@@ -22,7 +22,7 @@ import java.util.Set;
 
 import nz.org.winters.appspot.acrareporter.client.RemoteDataService;
 import nz.org.winters.appspot.acrareporter.client.RemoteDataServiceAsync;
-import nz.org.winters.appspot.acrareporter.store.MappingFile;
+import nz.org.winters.appspot.acrareporter.store.MappingFileInfo;
 
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.TextCell;
@@ -53,19 +53,19 @@ import com.google.gwt.view.client.SelectionModel;
 public class MappingList extends Composite
 {
   private static UIConstants                   constants     = (UIConstants) GWT.create(UIConstants.class);
-  public static final ProvidesKey<MappingFile> KEY_PROVIDER = new ProvidesKey<MappingFile>()
+  public static final ProvidesKey<MappingFileInfo> KEY_PROVIDER = new ProvidesKey<MappingFileInfo>()
                                                                   {
                                                                     @Override
-                                                                    public Object getKey(MappingFile item)
+                                                                    public Object getKey(MappingFileInfo item)
                                                                     {
                                                                       return item == null ? null : item.id;
                                                                     }
                                                                   };
 
-  private final class getMappingsCallback implements AsyncCallback<List<MappingFile>>
+  private final class getMappingsCallback implements AsyncCallback<List<MappingFileInfo>>
   {
     @Override
-    public void onSuccess(List<MappingFile> result)
+    public void onSuccess(List<MappingFileInfo> result)
     {
       dataProvider.setList(result);
       sortHandler.setList(dataProvider.getList());
@@ -74,7 +74,7 @@ public class MappingList extends Composite
     @Override
     public void onFailure(Throwable caught)
     {
-      // TODO Auto-generated method stub
+      Window.alert(caught.getMessage());
 
     }
   }
@@ -84,8 +84,8 @@ public class MappingList extends Composite
     public void closed();
   }
 
-  private ListHandler<MappingFile>         sortHandler;
-  private ListDataProvider<MappingFile>    dataProvider  = new ListDataProvider<MappingFile>();
+  private ListHandler<MappingFileInfo>         sortHandler;
+  private ListDataProvider<MappingFileInfo>    dataProvider  = new ListDataProvider<MappingFileInfo>();
 
   private static MappingListUiBinder             uiBinder      = GWT.create(MappingListUiBinder.class);
   @UiField
@@ -97,11 +97,11 @@ public class MappingList extends Composite
   @UiField
   Button                                         buttonClose;
   @UiField(provided = true)
-  DataGrid<MappingFile>                    dataGrid      = new DataGrid<MappingFile>(KEY_PROVIDER);
+  DataGrid<MappingFileInfo>                    dataGrid      = new DataGrid<MappingFileInfo>(KEY_PROVIDER);
   private DialogCallback                         callback;
   private String                                 packageName;
   private final RemoteDataServiceAsync           remoteService = GWT.create(RemoteDataService.class);
-  private MultiSelectionModel<MappingFile> selectionModel;
+  private MultiSelectionModel<MappingFileInfo> selectionModel;
 
   interface MappingListUiBinder extends UiBinder<Widget, MappingList>
   {
@@ -113,15 +113,15 @@ public class MappingList extends Composite
     this.callback = callback;
     initWidget(uiBinder.createAndBindUi(this));
 
-    sortHandler = new ListHandler<MappingFile>(dataProvider.getList());
+    sortHandler = new ListHandler<MappingFileInfo>(dataProvider.getList());
     dataGrid.addColumnSortHandler(sortHandler);
-    selectionModel = new MultiSelectionModel<MappingFile>(KEY_PROVIDER);
-    dataGrid.setSelectionModel(selectionModel, DefaultSelectionEventManager.<MappingFile> createCheckboxManager());
+    selectionModel = new MultiSelectionModel<MappingFileInfo>(KEY_PROVIDER);
+    dataGrid.setSelectionModel(selectionModel, DefaultSelectionEventManager.<MappingFileInfo> createCheckboxManager());
     initTableColumns(selectionModel, sortHandler);
 
-    dataProvider.setList(new ArrayList<MappingFile>());
+    dataProvider.setList(new ArrayList<MappingFileInfo>());
     sortHandler.setList(dataProvider.getList());
-    remoteService.getMappingFiles(packageName, new getMappingsCallback());
+   // remoteService.getMappingFiles(packageName, new getMappingsCallback());
 
     dataProvider.addDataDisplay(dataGrid);
 
@@ -131,13 +131,13 @@ public class MappingList extends Composite
 
   }
 
-  private void initTableColumns(final SelectionModel<MappingFile> selectionModel, ListHandler<MappingFile> sortHandler2)
+  private void initTableColumns(final SelectionModel<MappingFileInfo> selectionModel, ListHandler<MappingFileInfo> sortHandler2)
   {
     // selection check
-    Column<MappingFile, Boolean> checkColumn = new Column<MappingFile, Boolean>(new CheckboxCell(true, false))
+    Column<MappingFileInfo, Boolean> checkColumn = new Column<MappingFileInfo, Boolean>(new CheckboxCell(true, false))
     {
       @Override
-      public Boolean getValue(MappingFile object)
+      public Boolean getValue(MappingFileInfo object)
       {
         // Get the value from the selection model.
         return selectionModel.isSelected(object);
@@ -147,10 +147,10 @@ public class MappingList extends Composite
     dataGrid.setColumnWidth(checkColumn, 40, Unit.PX);
 
     // Date
-    Column<MappingFile, String> uploadDateColumn = new Column<MappingFile, String>(new TextCell())
+    Column<MappingFileInfo, String> uploadDateColumn = new Column<MappingFileInfo, String>(new TextCell())
     {
       @Override
-      public String getValue(MappingFile object)
+      public String getValue(MappingFileInfo object)
       {
         if (object.uploadDate != null)
         {
@@ -162,10 +162,10 @@ public class MappingList extends Composite
       }
     };
     uploadDateColumn.setSortable(true);
-    sortHandler.setComparator(uploadDateColumn, new Comparator<MappingFile>()
+    sortHandler.setComparator(uploadDateColumn, new Comparator<MappingFileInfo>()
     {
       @Override
-      public int compare(MappingFile o1, MappingFile o2)
+      public int compare(MappingFileInfo o1, MappingFileInfo o2)
       {
         if (o1.uploadDate != null && o2.uploadDate != null)
           return o1.uploadDate.compareTo(o2.uploadDate);
@@ -176,19 +176,19 @@ public class MappingList extends Composite
     dataGrid.addColumn(uploadDateColumn,constants.mappingListGridDate());
     dataGrid.setColumnWidth(uploadDateColumn, 200, Unit.PX);
 
-    Column<MappingFile, String> versionColumn = new Column<MappingFile, String>(new TextCell())
+    Column<MappingFileInfo, String> versionColumn = new Column<MappingFileInfo, String>(new TextCell())
     {
       @Override
-      public String getValue(MappingFile object)
+      public String getValue(MappingFileInfo object)
       { // 2012-12-02T18:07:33.000-06:00
         return object.version;
       }
     };
     versionColumn.setSortable(true);
-    sortHandler.setComparator(versionColumn, new Comparator<MappingFile>()
+    sortHandler.setComparator(versionColumn, new Comparator<MappingFileInfo>()
     {
       @Override
-      public int compare(MappingFile o1, MappingFile o2)
+      public int compare(MappingFileInfo o1, MappingFileInfo o2)
       {
         return o1.version.compareTo(o2.version);
       }
@@ -242,8 +242,8 @@ public class MappingList extends Composite
         if (!Window.confirm(constants.mappingListConformDelete()))
           return;
 
-        final Set<MappingFile> selected = selectionModel.getSelectedSet();
-        Iterator<MappingFile> iter = selected.iterator();
+        final Set<MappingFileInfo> selected = selectionModel.getSelectedSet();
+        Iterator<MappingFileInfo> iter = selected.iterator();
         ArrayList<Long> ids = new ArrayList<Long>();
         while (iter.hasNext())
         {
@@ -295,7 +295,7 @@ public class MappingList extends Composite
       {
         if(selectionModel.getSelectedSet().isEmpty())
           return;
-       final MappingFile mfs = selectionModel.getSelectedSet().iterator().next();
+       final MappingFileInfo mfs = selectionModel.getSelectedSet().iterator().next();
         
         InputDialog.doInput(constants.mappingListLabelEditMapping(), constants.mappingListGridVersion(), mfs.version, new InputDialog.DialogCallback()
         {

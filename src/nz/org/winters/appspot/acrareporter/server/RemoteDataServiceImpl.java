@@ -21,10 +21,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -46,11 +44,13 @@ import nz.org.winters.appspot.acrareporter.store.AppPackage;
 import nz.org.winters.appspot.acrareporter.store.AppUser;
 import nz.org.winters.appspot.acrareporter.store.BasicErrorInfo;
 import nz.org.winters.appspot.acrareporter.store.DailyCounts;
-import nz.org.winters.appspot.acrareporter.store.MappingFile;
+import nz.org.winters.appspot.acrareporter.store.MappingFileData;
+import nz.org.winters.appspot.acrareporter.store.MappingFileInfo;
 
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.googlecode.objectify.ObjectifyService;
+import com.googlecode.objectify.util.ResultProxy;
 
 /**
  * The server side implementation of the RPC service.
@@ -71,27 +71,27 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
     return StringReTrace.doReTrace(mapping, error);
   }
 
-  @Override
-  public Map<Long, String> getMaps(LoginInfo loginInfo) throws IllegalArgumentException
-  {
-    AppUser appUser = getAppUser(loginInfo);
-
-    HashMap<Long, String> values = new HashMap<Long, String>();
-
-    List<MappingFile> list = ObjectifyService.ofy().load().type(MappingFile.class).filter("Owner", appUser.id).list();
-
-    for (MappingFile file : list)
-    {
-      values.put(file.getId(), file.getApppackage() + " - " + file.getVersion());
-    }
-
-    return values;
-  }
+//  @Override
+//  public Map<Long, String> getMaps(LoginInfo loginInfo) throws IllegalArgumentException
+//  {
+//    AppUser appUser = getAppUser(loginInfo);
+//
+//    HashMap<Long, String> values = new HashMap<Long, String>();
+//
+//    List<MappingFileInfo> list = ObjectifyService.ofy().load().type(MappingFileInfo.class).filter("Owner", appUser.id).list();
+//
+//    for (MappingFileInfo file : list)
+//    {
+//      values.put(file.getId(), file.getApppackage() + " - " + file.getVersion());
+//    }
+//
+//    return values;
+//  }
 
   @Override
   public String retrace(Long mappingId, String error) throws IllegalArgumentException
   {
-    MappingFile file = ObjectifyService.ofy().load().type(MappingFile.class).id(mappingId).get();
+    MappingFileData file = ObjectifyService.ofy().load().type(MappingFileData.class).id(mappingId).get();
     if (file != null)
     {
       return StringReTrace.doReTrace(file.mapping, error);
@@ -167,10 +167,11 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
     }
 
     BasicErrorInfo bei = ObjectifyService.ofy().load().type(BasicErrorInfo.class).filter("REPORT_ID", REPORT_ID).first().get();
-    if (bei != null)
+    if (bei == null)
     {
-      ObjectifyService.ofy().delete().entity(bei);
+      return;
     }
+    ObjectifyService.ofy().delete().entity(bei);
 
     AppUser user = getAppUser(bei.Owner);
     AppPackage ap = getAppPackage(bei.PACKAGE_NAME);
@@ -181,6 +182,12 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
     ap.Totals.incDeleted();
     user.Totals.incDeleted();
 
+    if(bei.lookedAt)
+    {
+      ap.Totals.decLookedAt();
+      user.Totals.decLookedAt();
+    }
+    
     ObjectifyService.ofy().save().entity(counts);
     ObjectifyService.ofy().save().entity(ap);
     ObjectifyService.ofy().save().entity(user);
@@ -279,7 +286,7 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
     if (acraLog != null)
     {
 
-      MappingFile mapping = ObjectifyService.ofy().load().type(MappingFile.class).filter("apppackage", acraLog.PACKAGE_NAME).filter("version", acraLog.APP_VERSION_NAME).first().get();
+      MappingFileData mapping = ObjectifyService.ofy().load().type(MappingFileData.class).filter("PACKAGE_NAME", acraLog.PACKAGE_NAME).filter("version", acraLog.APP_VERSION_NAME).first().get();
       if (mapping != null)
       {
         acraLog.MAPPED_STACK_TRACE = StringReTrace.doReTrace(mapping.mapping, acraLog.STACK_TRACE);
@@ -457,22 +464,22 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
   }
 
   @Override
-  public List<MappingFile> getMappingFiles(String PACKAGE_NAME) throws IllegalArgumentException
+  public List<MappingFileInfo> getMappingFiles(String PACKAGE_NAME) throws IllegalArgumentException
   {
-    List<MappingFile> list = ObjectifyService.ofy().load().type(MappingFile.class).filter("apppackage", PACKAGE_NAME).order("version").list();
-    return new ArrayList<MappingFile>(list);
+    List<MappingFileInfo> list = ObjectifyService.ofy().load().type(MappingFileInfo.class).filter("PACKAGE_NAME", PACKAGE_NAME).order("version").list();
+    return new ArrayList<MappingFileInfo>(list);
   }
 
   @Override
   public void deleteMappings(List<Long> ids) throws IllegalArgumentException
   {
-    ObjectifyService.ofy().delete().type(MappingFile.class).ids(ids);
+    ObjectifyService.ofy().delete().type(MappingFileInfo.class).ids(ids);
   }
 
   @Override
   public void editMappingVersion(Long id, String version) throws IllegalArgumentException
   {
-    MappingFile mf = ObjectifyService.ofy().load().type(MappingFile.class).id(id).get();
+    MappingFileInfo mf = ObjectifyService.ofy().load().type(MappingFileInfo.class).id(id).get();
     mf.setVersion(version);
     ObjectifyService.ofy().save().entity(mf);
 
@@ -485,6 +492,7 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
     ArrayList<Long> idsACRA = new ArrayList<Long>();
     Long owner = 0L;
     String packageName = "";
+    int lookedAt = 0;
 
     for (String report_id : reportIds)
     {
@@ -498,6 +506,11 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
 
       userCounts.incDeleted();
       packageCounts.incDeleted();
+
+      if(beo.lookedAt)
+      {
+        lookedAt++;
+      }
 
       ObjectifyService.ofy().save().entity(userCounts);
       ObjectifyService.ofy().save().entity(packageCounts);
@@ -515,8 +528,11 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
       AppUser appUser = getAppUser(owner);
 
       appPackage.Totals.Deleted = appPackage.Totals.Deleted + reportIds.size();
+      appPackage.Totals.LookedAt = appPackage.Totals.LookedAt - lookedAt;
       ObjectifyService.ofy().save().entity(appPackage);
+
       appUser.Totals.Deleted = appUser.Totals.Deleted + reportIds.size();
+      appUser.Totals.LookedAt = appUser.Totals.LookedAt - lookedAt;
       ObjectifyService.ofy().save().entity(appUser);
 
     }

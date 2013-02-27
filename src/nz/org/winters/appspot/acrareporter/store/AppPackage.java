@@ -74,6 +74,7 @@ public class AppPackage implements Serializable
   @Ignore
   public String  AuthPassword;
 
+  public int mappingsToKeep = 10;
   
   public AppPackage()
   {

@@ -90,7 +90,16 @@
 	</servlet-mapping>
 
 
+	<servlet>
+		<servlet-name>dbupgradeServlet</servlet-name>
+		<servlet-class>nz.org.winters.appspot.acrareporter.server.DatabaseUpgrade</servlet-class>
+	</servlet>
 
+	<servlet-mapping>
+		<servlet-name>dbupgradeServlet</servlet-name>
+		<url-pattern>/cron/dbupgrade</url-pattern>
+	</servlet-mapping>
+	
 	<servlet>
 		<servlet-name>androidServlet</servlet-name>
 		<servlet-class>nz.org.winters.appspot.acrareporter.server.AndroidInterface</servlet-class>

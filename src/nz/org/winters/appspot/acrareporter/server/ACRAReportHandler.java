@@ -33,7 +33,8 @@ import nz.org.winters.appspot.acrareporter.store.AppPackage;
 import nz.org.winters.appspot.acrareporter.store.AppUser;
 import nz.org.winters.appspot.acrareporter.store.BasicErrorInfo;
 import nz.org.winters.appspot.acrareporter.store.DailyCounts;
-import nz.org.winters.appspot.acrareporter.store.MappingFile;
+import nz.org.winters.appspot.acrareporter.store.MappingFileData;
+import nz.org.winters.appspot.acrareporter.store.MappingFileInfo;
 
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.apphosting.api.ApiProxy.OverQuotaException;
@@ -146,10 +147,10 @@ public class ACRAReportHandler extends HttpServlet
 
 
         // find mapping.
-        MappingFile mapping = ObjectifyService.ofy().load().type(MappingFile.class).filter("apppackage", acraLog.PACKAGE_NAME).filter("version", acraLog.APP_VERSION_NAME).first().get();
+        MappingFileData mapping = ObjectifyService.ofy().load().type(MappingFileData.class).filter("PACKAGE_NAME", acraLog.PACKAGE_NAME).filter("version", acraLog.APP_VERSION_NAME).first().get();
         if (mapping != null)
         {
-          MappingFile mostRecentMapping = ObjectifyService.ofy().load().type(MappingFile.class).filter("apppackage", acraLog.PACKAGE_NAME).order("uploadDate").limit(1).first().get();
+          MappingFileInfo mostRecentMapping = ObjectifyService.ofy().load().type(MappingFileInfo.class).filter("PACKAGE_NAME", acraLog.PACKAGE_NAME).order("uploadDate").limit(1).first().get();
           if(mostRecentMapping != null)
           {
             if(mostRecentMapping.getId() != mapping.getId())

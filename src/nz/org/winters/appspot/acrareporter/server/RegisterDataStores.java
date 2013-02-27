@@ -21,9 +21,11 @@ import nz.org.winters.appspot.acrareporter.store.AppUser;
 import nz.org.winters.appspot.acrareporter.store.BasicErrorInfo;
 import nz.org.winters.appspot.acrareporter.store.DailyCounts;
 import nz.org.winters.appspot.acrareporter.store.MappingFile;
+import nz.org.winters.appspot.acrareporter.store.MappingFileData;
+import nz.org.winters.appspot.acrareporter.store.MappingFileInfo;
 
-// helper to register the datastore files.
 import com.googlecode.objectify.ObjectifyService;
+// helper to register the datastore files.
 
 public class RegisterDataStores
 {
@@ -35,6 +37,9 @@ public class RegisterDataStores
     ObjectifyService.register(BasicErrorInfo.class);
     ObjectifyService.register(DailyCounts.class);
     ObjectifyService.register(MappingFile.class);
+    ObjectifyService.register(MappingFileInfo.class);
+    ObjectifyService.register(MappingFileData.class);
+    ObjectifyService.register(SettingStore.class);
 
   }
 }

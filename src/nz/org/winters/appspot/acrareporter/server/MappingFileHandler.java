@@ -15,6 +15,7 @@ package nz.org.winters.appspot.acrareporter.server;
  * limitations under the License.
 */
 import java.io.IOException;
+import java.util.List;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -29,7 +30,8 @@ import nz.org.winters.appspot.acrareporter.shared.Configuration;
 import nz.org.winters.appspot.acrareporter.shared.Utils;
 import nz.org.winters.appspot.acrareporter.store.AppPackage;
 import nz.org.winters.appspot.acrareporter.store.AppUser;
-import nz.org.winters.appspot.acrareporter.store.MappingFile;
+import nz.org.winters.appspot.acrareporter.store.MappingFileData;
+import nz.org.winters.appspot.acrareporter.store.MappingFileInfo;
 
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.apphosting.api.ApiProxy.OverQuotaException;
@@ -153,11 +155,14 @@ public class MappingFileHandler extends HttpServlet
 
       String data = convertStreamToString(input);
 
-      MappingFile mapping = new MappingFile(appUser, apppackage, version);
+      MappingFileData mapping = new MappingFileData(appUser, apppackage, version);
       mapping.add(data);
 
       ObjectifyService.ofy().save().entity(mapping);
 
+      tidyMapList(appPackage);
+      
+      
       if (SystemProperty.environment.value() == SystemProperty.Environment.Value.Production)
       {
         // analytics.
@@ -186,6 +191,17 @@ public class MappingFileHandler extends HttpServlet
       response.getWriter().println("FAIL ERROR " + e.getMessage());
       log.severe(e.getMessage());
     }
+  
+  }
+  
+  private void tidyMapList(AppPackage appPackage)
+  {
+    if(appPackage.mappingsToKeep == 0)
+      return;
+    
+    List<MappingFileInfo> allmaps = ObjectifyService.ofy().load().type(MappingFileInfo.class).filter("PACKAGE_NAME", appPackage.PACKAGE_NAME).order("-uploadDate").offset(appPackage.mappingsToKeep).list();
+    ObjectifyService.ofy().delete().entities(allmaps);
+    
   }
 
 }

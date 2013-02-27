@@ -24,7 +24,7 @@ import nz.org.winters.appspot.acrareporter.store.AppPackage;
 import nz.org.winters.appspot.acrareporter.store.AppUser;
 import nz.org.winters.appspot.acrareporter.store.BasicErrorInfo;
 import nz.org.winters.appspot.acrareporter.store.DailyCounts;
-import nz.org.winters.appspot.acrareporter.store.MappingFile;
+import nz.org.winters.appspot.acrareporter.store.MappingFileInfo;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
@@ -33,7 +33,7 @@ public interface RemoteDataServiceAsync
 {
   void retrace(String mapping, String error, AsyncCallback<String> callback);
 
-  void getMaps(LoginInfo user, AsyncCallback<Map<Long, String>> callback);
+
 
   void retrace(Long mappingId, String error, AsyncCallback<String> callback);
 
@@ -69,7 +69,7 @@ public interface RemoteDataServiceAsync
 
   void addAppUser(LoginInfo user, AppUser appUser, AsyncCallback<Void> callback);
 
-  void getMappingFiles(String PACKAGE_NAME, AsyncCallback<List<MappingFile>> callback);
+  void getMappingFiles(String PACKAGE_NAME, AsyncCallback<List<MappingFileInfo>> callback);
 
   void deleteMappings(List<Long> ids, AsyncCallback<Void> callback);
 

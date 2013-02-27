@@ -30,9 +30,17 @@
 						<g:Label text="" horizontalAlignment="ALIGN_RIGHT" />
 					</g:customCell>
 					<g:customCell>
-					    <g:CheckBox ui:field="checkDisallowOldReports">
-					        Disallow reports from old app versions:
+						<g:CheckBox ui:field="checkDisallowOldReports">
+							Disallow reports from old app versions:
 						</g:CheckBox>
+					</g:customCell>
+				</g:row>
+				<g:row>
+					<g:customCell>
+						<g:Label text="Map files to keep:" horizontalAlignment="ALIGN_RIGHT" />
+					</g:customCell>
+					<g:customCell>
+						<g:IntegerBox ui:field="textMapsToKeep" />
 					</g:customCell>
 				</g:row>
 			</g:Grid>

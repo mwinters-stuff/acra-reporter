@@ -24,7 +24,7 @@ import nz.org.winters.appspot.acrareporter.store.AppPackage;
 import nz.org.winters.appspot.acrareporter.store.AppUser;
 import nz.org.winters.appspot.acrareporter.store.BasicErrorInfo;
 import nz.org.winters.appspot.acrareporter.store.DailyCounts;
-import nz.org.winters.appspot.acrareporter.store.MappingFile;
+import nz.org.winters.appspot.acrareporter.store.MappingFileInfo;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
@@ -38,7 +38,7 @@ public interface RemoteDataService extends RemoteService
   String retrace(String mapping, String error) throws IllegalArgumentException;
   String retrace(Long mappingId, String error) throws IllegalArgumentException;
   
-  Map<Long,String> getMaps(LoginInfo user) throws IllegalArgumentException;
+  
   List<AppPackage> getPackages(LoginInfo user) throws IllegalArgumentException;
 
   AppPackage getPackage(String PACKAGE_NAME) throws IllegalArgumentException;
@@ -65,7 +65,7 @@ public interface RemoteDataService extends RemoteService
   void addAppUser(LoginInfo user, AppUser appUser) throws IllegalArgumentException;
   void addAppUser(AppUser appUser) throws IllegalArgumentException;
   
-  List<MappingFile> getMappingFiles(String PACKAGE_NAME) throws IllegalArgumentException;
+  List<MappingFileInfo> getMappingFiles(String PACKAGE_NAME) throws IllegalArgumentException;
   
   void retraceReport(String REPORT_ID) throws IllegalArgumentException;
   

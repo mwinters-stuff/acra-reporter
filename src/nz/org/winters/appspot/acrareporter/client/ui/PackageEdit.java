@@ -28,6 +28,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
@@ -58,6 +59,8 @@ public class PackageEdit extends Composite
   TextArea                                    textTemplate;
   @UiField
   CheckBox                                    checkDisallowOldReports;
+  @UiField              
+  IntegerBox                                  textMapsToKeep;
   @UiField
   Button                                      buttonOK;
   @UiField
@@ -91,6 +94,7 @@ public class PackageEdit extends Composite
     textAuthUsername.setText(aps.AuthUsername);
     textAuthPassword.setText(aps.AuthPassword);
     checkDisallowOldReports.setValue(aps.DiscardOldVersionReports);
+    textMapsToKeep.setValue(aps.mappingsToKeep);
 
   }
 
@@ -106,7 +110,8 @@ public class PackageEdit extends Composite
     appPackage.AuthPassword = textAuthPassword.getText();
     appPackage.AuthUsername = textAuthUsername.getText();
     appPackage.DiscardOldVersionReports = checkDisallowOldReports.getValue();
-
+    appPackage.mappingsToKeep = textMapsToKeep.getValue();
+    
     callback.result(true, appPackage);
   }
 
