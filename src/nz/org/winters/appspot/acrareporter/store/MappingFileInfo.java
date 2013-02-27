@@ -44,7 +44,7 @@ public class MappingFileInfo implements Serializable
   @Index
   public Date               uploadDate;
 
-  protected MappingFileInfo()
+  public MappingFileInfo()
   {
   };
 

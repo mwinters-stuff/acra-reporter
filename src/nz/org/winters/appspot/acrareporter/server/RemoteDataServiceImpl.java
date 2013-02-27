@@ -286,10 +286,11 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
     if (acraLog != null)
     {
 
-      MappingFileData mapping = ObjectifyService.ofy().load().type(MappingFileData.class).filter("PACKAGE_NAME", acraLog.PACKAGE_NAME).filter("version", acraLog.APP_VERSION_NAME).first().get();
+      MappingFileInfo mapping = ObjectifyService.ofy().load().type(MappingFileInfo.class).filter("PACKAGE_NAME", acraLog.PACKAGE_NAME).filter("version", acraLog.APP_VERSION_NAME).first().get();
       if (mapping != null)
       {
-        acraLog.MAPPED_STACK_TRACE = StringReTrace.doReTrace(mapping.mapping, acraLog.STACK_TRACE);
+        MappingFileData mfd = ObjectifyService.ofy().load().type(MappingFileData.class).filter("mappingFileInfoId",mapping.id).first().get();
+        acraLog.MAPPED_STACK_TRACE = StringReTrace.doReTrace(mfd.mapping, acraLog.STACK_TRACE);
         ObjectifyService.ofy().save().entity(acraLog);
       } else
       {
@@ -467,7 +468,12 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
   public List<MappingFileInfo> getMappingFiles(String PACKAGE_NAME) throws IllegalArgumentException
   {
     List<MappingFileInfo> list = ObjectifyService.ofy().load().type(MappingFileInfo.class).filter("PACKAGE_NAME", PACKAGE_NAME).order("version").list();
-    return new ArrayList<MappingFileInfo>(list);
+    System.out.println(list.toString());
+    ArrayList<MappingFileInfo> newlist = new ArrayList<MappingFileInfo>(list);
+    System.out.println(newlist.toString());
+    
+    return newlist;
+    
   }
 
   @Override

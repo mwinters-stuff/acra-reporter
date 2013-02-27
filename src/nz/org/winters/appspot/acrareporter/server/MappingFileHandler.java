@@ -15,6 +15,7 @@ package nz.org.winters.appspot.acrareporter.server;
  * limitations under the License.
 */
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -35,7 +36,9 @@ import nz.org.winters.appspot.acrareporter.store.MappingFileInfo;
 
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.apphosting.api.ApiProxy.OverQuotaException;
+import com.googlecode.objectify.Key;
 import com.googlecode.objectify.ObjectifyService;
+import com.googlecode.objectify.Ref;
 
 public class MappingFileHandler extends HttpServlet
 {
@@ -155,11 +158,15 @@ public class MappingFileHandler extends HttpServlet
 
       String data = convertStreamToString(input);
 
-      MappingFileData mapping = new MappingFileData(appUser, apppackage, version);
-      mapping.add(data);
+      MappingFileInfo mfi = new MappingFileInfo(appUser, apppackage, version);
 
-      ObjectifyService.ofy().save().entity(mapping);
-
+      Key<MappingFileInfo> resultkey = ObjectifyService.ofy().save().entity(mfi).now();
+      
+      MappingFileData mfd = new MappingFileData();
+      mfd.add(data);
+      mfd.mappingFileInfoId = resultkey.getId();
+      ObjectifyService.ofy().save().entity(mfd);
+      
       tidyMapList(appPackage);
       
       
@@ -200,7 +207,23 @@ public class MappingFileHandler extends HttpServlet
       return;
     
     List<MappingFileInfo> allmaps = ObjectifyService.ofy().load().type(MappingFileInfo.class).filter("PACKAGE_NAME", appPackage.PACKAGE_NAME).order("-uploadDate").offset(appPackage.mappingsToKeep).list();
-    ObjectifyService.ofy().delete().entities(allmaps);
+    
+    if(allmaps.size() > 0)
+    {
+      for(MappingFileInfo map: allmaps)
+      {
+        MappingFileData mfd = ObjectifyService.ofy().load().type(MappingFileData.class).filter("mappingFileInfoId",map.id).first().get();
+        if(mfd != null)
+        {
+          ObjectifyService.ofy().delete().entity(mfd);
+        }
+      }
+      
+      ObjectifyService.ofy().delete().entities(allmaps);
+
+    }
+    
+    
     
   }
 

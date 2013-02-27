@@ -53,7 +53,7 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
   }
 
   @Override
-  public LoginInfo login(String requestUri)
+  public LoginInfo login(String requestUri) throws Exception
   {
     UserService userService = UserServiceFactory.getUserService();
     User user = userService.getCurrentUser();
@@ -62,6 +62,7 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
     loginInfo.setLogoutUrl(userService.createLogoutURL(requestUri));
     loginInfo.setLoginUrl(userService.createLoginURL(requestUri));
 
+    
     if (user != null)
     {
       loginInfo.setEmailAddress(user.getEmail());
@@ -147,6 +148,12 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
     {
       loginInfo.setLoggedIn(false);
     }
+    
+    if(loginInfo.isLoggedIn() && Integer.parseInt(SettingStore.get(Constants.SETTING_DATABASEVERSION, "1")) < Constants.databaseVersion)
+    {
+      throw new Exception("Data store needs an upgrade! administrator needs to run dbupgrade scriptlet");
+    }
+
     return loginInfo;
   }
 

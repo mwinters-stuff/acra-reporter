@@ -39,6 +39,7 @@ import nz.org.winters.appspot.acrareporter.store.MappingFileInfo;
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.apphosting.api.ApiProxy.OverQuotaException;
 import com.googlecode.objectify.ObjectifyService;
+import com.googlecode.objectify.Ref;
 
 public class ACRAReportHandler extends HttpServlet
 {
@@ -145,26 +146,27 @@ public class ACRAReportHandler extends HttpServlet
         basicInfo.USER_CRASH_DATE = acraLog.USER_CRASH_DATE;
         basicInfo.Timestamp = acraLog.Timestamp;
 
-
         // find mapping.
-        MappingFileData mapping = ObjectifyService.ofy().load().type(MappingFileData.class).filter("PACKAGE_NAME", acraLog.PACKAGE_NAME).filter("version", acraLog.APP_VERSION_NAME).first().get();
+        MappingFileInfo mapping = ObjectifyService.ofy().load().type(MappingFileInfo.class).filter("PACKAGE_NAME", acraLog.PACKAGE_NAME).filter("version", acraLog.APP_VERSION_NAME).first().get();
         if (mapping != null)
         {
           MappingFileInfo mostRecentMapping = ObjectifyService.ofy().load().type(MappingFileInfo.class).filter("PACKAGE_NAME", acraLog.PACKAGE_NAME).order("uploadDate").limit(1).first().get();
-          if(mostRecentMapping != null)
+          if (mostRecentMapping != null)
           {
-            if(mostRecentMapping.getId() != mapping.getId())
+            if (mostRecentMapping.getId() != mapping.getId())
             {
               // old version, lets write out message
               response.getWriter().println("OLD VERSION");
-              if(appPackage.DiscardOldVersionReports)
+              if (appPackage.DiscardOldVersionReports)
               {
                 return;
               }
             }
           }
-        	
-          acraLog.MAPPED_STACK_TRACE = StringReTrace.doReTrace(mapping.mapping, acraLog.STACK_TRACE);
+
+          MappingFileData mfd = ObjectifyService.ofy().load().type(MappingFileData.class).filter("mappingFileInfoId",mapping.id).first().get();
+
+          acraLog.MAPPED_STACK_TRACE = StringReTrace.doReTrace(mfd.mapping, acraLog.STACK_TRACE);
         }
 
         ObjectifyService.ofy().save().entity(basicInfo);
@@ -259,15 +261,15 @@ public class ACRAReportHandler extends HttpServlet
     log.SHARED_PREFERENCES = request.getParameter("SHARED_PREFERENCES");
     log.SETTINGS_SYSTEM = request.getParameter("SETTINGS_SYSTEM");
     log.SETTINGS_SECURE = request.getParameter("SETTINGS_SECURE");
-    log.APPLICATION_LOG   = request.getParameter("APPLICATION_LOG");
-    log.DEVICE_ID         = request.getParameter("DEVICE_ID");
-    log.DROPBOX           = request.getParameter("DROPBOX");
-    log.EVENTSLOG         = request.getParameter("EVENTSLOG");
-    log.MEDIA_CODEC_LIST  = request.getParameter("MEDIA_CODEC_LIST");
-    log.RADIOLOG          = request.getParameter("RADIOLOG");
-    log.SETTINGS_GLOBAL   = request.getParameter("SETTINGS_GLOBAL");
-    log.THREAD_DETAILS    = request.getParameter("THREAD_DETAILS");
-    log.USER_IP           = request.getParameter("USER_IP");
+    log.APPLICATION_LOG = request.getParameter("APPLICATION_LOG");
+    log.DEVICE_ID = request.getParameter("DEVICE_ID");
+    log.DROPBOX = request.getParameter("DROPBOX");
+    log.EVENTSLOG = request.getParameter("EVENTSLOG");
+    log.MEDIA_CODEC_LIST = request.getParameter("MEDIA_CODEC_LIST");
+    log.RADIOLOG = request.getParameter("RADIOLOG");
+    log.SETTINGS_GLOBAL = request.getParameter("SETTINGS_GLOBAL");
+    log.THREAD_DETAILS = request.getParameter("THREAD_DETAILS");
+    log.USER_IP = request.getParameter("USER_IP");
     return log;
   }
 
