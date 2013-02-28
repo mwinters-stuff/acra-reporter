@@ -167,6 +167,13 @@ public class ACRAReportHandler extends HttpServlet
           MappingFileData mfd = ObjectifyService.ofy().load().type(MappingFileData.class).filter("mappingFileInfoId",mapping.id).first().get();
 
           acraLog.MAPPED_STACK_TRACE = StringReTrace.doReTrace(mfd.mapping, acraLog.STACK_TRACE);
+        }else 
+        {
+          response.getWriter().println("OLD VERSION");
+          if (appPackage.DiscardOldVersionReports)
+          {
+            return;
+          }
         }
 
         ObjectifyService.ofy().save().entity(basicInfo);
