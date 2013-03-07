@@ -16,6 +16,9 @@ package nz.org.winters.appspot.acrareporter.server;
  * limitations under the License.
  */
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Formatter;
 import java.util.List;
 import java.util.Locale;
@@ -32,13 +35,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.googlecode.objectify.ObjectifyService;
-
 import nz.org.winters.appspot.acrareporter.shared.Configuration;
 import nz.org.winters.appspot.acrareporter.shared.Utils;
 import nz.org.winters.appspot.acrareporter.store.AppPackage;
 import nz.org.winters.appspot.acrareporter.store.AppUser;
 import nz.org.winters.appspot.acrareporter.store.DailyCounts;
+
+import com.googlecode.objectify.ObjectifyService;
 
 public class CronJobEMails extends HttpServlet
 {
@@ -61,6 +64,12 @@ public class CronJobEMails extends HttpServlet
     return ObjectifyService.ofy().load().type(AppPackage.class).filter("Owner", owner).list();
   }
 
+  private String dateString(Date date)
+  {
+    DateFormat sdf = SimpleDateFormat.getDateInstance(SimpleDateFormat.SHORT);
+    return sdf.format(date);
+  }
+  
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException
   {
     resp.setContentType("text/plain");
@@ -103,11 +112,11 @@ public class CronJobEMails extends HttpServlet
           String bodyText;
           try
           {
-            sb.append("Overall for " + count.dateString() + ": \r\n" + "          New: " + count.NewReports() + "\r\n" + "      Reports: " + count.Reports + "\r\n" + "        Fixed: " + count.Fixed + "\r\n" + "    Looked At: " + count.LookedAt + "\r\n" + "      Deleted: " + count.Deleted + "\r\n" + "    Not Fixed: " + (count.NotFixedReports()) + "\r\n\r\n");
+            sb.append("Overall for " + dateString(count.date) + ": \r\n" + "          New: " + count.NewReports() + "\r\n" + "      Reports: " + count.Reports + "\r\n" + "        Fixed: " + count.Fixed + "\r\n" + "    Looked At: " + count.LookedAt + "\r\n" + "      Deleted: " + count.Deleted + "\r\n" + "    Not Fixed: " + (count.NotFixedReports()) + "\r\n\r\n");
 
             if(!packagesYesterday.isEmpty())
             {
-              String datestr = packagesYesterday.get(0).dateString();
+              String datestr = dateString(packagesYesterday.get(0).date);
               sb.append(datestr + " Package Totals\r\n" + header);
   
               for (DailyCounts dailyPackage : packagesYesterday)

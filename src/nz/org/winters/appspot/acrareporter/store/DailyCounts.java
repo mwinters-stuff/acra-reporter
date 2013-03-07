@@ -21,7 +21,6 @@ import java.util.Date;
 
 import nz.org.winters.appspot.acrareporter.shared.Counts;
 
-import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.i18n.shared.DateTimeFormat;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
