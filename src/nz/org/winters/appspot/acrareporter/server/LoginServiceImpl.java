@@ -53,7 +53,7 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
   }
 
   @Override
-  public LoginInfo login(String requestUri) throws Exception
+  public LoginInfo login(String requestUri) throws IllegalArgumentException
   {
     UserService userService = UserServiceFactory.getUserService();
     User user = userService.getCurrentUser();
@@ -151,7 +151,7 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
     
     if(loginInfo.isLoggedIn() && Integer.parseInt(SettingStore.get(Constants.SETTING_DATABASEVERSION, "1")) < Constants.databaseVersion)
     {
-      throw new Exception("Data store needs an upgrade! administrator needs to run dbupgrade scriptlet");
+      throw new IllegalArgumentException("Data store needs an upgrade! administrator needs to run dbupgrade scriptlet");
     }
 
     return loginInfo;

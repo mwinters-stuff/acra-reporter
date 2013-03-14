@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blacklistentries>
+<!--   <blacklist> -->
+<!--     <subnet>217.118.90.179</subnet> -->
+<!--   </blacklist> -->
+<!--   <blacklist> -->
+<!--     <subnet>208.54.86.177</subnet> -->
+<!--   </blacklist> -->
+<!--   <blacklist> -->
+<!--     <subnet>173.209.204.246</subnet> -->
+<!--   </blacklist> -->
+<!--   <blacklist> -->
+<!--     <subnet>173.209.204.211</subnet> -->
+<!--   </blacklist> -->
+<!--   <blacklist> -->
+<!--     <subnet>206.213.157.4</subnet> -->
+<!--   </blacklist> -->
+<!--   <blacklist> -->
+<!--     <subnet>128.124.150.88</subnet> -->
+<!--   </blacklist> -->
+<!--   <blacklist> -->
+<!--     <subnet>173.209.204.229</subnet> -->
+<!--   </blacklist> -->
+<!--   <blacklist> -->
+<!--     <subnet>66.249.76.175</subnet> -->
+<!--   </blacklist> -->
+<!--   <blacklist> -->
+<!--     <subnet>80.187.110.214</subnet> -->
+<!--   </blacklist> -->
+<!--   <blacklist> -->
+<!--     <subnet>66.87.88.205</subnet> -->
+<!--   </blacklist> -->
+<!--   <blacklist> -->
+<!--     <subnet>197.226.137.71</subnet> -->
+<!--   </blacklist> -->
+  
+</blacklistentries>

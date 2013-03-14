@@ -59,6 +59,8 @@ public class PackageEdit extends Composite
   TextArea                                    textTemplate;
   @UiField
   CheckBox                                    checkDisallowOldReports;
+  @UiField
+  CheckBox                                    checkEnabled;
   @UiField              
   IntegerBox                                  textMapsToKeep;
   @UiField
@@ -95,6 +97,7 @@ public class PackageEdit extends Composite
     textAuthPassword.setText(aps.AuthPassword);
     checkDisallowOldReports.setValue(aps.DiscardOldVersionReports);
     textMapsToKeep.setValue(aps.mappingsToKeep);
+    checkEnabled.setValue(aps.enabled);
 
   }
 
@@ -111,6 +114,7 @@ public class PackageEdit extends Composite
     appPackage.AuthUsername = textAuthUsername.getText();
     appPackage.DiscardOldVersionReports = checkDisallowOldReports.getValue();
     appPackage.mappingsToKeep = textMapsToKeep.getValue();
+    appPackage.enabled = checkEnabled.getValue();
     
     callback.result(true, appPackage);
   }

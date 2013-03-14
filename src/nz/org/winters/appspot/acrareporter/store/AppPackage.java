@@ -76,6 +76,8 @@ public class AppPackage implements Serializable
 
   public int mappingsToKeep = 10;
   
+  public boolean enabled = true;
+  
   public AppPackage()
   {
   };

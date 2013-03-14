@@ -17,8 +17,20 @@ package nz.org.winters.appspot.acrareporter.server;
  */
 import java.io.IOException;
 import java.util.Date;
+import java.util.Formatter;
+import java.util.List;
+import java.util.Locale;
+import java.util.Properties;
 import java.util.logging.Logger;
 
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -38,8 +50,9 @@ import nz.org.winters.appspot.acrareporter.store.MappingFileInfo;
 
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.apphosting.api.ApiProxy.OverQuotaException;
+import com.googlecode.objectify.Objectify;
+import com.googlecode.objectify.ObjectifyFactory;
 import com.googlecode.objectify.ObjectifyService;
-import com.googlecode.objectify.Ref;
 
 public class ACRAReportHandler extends HttpServlet
 {
@@ -83,25 +96,40 @@ public class ACRAReportHandler extends HttpServlet
     {
       if (!request.getParameterNames().hasMoreElements())
       {
+        System.out.println("NO DATA");
+        log.severe("NO DATA");
         response.getWriter().println("FAIL NO DATA\n" + request.toString());
         return;
-
       }
 
-      BasicErrorInfo basicInfo = ObjectifyService.ofy().load().type(BasicErrorInfo.class).filter("REPORT_ID", request.getParameter("REPORT_ID")).first().get();
+      Objectify ofy = ObjectifyService.factory().begin();
+      
+      BasicErrorInfo basicInfo = ofy.load().type(BasicErrorInfo.class).filter("REPORT_ID", request.getParameter("REPORT_ID")).first().get();
       if (basicInfo == null)
       {
-        ACRALog acraLog = populateACRA(request);
-
+        String PACKAGE_NAME = request.getParameter("PACKAGE_NAME");
         // get package.
-        AppPackage appPackage = ObjectifyService.ofy().load().type(AppPackage.class).filter("PACKAGE_NAME", acraLog.PACKAGE_NAME).first().get();
+        log.warning("PACKAGE = " + PACKAGE_NAME);
+        
+        AppPackage appPackage = ofy.load().type(AppPackage.class).filter("PACKAGE_NAME", PACKAGE_NAME).first().get();
         if (appPackage == null)
         {
-          response.getWriter().println("FAIL PACKAGE UNKNOWN");
-          log.severe("package unknown " + acraLog.PACKAGE_NAME);
+          System.out.println("package unknown " + PACKAGE_NAME);
+          log.severe("package unknown " + PACKAGE_NAME);
+          response.sendError(HttpServletResponse.SC_FORBIDDEN);
+//          response.getWriter().println("FAIL PACKAGE UNKNOWN");
           return;
         }
-
+        
+        if(!appPackage.enabled)
+        {
+          System.out.println("package disabled " + PACKAGE_NAME);
+          log.severe("package disabled " + PACKAGE_NAME);
+          response.sendError(HttpServletResponse.SC_FORBIDDEN);
+          return;
+        }
+        
+        ACRALog acraLog = populateACRA(request);
         String auth = request.getHeader("Authorization");
         if (Utils.isEmpty(auth))
         {
@@ -118,12 +146,13 @@ public class ACRAReportHandler extends HttpServlet
         }
 
         // get user for package.
-        AppUser appUser = ObjectifyService.ofy().load().type(AppUser.class).id(appPackage.Owner).get();
+        AppUser appUser = ofy.load().type(AppUser.class).id(appPackage.Owner).get();
 
         if (appUser == null)
         {
           response.getWriter().println("FAIL USER UNKNOWN");
           log.severe("User not found " + acraLog.PACKAGE_NAME);
+          response.sendError(HttpServletResponse.SC_FORBIDDEN);
           return;
 
         }
@@ -132,6 +161,7 @@ public class ACRAReportHandler extends HttpServlet
         {
           response.getWriter().println("FAIL SUBSCRIPTION NOT PAID");
           log.severe("subscription unpaid " + appUser.EMailAddress + " - " + acraLog.PACKAGE_NAME);
+          response.sendError(HttpServletResponse.SC_FORBIDDEN);
           return;
         }
 
@@ -147,10 +177,10 @@ public class ACRAReportHandler extends HttpServlet
         basicInfo.Timestamp = acraLog.Timestamp;
 
         // find mapping.
-        MappingFileInfo mapping = ObjectifyService.ofy().load().type(MappingFileInfo.class).filter("PACKAGE_NAME", acraLog.PACKAGE_NAME).filter("version", acraLog.APP_VERSION_NAME).first().get();
+        MappingFileInfo mapping = ofy.load().type(MappingFileInfo.class).filter("PACKAGE_NAME", acraLog.PACKAGE_NAME).filter("version", acraLog.APP_VERSION_NAME).first().get();
         if (mapping != null)
         {
-          MappingFileInfo mostRecentMapping = ObjectifyService.ofy().load().type(MappingFileInfo.class).filter("PACKAGE_NAME", acraLog.PACKAGE_NAME).order("uploadDate").limit(1).first().get();
+          MappingFileInfo mostRecentMapping = ofy.load().type(MappingFileInfo.class).filter("PACKAGE_NAME", acraLog.PACKAGE_NAME).order("uploadDate").limit(1).first().get();
           if (mostRecentMapping != null)
           {
             if (mostRecentMapping.getId() != mapping.getId())
@@ -159,12 +189,14 @@ public class ACRAReportHandler extends HttpServlet
               response.getWriter().println("OLD VERSION");
               if (appPackage.DiscardOldVersionReports)
               {
+                System.out.println("Discarded Old version " + PACKAGE_NAME + "," + mostRecentMapping.version + "," + mapping.version);
+                log.warning("Discarded Old version " + PACKAGE_NAME + "," + mostRecentMapping.version + "," + mapping.version);
                 return;
               }
             }
           }
 
-          MappingFileData mfd = ObjectifyService.ofy().load().type(MappingFileData.class).filter("mappingFileInfoId",mapping.id).first().get();
+          MappingFileData mfd = ofy.load().type(MappingFileData.class).filter("mappingFileInfoId",mapping.id).first().get();
 
           acraLog.MAPPED_STACK_TRACE = StringReTrace.doReTrace(mfd.mapping, acraLog.STACK_TRACE);
         }else 
@@ -172,27 +204,46 @@ public class ACRAReportHandler extends HttpServlet
           response.getWriter().println("OLD VERSION");
           if (appPackage.DiscardOldVersionReports)
           {
+            System.out.println("Discarded Old version " + PACKAGE_NAME + " NO MAPPING");
+            log.warning("Discarded Old version " + PACKAGE_NAME + " NO MAPPING");
             return;
           }
         }
 
-        ObjectifyService.ofy().save().entity(basicInfo);
-        ObjectifyService.ofy().save().entity(acraLog);
+        DailyCounts today = DailyCountsGetters.getToday(acraLog.PACKAGE_NAME);
+        if(today.Reports > 200)
+        {
+          System.out.println("200 Reports in day " + PACKAGE_NAME + " DISCARDING NEW");
+          log.severe("200 Reports in day " + PACKAGE_NAME + " DISCARDING NEW");
+          appPackage.enabled = false;
+          ofy.save().entity(appPackage).now();
+          
+          // email app owner.
+          SendAppTooManyEMail(appUser,appPackage,today);
+          
+          
+          response.sendError(HttpServletResponse.SC_FORBIDDEN);
+          return;
+        }
+        
+        ofy.save().entity(basicInfo).now();
+        ofy.save().entity(acraLog).now();
 
         // Increment counters.
         appUser.Totals.incReports();
-        ObjectifyService.ofy().save().entity(appUser);
+        ofy.save().entity(appUser).now();
 
         appPackage.Totals.incReports();
-        ObjectifyService.ofy().save().entity(appPackage);
+        ofy.save().entity(appPackage).now();
 
         DailyCounts counts = DailyCountsGetters.getToday(appUser.id);
         counts.incReports();
-        ObjectifyService.ofy().save().entity(counts);
+        ofy.save().entity(counts).now();
 
-        counts = DailyCountsGetters.getToday(acraLog.PACKAGE_NAME);
-        counts.incReports();
-        ObjectifyService.ofy().save().entity(counts);
+        today.incReports();
+        ofy.save().entity(today).now();
+
+        ofy = null;
 
         // analytics.
         if (SystemProperty.environment.value() == SystemProperty.Environment.Value.Production)
@@ -212,22 +263,82 @@ public class ACRAReportHandler extends HttpServlet
             tracker.trackSynchronously(focusVer);
           }
         }
+        
 
+        System.out.println("OK " + acraLog.REPORT_ID);
+        log.warning("OK " + acraLog.REPORT_ID);
         response.getWriter().println("OK");
+        
+        
       } else
       {
+        System.out.println("OK SKIPPED REPORT_ID MATCH");
+        log.warning("OK SKIPPED REPORT_ID MATCH");
         response.getWriter().println("OK SKIPPED REPORT_ID MATCH");
       }
 
     } catch (OverQuotaException e)
     {
-      response.getWriter().println("FAIL resource over quota, try again in a few hours.");
+//      response.getWriter().println("FAIL resource over quota, try again in a few hours.");
       log.severe(e.getMessage());
+      System.out.println("OVER QUOTA");
+      response.sendError(HttpServletResponse.SC_FORBIDDEN);
     } catch (Exception e)
     {
       response.getWriter().println("FAIL ERROR " + e.getMessage());
+      System.out.println("Exception " + e.getMessage());
       log.severe(e.getMessage());
     }
+  
+  }
+
+  private void SendAppTooManyEMail(AppUser appUser, AppPackage appPackage, DailyCounts today) throws Exception
+  {
+    Properties props = new Properties();
+    Session session = Session.getInstance(props, null);
+    Message msg = new MimeMessage(session);
+    msg.setFrom(new InternetAddress(Configuration.defaultSenderEMailAddress, Configuration.defaultSenderName));
+    msg.addRecipient(Message.RecipientType.TO, new InternetAddress(appUser.EMailAddress, appUser.FirstName + " " + appUser.LastName));
+    msg.setSubject("ACRA Reporter - App " + appPackage.PACKAGE_NAME + " creating too many error reports!");
+
+    StringBuilder sb = new StringBuilder();
+    Formatter formatter = new Formatter(sb, Locale.US);
+    String bodyText;
+    try
+    {
+      sb.append("This is a notice that the app has been disabled and will not accept any more error reports!\r\n ");
+      sb.append("The app has created 200 errors since " + today.dateString() + " this limit has been implemented to ensure the app engine instance is aviable to all users as excessive error reports used to overload the daily free limits for the app engine instance.\r\n ");
+      sb.append("\r\n\r\n");
+
+      if(!appPackage.DiscardOldVersionReports)
+      {
+        sb.append("There is information on the wiki about modifying your application so it will alert the user if they are logging an error for a old app version which can be a good idea.\r\n");
+      }
+      
+      bodyText = sb.toString();
+    } finally
+    {
+      formatter.close();
+    }
+
+    MimeBodyPart messageBodyPart = new MimeBodyPart();
+
+    messageBodyPart.setContent("<pre>" + bodyText + "</pre>", "text/html");
+
+    MimeMultipart multipart = new MimeMultipart();
+
+    MimeBodyPart messageBodyPartText = new MimeBodyPart();
+
+    messageBodyPartText.setContent(bodyText, "text/plain");
+
+    multipart.addBodyPart(messageBodyPart);
+    multipart.addBodyPart(messageBodyPartText);
+    msg.setContent(multipart);
+
+    Transport.send(msg);
+    
+    
+    
   }
 
   ACRALog populateACRA(HttpServletRequest request)

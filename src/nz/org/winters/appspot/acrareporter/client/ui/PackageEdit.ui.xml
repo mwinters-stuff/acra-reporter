@@ -30,8 +30,18 @@
 						<g:Label text="" horizontalAlignment="ALIGN_RIGHT" />
 					</g:customCell>
 					<g:customCell>
+						<g:CheckBox ui:field="checkEnabled">
+							Enabled
+						</g:CheckBox>
+					</g:customCell>
+				</g:row>
+				<g:row>
+					<g:customCell>
+						<g:Label text="" horizontalAlignment="ALIGN_RIGHT" />
+					</g:customCell>
+					<g:customCell>
 						<g:CheckBox ui:field="checkDisallowOldReports">
-							Disallow reports from old app versions:
+							Disallow reports from old app versions
 						</g:CheckBox>
 					</g:customCell>
 				</g:row>
