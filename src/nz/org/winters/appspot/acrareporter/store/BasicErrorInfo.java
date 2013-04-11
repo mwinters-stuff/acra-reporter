@@ -21,7 +21,6 @@ package nz.org.winters.appspot.acrareporter.store;
 import java.io.Serializable;
 import java.util.Date;
 
-import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
