@@ -16,6 +16,7 @@ package nz.org.winters.appspot.acrareporter.client.ui;
 */
 import nz.org.winters.appspot.acrareporter.client.RemoteDataServiceAsync;
 import nz.org.winters.appspot.acrareporter.shared.LoginInfo;
+import nz.org.winters.appspot.acrareporter.shared.Utils;
 import nz.org.winters.appspot.acrareporter.store.AppPackage;
 
 import com.google.gwt.core.client.GWT;
@@ -79,6 +80,7 @@ public class PackageEdit extends Composite
     initWidget(uiBinder.createAndBindUi(this));
     this.appPackage = new AppPackage();
     this.callback = callback;
+    textMapsToKeep.setValue(10);
 
   }
 
@@ -113,7 +115,7 @@ public class PackageEdit extends Composite
     appPackage.AuthPassword = textAuthPassword.getText();
     appPackage.AuthUsername = textAuthUsername.getText();
     appPackage.DiscardOldVersionReports = checkDisallowOldReports.getValue();
-    appPackage.mappingsToKeep = textMapsToKeep.getValue();
+    appPackage.mappingsToKeep =  Utils.isEmpty(textMapsToKeep.getText()) ? 10 : textMapsToKeep.getValue();
     appPackage.enabled = checkEnabled.getValue();
     
     callback.result(true, appPackage);

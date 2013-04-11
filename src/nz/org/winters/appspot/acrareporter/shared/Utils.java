@@ -31,7 +31,7 @@ public class Utils
   
   public static boolean isEmpty(String in)
   {
-    return in == null || in.isEmpty();
+    return in == null || in.trim().isEmpty();
   }
   
   

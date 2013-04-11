@@ -149,7 +149,7 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
       loginInfo.setLoggedIn(false);
     }
     
-    if(loginInfo.isLoggedIn() && Integer.parseInt(SettingStore.get(Constants.SETTING_DATABASEVERSION, "1")) < Constants.databaseVersion)
+    if(loginInfo.isLoggedIn() && SettingStore.has(Constants.SETTING_DATABASEVERSION) && Integer.parseInt(SettingStore.get(Constants.SETTING_DATABASEVERSION, "1")) < Constants.databaseVersion)
     {
       throw new IllegalArgumentException("Data store needs an upgrade! administrator needs to run dbupgrade scriptlet");
     }

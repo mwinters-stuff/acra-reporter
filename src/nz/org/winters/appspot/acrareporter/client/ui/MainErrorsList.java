@@ -73,56 +73,57 @@ public class MainErrorsList extends Composite implements Handler
     public void showReport(BasicErrorInfo basicErrorInfo);
   }
 
-  private UIConstants                                   constants     = (UIConstants) GWT.create(UIConstants.class);
+  private UIConstants                             constants     = (UIConstants) GWT.create(UIConstants.class);
 
   public static final ProvidesKey<BasicErrorInfo> KEY_PROVIDER  = new ProvidesKey<BasicErrorInfo>()
-                                                                      {
-                                                                        @Override
-                                                                        public Object getKey(BasicErrorInfo item)
-                                                                        {
-                                                                          return item == null ? null : item.id;
-                                                                        }
-                                                                      };
+                                                                {
+                                                                  @Override
+                                                                  public Object getKey(BasicErrorInfo item)
+                                                                  {
+                                                                    return item == null ? null : item.id;
+                                                                  }
+                                                                };
   @UiField(provided = true)
-  SimplePager                                           simplePager;
+  SimplePager                                     simplePager;
 
   @UiField
   DataGrid<BasicErrorInfo>                        dataGrid;
 
   @UiField
-  HorizontalPanel                                       checkMultiSelect;
+  HorizontalPanel                                 checkMultiSelect;
   @UiField
-  MenuItem                                              popupActions;
+  MenuItem                                        popupActions;
   @UiField
-  MenuItem                                              miErrorsAllLookedAt;
+  MenuItem                                        miErrorsAllLookedAt;
   @UiField
-  MenuItem                                              miErrorsAllFixed;
+  MenuItem                                        miErrorsAllFixed;
   @UiField
-  MenuItem                                              miErrorsAllEMailed;
+  MenuItem                                        miErrorsAllEMailed;
   @UiField
-  MenuItem                                              miReportsEMailSelected;
+  MenuItem                                        miReportsEMailSelected;
   @UiField
-  MenuItem                                              miErrorsDeleteSelected;
+  MenuItem                                        miErrorsDeleteSelected;
   @UiField
-  CheckBox                                              checkErrorsMultiSelect;
+  CheckBox                                        checkErrorsMultiSelect;
   @UiField
-  ListBox                                               comboShow;
-  @UiField(provided=true) PushButton buttonRefresh = new PushButton(new Image(Resources.INSTANCE.refresh()));
+  ListBox                                         comboShow;
+  @UiField(provided = true)
+  PushButton                                      buttonRefresh = new PushButton(new Image(Resources.INSTANCE.refresh()));
 
-  private final RemoteDataServiceAsync                  remoteService = GWT.create(RemoteDataService.class);
+  private final RemoteDataServiceAsync            remoteService = GWT.create(RemoteDataService.class);
 
   private ListHandler<BasicErrorInfo>             sortHandler;
   private SingleSelectionModel<BasicErrorInfo>    singleSelectionModel;
   private MultiSelectionModel<BasicErrorInfo>     multipleSelectionModel;
 
-  private static MainErrorsListUiBinder                 uiBinder      = GWT.create(MainErrorsListUiBinder.class);
-  private ListProvider                                  dataProvider  = new ListProvider();
+  private static MainErrorsListUiBinder           uiBinder      = GWT.create(MainErrorsListUiBinder.class);
+  private ListProvider                            dataProvider  = new ListProvider();
 
-  private CallbackShowReport                            mCallbackShowReport;
+  private CallbackShowReport                      mCallbackShowReport;
 
-  private String                                        packageName;
+  private String                                  packageName;
 
-  private LoginInfo                                     mLoginInfo;
+  private LoginInfo                               mLoginInfo;
 
   private AppPackage                              mAppPackage;
 
@@ -152,7 +153,7 @@ public class MainErrorsList extends Composite implements Handler
     comboShow.setItemSelected(0, true);
     // dataGrid = new DataGrid<BasicErrorInfo>();
     // dataGrid.setWidth("100%");
-    
+
     dataGrid.setAutoHeaderRefreshDisabled(true);
     dataGrid.setEmptyTableWidget(new Label(constants.gridEmpty()));
 
@@ -344,8 +345,6 @@ public class MainErrorsList extends Composite implements Handler
       }
     });
 
-  
-
     miErrorsDeleteSelected.setScheduledCommand(new Command()
     {
 
@@ -413,28 +412,28 @@ public class MainErrorsList extends Composite implements Handler
   }
 
   AsyncCallback<List<BasicErrorInfo>> mGetBasicErrorCallback = new AsyncCallback<List<BasicErrorInfo>>()
-                                                                   {
+                                                             {
 
-                                                                     @Override
-                                                                     public void onSuccess(List<BasicErrorInfo> result)
-                                                                     {
-                                                                       dataProvider.stopLoading(result);
-                                                                       stopLoading();
+                                                               @Override
+                                                               public void onSuccess(List<BasicErrorInfo> result)
+                                                               {
+                                                                 dataProvider.stopLoading(result);
+                                                                 stopLoading();
 
-                                                                       sortHandler.setList(dataProvider.getList());
-                                                                       // dataProvider.addDataDisplay(dataGrid);
+                                                                 sortHandler.setList(dataProvider.getList());
+                                                                 // dataProvider.addDataDisplay(dataGrid);
 
-                                                                       ColumnSortEvent.fire(dataGrid, dataGrid.getColumnSortList());
-                                                                     }
+                                                                 ColumnSortEvent.fire(dataGrid, dataGrid.getColumnSortList());
+                                                               }
 
-                                                                     @Override
-                                                                     public void onFailure(Throwable caught)
-                                                                     {
-                                                                       stopLoading();
-                                                                       dataProvider.stopLoading(null);
+                                                               @Override
+                                                               public void onFailure(Throwable caught)
+                                                               {
+                                                                 stopLoading();
+                                                                 dataProvider.stopLoading(null);
 
-                                                                     }
-                                                                   };
+                                                               }
+                                                             };
 
   private void initTableColumns(final SelectionModel<BasicErrorInfo> selectionModel, ListHandler<BasicErrorInfo> sortHandler)
   {
@@ -455,7 +454,7 @@ public class MainErrorsList extends Composite implements Handler
       {
         Date d1 = UIUtils.reportDateToDate(o1.USER_CRASH_DATE);
         Date d2 = UIUtils.reportDateToDate(o2.USER_CRASH_DATE);
-       
+
         if (d1 != null && d2 != null)
         {
           return d1.compareTo(d2);
@@ -507,22 +506,22 @@ public class MainErrorsList extends Composite implements Handler
   }
 
   RowStyles<BasicErrorInfo> mGridRowStyles = new RowStyles<BasicErrorInfo>()
-                                                 {
+                                           {
 
-                                                   @Override
-                                                   public String getStyleNames(BasicErrorInfo row, int rowIndex)
-                                                   {
-                                                     if (!row.fixed && !row.lookedAt)
-                                                     {
-                                                       return "redback";
-                                                     }
-                                                     if (!row.fixed && row.lookedAt)
-                                                     {
-                                                       return "blueback";
-                                                     }
-                                                     return "whiteback";
-                                                   }
-                                                 };
+                                             @Override
+                                             public String getStyleNames(BasicErrorInfo row, int rowIndex)
+                                             {
+                                               if (!row.fixed && !row.lookedAt)
+                                               {
+                                                 return "redback";
+                                               }
+                                               if (!row.fixed && row.lookedAt)
+                                               {
+                                                 return "blueback";
+                                               }
+                                               return "whiteback";
+                                             }
+                                           };
 
   class ListProvider extends ListDataProvider<BasicErrorInfo>
   {
@@ -543,12 +542,14 @@ public class MainErrorsList extends Composite implements Handler
   }
 
   @UiHandler("comboShow")
-  void onComboShowChange(ChangeEvent event) {
+  void onComboShowChange(ChangeEvent event)
+  {
     refreshList();
   }
-  
+
   @UiHandler("buttonRefresh")
-  void onButtonRefreshClick(ClickEvent event) {
+  void onButtonRefreshClick(ClickEvent event)
+  {
     refreshList();
   }
 }

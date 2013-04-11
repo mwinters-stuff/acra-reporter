@@ -862,6 +862,7 @@ public class Overview extends Composite implements ChangeHandler, AppPackageView
         {
           mAppPackage.add(appPackage);
           loadTotalsGraphData();
+          updateTotalsGraph();
 
         }
       }

@@ -129,6 +129,11 @@ public class ACRAReportView extends Composite
   Button                                buttonReportRetrace;
   @UiField
   Button                                buttonReportEmail;
+  
+  @UiField
+  DisclosurePanel                       disStackTrace;
+  @UiField
+  DisclosurePanel                       disRawStackTrace;
 
   NameValueList                         nvlBuild;
   NameValueList                         nvlInitialConfiguration;
@@ -232,13 +237,19 @@ public class ACRAReportView extends Composite
     }
     captionPanelCenter.setText(constants.acraReportViewLabelTitle(result.REPORT_ID));
 
-    textStackTrace.setText(Utils.isEmpty(result.MAPPED_STACK_TRACE) ? result.STACK_TRACE : result.MAPPED_STACK_TRACE);
-    if (textStackTrace.getText().length() == 0)
-    {
-      textStackTrace.setText("Mapping not found!");
-    }
     textStackTrace.setText(result.MAPPED_STACK_TRACE);
     textRawStackTrace.setText(result.STACK_TRACE);
+    
+    if(Utils.isEmpty(result.MAPPED_STACK_TRACE))
+    {
+      disStackTrace.setOpen(false);
+      disRawStackTrace.setOpen(true);
+    }else
+    {
+      disStackTrace.setOpen(true);
+      disRawStackTrace.setOpen(false);
+    }
+    
     nvlBuild.setData(result.BUILD);
     textCustomData.setText(result.CUSTOM_DATA);
     nvlInitialConfiguration.setData(result.INITIAL_CONFIGURATION);

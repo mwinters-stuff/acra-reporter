@@ -28,6 +28,12 @@ public class SettingStore
     return setting.value;
   }
   
+  public static boolean has(String name)
+  {
+    SettingStore setting= ObjectifyService.ofy().load().type(SettingStore.class).filter("name",name).first().get();
+    return setting != null;
+  }  
+  
   public static void put(String name, String value)
   {
     SettingStore setting= ObjectifyService.ofy().load().type(SettingStore.class).filter("name",name).first().get();

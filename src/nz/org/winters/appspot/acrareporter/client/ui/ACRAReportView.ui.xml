@@ -151,14 +151,14 @@
 						</g:header>
 						<g:ScrollPanel>
 							<g:VerticalPanel width="100%">
-								<g:DisclosurePanel open="true" width="100%">
+								<g:DisclosurePanel open="true" width="100%" ui:field="disStackTrace">
 									<g:header>
 										<ui:msg>Remapped stack trace</ui:msg>
 									</g:header>
 									<g:TextArea ui:field="textStackTrace" styleName="monospacetext"
 										width="98%" visibleLines="40" />
 								</g:DisclosurePanel>
-								<g:DisclosurePanel open="false" width="100%">
+								<g:DisclosurePanel open="false" width="100%" ui:field="disRawStackTrace">
 									<g:header>
 										<ui:msg>Original Stack Strace</ui:msg>
 									</g:header>
