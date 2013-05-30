@@ -49,6 +49,16 @@
 	</servlet-mapping>
 
 	<servlet>
+		<servlet-name>mappingfileupload</servlet-name>
+		<servlet-class>nz.org.winters.appspot.acrareporter.server.MappingUploadHandler</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>mappingfileupload</servlet-name>
+		<url-pattern>/mappingupload</url-pattern>
+	</servlet-mapping>
+	
+		<servlet>
 		<servlet-name>acrareporthandler</servlet-name>
 		<servlet-class>nz.org.winters.appspot.acrareporter.server.ACRAReportHandler</servlet-class>
 	</servlet>

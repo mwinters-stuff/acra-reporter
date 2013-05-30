@@ -25,6 +25,7 @@ import nz.org.winters.appspot.acrareporter.store.BasicErrorInfo;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -41,6 +42,7 @@ import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.Widget;
+
 
 public class ACRAReportView extends Composite
 {
@@ -115,6 +117,8 @@ public class ACRAReportView extends Composite
   Label                                 textDeviceID;
   @UiField
   Label                                 textUserIP;
+  @UiField
+  Label                                 textSilent;
   @UiField
   Label                                 textUserEMail;
   @UiField
@@ -280,11 +284,12 @@ public class ACRAReportView extends Composite
     textBrand.setText(result.BRAND);
     textProduct.setText(result.PRODUCT);
     textAndroidVersion.setText(result.ANDROID_VERSION);
-    textMemory.setText(result.TOTAL_MEM_SIZE + "/" + result.AVAILABLE_MEM_SIZE);
+    textMemory.setText(memToMB(result.TOTAL_MEM_SIZE) + " / " + memToMB(result.AVAILABLE_MEM_SIZE));
     textUserAppStartDate.setText(UIUtils.reportDateToLocal(result.USER_APP_START_DATE));
     textUserCrashDate.setText(UIUtils.reportDateToLocal(result.USER_CRASH_DATE));
     textDeviceID.setText(result.DEVICE_ID);
     textUserIP.setText(result.USER_IP);
+    textSilent.setText(result.IS_SILENT);
     textUserEMail.setText(result.USER_EMAIL);
 
     checkFixed.setValue(beio.fixed);
@@ -299,6 +304,18 @@ public class ACRAReportView extends Composite
 
     stopLoading();
 
+  }
+
+
+
+  private String memToMB(String mem)
+  {
+    long value = Long.parseLong(mem);
+    double valued = (double)value / 1024.0 / 1024.0;
+    
+    NumberFormat df = NumberFormat.getFormat("#0.00 mb");
+    
+    return df.format(valued);
   }
 
 
@@ -382,6 +399,7 @@ public class ACRAReportView extends Composite
     textUserCrashDate.setText("");
     textDeviceID.setText("");
     textUserIP.setText("");
+    textSilent.setText("");
 
     textUserEMail.setText("");
     checkFixed.setValue(false);
@@ -414,6 +432,7 @@ public class ACRAReportView extends Composite
       @Override
       public void onSuccess(Void result)
       {
+        clearData();
         mCallbackReloadPackageList.reloadPackageList();
       }
 

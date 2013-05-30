@@ -111,6 +111,13 @@
 							</g:Label>
 							<g:Label text="" width="170px" wordWrap="false" ui:field="textUserIP" />
 						</g:HorizontalPanel>
+						<g:HorizontalPanel spacing="2">
+							<g:Label width="170px" wordWrap="false"
+								horizontalAlignment="ALIGN_RIGHT">
+								<ui:msg>Silent:</ui:msg>
+							</g:Label>
+							<g:Label text="" width="170px" wordWrap="false" ui:field="textSilent" />
+						</g:HorizontalPanel>
 					</g:HorizontalPanel>
 
 					<g:HorizontalPanel verticalAlignment="ALIGN_MIDDLE"

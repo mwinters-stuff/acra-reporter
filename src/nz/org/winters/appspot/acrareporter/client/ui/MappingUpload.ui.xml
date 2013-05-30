@@ -4,7 +4,7 @@
 	<ui:style>
 
 	</ui:style>
-	<g:FormPanel ui:field="form" action="/mappingfile">
+	<g:FormPanel ui:field="form" action="/mappingupload">
 		<g:VerticalPanel>
 			<g:Cell width="100%">
 				<g:Grid cellSpacing="4">
@@ -31,7 +31,7 @@
 							<g:Label text="File:" horizontalAlignment="ALIGN_RIGHT" />
 						</g:customCell>
 						<g:customCell>
-							<g:FileUpload ui:field="fileUpload" />
+							<g:FileUpload ui:field="fileUpload" name="filetoupload" />
 						</g:customCell>
 					</g:row>
 				</g:Grid>

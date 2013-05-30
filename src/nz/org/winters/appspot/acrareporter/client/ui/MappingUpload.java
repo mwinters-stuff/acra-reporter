@@ -72,7 +72,7 @@ public class MappingUpload extends Composite
 
     textPackage.setText(packageName);
 
-   // form.setAction("/mappingfile");
+    form.setAction("/mappingupload");
     form.setEncoding(FormPanel.ENCODING_MULTIPART);
     form.setMethod(FormPanel.METHOD_POST);
     
@@ -95,14 +95,23 @@ public class MappingUpload extends Composite
           Window.alert(constants.mappingUploadAlertNoVersion());
           event.cancel();
         }
-
+        AppLoadingView.getInstance().start();
+        
       }
     });
     form.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler()
     {
       public void onSubmitComplete(SubmitCompleteEvent event)
       {
+        AppLoadingView.getInstance().stop();
         String result = event.getResults();
+        
+        int pos = result.indexOf(";\">");
+        if(pos >= 0)
+        {
+          result = result.substring(pos+3, result.indexOf("</pre")-1).trim();
+        }
+        
         if(Utils.isEmpty(result) || !result.equalsIgnoreCase("OK"))
         {
           Window.alert(constants.mappingUploadAlertResponse(result));

@@ -90,4 +90,8 @@ public interface RemoteDataServiceAsync
   void getPackageLastMonthDailyCounts(LoginInfo user, String PACKAGE_NAME, AsyncCallback<List<DailyCounts>> callback);
 
 
+
+  void purgeReports(String PACKAGE_NAME, AsyncCallback<Void> callback);
+
+
 }

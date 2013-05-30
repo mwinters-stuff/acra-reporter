@@ -13,6 +13,8 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
@@ -32,10 +34,10 @@ public class AppPackageView extends Composite implements CallbackReloadPackageLi
 
   private MainErrorsList                mMainErrorsList;
   private ACRAReportView                mACRAReportView;
-  protected BasicErrorInfo        mSelectedBasicErrorInfo;
+  protected BasicErrorInfo              mSelectedBasicErrorInfo;
 
   private LoginInfo                     mLoginInfo;
-  private AppPackage              mAppPackage;
+  private AppPackage                    mAppPackage;
 
   private UIConstants                   constants     = (UIConstants) GWT.create(UIConstants.class);
 
@@ -64,7 +66,7 @@ public class AppPackageView extends Composite implements CallbackReloadPackageLi
 
     dockLayoutPanel.addWest(mMainErrorsList, 300);
     dockLayoutPanel.add(mACRAReportView);
-    labelTitle.setText(constants.appPackageLabelTitle(appPackage.AppName,appPackage.PACKAGE_NAME));
+    labelTitle.setText(constants.appPackageLabelTitle(appPackage.AppName, appPackage.PACKAGE_NAME));
 
     mACRAReportView.clearData();
     mMainErrorsList.setAppPackage(appPackage.PACKAGE_NAME);
@@ -132,9 +134,38 @@ public class AppPackageView extends Composite implements CallbackReloadPackageLi
       {
         if (ok)
         {
-          labelTitle.setText(constants.appPackageLabelTitle(appPackage.AppName,appPackage.PACKAGE_NAME));
+          labelTitle.setText(constants.appPackageLabelTitle(appPackage.AppName, appPackage.PACKAGE_NAME));
         }
       }
     });
   }
+  
+  
+  @UiHandler("buttonPurge")
+  void onButtonPurgeClick(ClickEvent event)
+  {
+    if (!Window.confirm(constants.packageViewConfirmPurge()))
+      return;
+
+    startLoading();
+    remoteService.purgeReports(mAppPackage.PACKAGE_NAME, new AsyncCallback<Void>()
+    {
+      
+      @Override
+      public void onSuccess(Void result)
+      {
+        mACRAReportView.clearData();
+        reloadPackageList();
+      }
+      
+      @Override
+      public void onFailure(Throwable caught)
+      {
+        stopLoading();
+        
+      }
+    });
+      
+  }
+  
 }

@@ -724,4 +724,61 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
     return new ArrayList<DailyCounts>(counts);
   }
 
+  @Override
+  public void purgeReports(String PACKAGE_NAME) throws IllegalArgumentException
+  {
+    ArrayList<Long> idsBasic = new ArrayList<Long>();
+    ArrayList<Long> idsACRA = new ArrayList<Long>();
+    Long owner = 0L;
+    String packageName = "";
+    int lookedAt = 0;
+
+    List<BasicErrorInfo> beoList = ObjectifyService.ofy().load().type(BasicErrorInfo.class).filter("PACKAGE_NAME", PACKAGE_NAME).list();
+    
+    for (BasicErrorInfo beo: beoList)
+    {
+      
+      ACRALog acra = ObjectifyService.ofy().load().type(ACRALog.class).filter("REPORT_ID", beo.REPORT_ID).first().get();
+      
+      owner = beo.Owner;
+
+      DailyCounts userCounts = DailyCountsGetters.getDate(owner, beo.Timestamp);
+      DailyCounts packageCounts = DailyCountsGetters.getDate(beo.PACKAGE_NAME, beo.Timestamp);
+
+      userCounts.incDeleted();
+      packageCounts.incDeleted();
+
+      if(beo.lookedAt)
+      {
+        lookedAt++;
+      }
+
+      ObjectifyService.ofy().save().entity(userCounts);
+      ObjectifyService.ofy().save().entity(packageCounts);
+
+      idsBasic.add(beo.id);
+      idsACRA.add(acra.id);
+    }
+
+    ObjectifyService.ofy().delete().type(BasicErrorInfo.class).ids(idsBasic);
+    ObjectifyService.ofy().delete().type(ACRALog.class).ids(idsACRA);
+
+    if (owner != 0L)
+    {
+      AppPackage appPackage = getAppPackage(packageName);
+      AppUser appUser = getAppUser(owner);
+
+      appPackage.Totals.Deleted = appPackage.Totals.Deleted + beoList.size();
+      appPackage.Totals.LookedAt = appPackage.Totals.LookedAt - lookedAt;
+      ObjectifyService.ofy().save().entity(appPackage);
+
+      appUser.Totals.Deleted = appUser.Totals.Deleted + beoList.size();
+      appUser.Totals.LookedAt = appUser.Totals.LookedAt - lookedAt;
+      ObjectifyService.ofy().save().entity(appUser);
+
+    }
+    
+    ObjectifyService.ofy().delete().entities(beoList).now();
+  }
+
 }

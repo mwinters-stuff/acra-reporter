@@ -14,6 +14,9 @@
 					<g:Label styleName="gwt-LabelBold" horizontalAlignment="ALIGN_LEFT" ui:field="labelTitle">Crash Reports for:</g:Label>
 				</g:Cell>
 				<g:Cell horizontalAlignment="ALIGN_RIGHT" verticalAlignment="ALIGN_MIDDLE">
+					<g:Button width="100px" ui:field="buttonPurge"><ui:msg>Purge</ui:msg></g:Button>
+				</g:Cell>
+				<g:Cell horizontalAlignment="ALIGN_RIGHT" verticalAlignment="ALIGN_MIDDLE">
 					<g:Button width="100px" ui:field="buttonEditPackage"><ui:msg>Edit App</ui:msg></g:Button>
 				</g:Cell>
 				<g:Cell horizontalAlignment="ALIGN_RIGHT" verticalAlignment="ALIGN_MIDDLE">

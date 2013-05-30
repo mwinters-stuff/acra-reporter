@@ -137,6 +137,7 @@ public interface UIConstants extends Messages
   @Key("signup.alert.authpassword")
   String signupAleryAuthPassword();
 
-
+  @Key("package.view.confirm.purge")
+  String packageViewConfirmPurge();
 
 }

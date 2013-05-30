@@ -67,6 +67,7 @@ public class MappingList extends Composite
     @Override
     public void onSuccess(List<MappingFileInfo> result)
     {
+      AppLoadingView.getInstance().stop();
       dataProvider.setList(result);
       sortHandler.setList(dataProvider.getList());
     }
@@ -74,6 +75,7 @@ public class MappingList extends Composite
     @Override
     public void onFailure(Throwable caught)
     {
+      AppLoadingView.getInstance().stop();
       Window.alert(caught.getMessage());
 
     }
@@ -127,6 +129,8 @@ public class MappingList extends Composite
 
     setupMenus();
     
+    AppLoadingView.getInstance().start();
+
     remoteService.getMappingFiles(packageName, new getMappingsCallback());
 
   }
@@ -249,6 +253,8 @@ public class MappingList extends Composite
         {
           ids.add(iter.next().id);
         }
+        AppLoadingView.getInstance().start();
+
         remoteService.deleteMappings(ids, new AsyncCallback<Void>()
         {
 
@@ -262,6 +268,8 @@ public class MappingList extends Composite
           @Override
           public void onFailure(Throwable caught)
           {
+            AppLoadingView.getInstance().stop();
+
             Window.alert(caught.toString());
           }
         });
@@ -280,6 +288,8 @@ public class MappingList extends Composite
           @Override
           public void result(boolean ok)
           {
+            AppLoadingView.getInstance().start();
+
             remoteService.getMappingFiles(packageName, new getMappingsCallback());
           }
         });
@@ -305,6 +315,8 @@ public class MappingList extends Composite
           {
             if(ok)
             {
+              AppLoadingView.getInstance().start();
+
               remoteService.editMappingVersion(mfs.id, inputValue, new AsyncCallback<Void>()
               {
                 
@@ -317,6 +329,8 @@ public class MappingList extends Composite
                 @Override
                 public void onFailure(Throwable caught)
                 {
+                  AppLoadingView.getInstance().stop();
+
                   Window.alert(caught.toString());
                   
                 }
