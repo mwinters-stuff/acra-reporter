@@ -15,7 +15,6 @@ package nz.org.winters.appspot.acrareporter.client;
  * limitations under the License.
 */
 import java.util.List;
-import java.util.Map;
 
 import nz.org.winters.appspot.acrareporter.shared.ErrorListFilter;
 import nz.org.winters.appspot.acrareporter.shared.LoginInfo;

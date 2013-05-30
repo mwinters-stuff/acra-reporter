@@ -23,7 +23,7 @@ public class DailyCountsGetters
   {
     datein = removeTimeFromDate(datein);
 
-    DailyCounts counts = ObjectifyService.ofy().load().type(DailyCounts.class).filter("Owner", owner).filter("date", datein).first().get();
+    DailyCounts counts = ObjectifyService.ofy().load().type(DailyCounts.class).filter("Owner", owner).filter("date", datein).first().now();
     if (counts == null)
     {
       counts = new DailyCounts();
@@ -65,7 +65,7 @@ public class DailyCountsGetters
 
     datein = removeTimeFromDate(datein);
 
-    DailyCounts counts = ObjectifyService.ofy().load().type(DailyCounts.class).filter("PACKAGE_NAME", package_name).filter("date", datein).first().get();
+    DailyCounts counts = ObjectifyService.ofy().load().type(DailyCounts.class).filter("PACKAGE_NAME", package_name).filter("date", datein).first().now();
     if (counts == null)
     {
       counts = new DailyCounts();

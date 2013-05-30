@@ -37,7 +37,6 @@ import nz.org.winters.appspot.acrareporter.store.MappingFileInfo;
 import nz.org.winters.appspot.acrareporter.store.MemoryFileItemFactory;
 
 import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 import com.google.appengine.api.utils.SystemProperty;
@@ -150,7 +149,7 @@ public class MappingUploadHandler extends HttpServlet
         return;
       }
 
-      AppPackage appPackage = ObjectifyService.ofy().load().type(AppPackage.class).filter("PACKAGE_NAME", apppackage).first().get();
+      AppPackage appPackage = ObjectifyService.ofy().load().type(AppPackage.class).filter("PACKAGE_NAME", apppackage).first().now();
       if (appPackage == null)
       {
         response.getWriter().println("FAIL PACKAGE UNKNOWN: " + apppackage);
@@ -159,7 +158,7 @@ public class MappingUploadHandler extends HttpServlet
       }
 
       // get user for package.
-      AppUser appUser = ObjectifyService.ofy().load().type(AppUser.class).id(appPackage.Owner).get();
+      AppUser appUser = ObjectifyService.ofy().load().type(AppUser.class).id(appPackage.Owner).now();
 
       if (appUser == null)
       {
@@ -232,7 +231,7 @@ public class MappingUploadHandler extends HttpServlet
     {
       for (MappingFileInfo map : allmaps)
       {
-        MappingFileData mfd = ObjectifyService.ofy().load().type(MappingFileData.class).filter("mappingFileInfoId", map.id).first().get();
+        MappingFileData mfd = ObjectifyService.ofy().load().type(MappingFileData.class).filter("mappingFileInfoId", map.id).first().now();
         if (mfd != null)
         {
           ObjectifyService.ofy().delete().entity(mfd);

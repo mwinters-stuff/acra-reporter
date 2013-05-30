@@ -55,8 +55,8 @@ import proguard.obfuscate.MappingProcessor;
  */
 public class StringReTrace implements MappingProcessor
 {
-  private static final String REGEX_OPTION           = "-regex";
-  private static final String VERBOSE_OPTION         = "-verbose";
+  //private static final String REGEX_OPTION           = "-regex";
+ // private static final String VERBOSE_OPTION         = "-verbose";
 
   public static final String  STACK_TRACE_EXPRESSION = "(?:.*?\\bat\\s+%c.%m\\s*\\(.*?(?::%l)?\\)\\s*)|(?:(?:.*?[:\"]\\s+)?%c(?::.*)?)";
 
@@ -74,9 +74,9 @@ public class StringReTrace implements MappingProcessor
   private final String        stackTraceFile;
   private String        result;
 
-  private Map                 classMap               = new HashMap();
-  private Map                 classFieldMap          = new HashMap();
-  private Map                 classMethodMap         = new HashMap();
+  private Map<String,String>                 classMap               = new HashMap<String,String>();
+  private Map<String,Map<String,Set<FieldInfo>>>                 classFieldMap          = new HashMap<String,Map<String,Set<FieldInfo>>>();
+  private Map<String,Map<String,Set<MethodInfo>>>                 classMethodMap         = new HashMap<String,Map<String,Set<MethodInfo>>>();
 
   /**
    * Creates a new ReTrace object to process stack traces on the standard input,
@@ -191,7 +191,7 @@ public class StringReTrace implements MappingProcessor
     // (Reader)new BufferedReader(new FileReader(stackTraceFile)));
 
     StringBuffer outLine = new StringBuffer(256);
-    List extraOutLines = new ArrayList();
+    List<StringBuffer> extraOutLines = new ArrayList<StringBuffer>();
 
     String className = null;
 
@@ -334,20 +334,20 @@ public class StringReTrace implements MappingProcessor
    * Finds the original field name(s), appending the first one to the out line,
    * and any additional alternatives to the extra lines.
    */
-  private void originalFieldName(String className, String obfuscatedFieldName, String type, StringBuffer outLine, List extraOutLines)
+  private void originalFieldName(String className, String obfuscatedFieldName, String type, StringBuffer outLine, List<StringBuffer> extraOutLines)
   {
     int extraIndent = -1;
 
     // Class name -> obfuscated field names.
-    Map fieldMap = (Map) classFieldMap.get(className);
+    Map<String,Set<FieldInfo>> fieldMap = classFieldMap.get(className);
     if (fieldMap != null)
     {
       // Obfuscated field names -> fields.
-      Set fieldSet = (Set) fieldMap.get(obfuscatedFieldName);
+      Set<FieldInfo> fieldSet = fieldMap.get(obfuscatedFieldName);
       if (fieldSet != null)
       {
         // Find all matching fields.
-        Iterator fieldInfoIterator = fieldSet.iterator();
+        Iterator<FieldInfo> fieldInfoIterator = fieldSet.iterator();
         while (fieldInfoIterator.hasNext())
         {
           FieldInfo fieldInfo = (FieldInfo) fieldInfoIterator.next();
@@ -401,23 +401,23 @@ public class StringReTrace implements MappingProcessor
    * Finds the original method name(s), appending the first one to the out line,
    * and any additional alternatives to the extra lines.
    */
-  private void originalMethodName(String className, String obfuscatedMethodName, int lineNumber, String type, String arguments, StringBuffer outLine, List extraOutLines)
+  private void originalMethodName(String className, String obfuscatedMethodName, int lineNumber, String type, String arguments, StringBuffer outLine, List<StringBuffer> extraOutLines)
   {
     int extraIndent = -1;
 
     // Class name -> obfuscated method names.
-    Map methodMap = (Map) classMethodMap.get(className);
+    Map<String,Set<MethodInfo>> methodMap =  classMethodMap.get(className);
     if (methodMap != null)
     {
       // Obfuscated method names -> methods.
-      Set methodSet = (Set) methodMap.get(obfuscatedMethodName);
+      Set<MethodInfo> methodSet = methodMap.get(obfuscatedMethodName);
       if (methodSet != null)
       {
         // Find all matching methods.
-        Iterator methodInfoIterator = methodSet.iterator();
+        Iterator<MethodInfo> methodInfoIterator = methodSet.iterator();
         while (methodInfoIterator.hasNext())
         {
-          MethodInfo methodInfo = (MethodInfo) methodInfoIterator.next();
+          MethodInfo methodInfo = methodInfoIterator.next();
           if (methodInfo.matches(lineNumber, type, arguments))
           {
             // Is this the first matching method?
@@ -531,18 +531,18 @@ public class StringReTrace implements MappingProcessor
   public void processFieldMapping(String className, String fieldType, String fieldName, String newFieldName)
   {
     // Original class name -> obfuscated field names.
-    Map fieldMap = (Map) classFieldMap.get(className);
+    Map<String,Set<FieldInfo>> fieldMap = classFieldMap.get(className);
     if (fieldMap == null)
     {
-      fieldMap = new HashMap();
+      fieldMap = new HashMap<String,Set<FieldInfo>>();
       classFieldMap.put(className, fieldMap);
     }
 
     // Obfuscated field name -> fields.
-    Set fieldSet = (Set) fieldMap.get(newFieldName);
+    Set<FieldInfo> fieldSet = fieldMap.get(newFieldName);
     if (fieldSet == null)
     {
-      fieldSet = new LinkedHashSet();
+      fieldSet = new LinkedHashSet<FieldInfo>();
       fieldMap.put(newFieldName, fieldSet);
     }
 
@@ -553,18 +553,18 @@ public class StringReTrace implements MappingProcessor
   public void processMethodMapping(String className, int firstLineNumber, int lastLineNumber, String methodReturnType, String methodName, String methodArguments, String newMethodName)
   {
     // Original class name -> obfuscated method names.
-    Map methodMap = (Map) classMethodMap.get(className);
+    Map<String,Set<MethodInfo>> methodMap = (Map<String,Set<MethodInfo>>) classMethodMap.get(className);
     if (methodMap == null)
     {
-      methodMap = new HashMap();
+      methodMap = new HashMap<String,Set<MethodInfo>>();
       classMethodMap.put(className, methodMap);
     }
 
     // Obfuscated method name -> methods.
-    Set methodSet = (Set) methodMap.get(newMethodName);
+    Set<MethodInfo> methodSet = (Set<MethodInfo>) methodMap.get(newMethodName);
     if (methodSet == null)
     {
-      methodSet = new LinkedHashSet();
+      methodSet = new LinkedHashSet<MethodInfo>();
       methodMap.put(newMethodName, methodSet);
     }
 

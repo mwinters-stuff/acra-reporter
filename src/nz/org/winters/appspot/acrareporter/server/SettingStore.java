@@ -17,7 +17,7 @@ public class SettingStore
   
   public static String get(String name, String defaultvalue)
   {
-    SettingStore setting= ObjectifyService.ofy().load().type(SettingStore.class).filter("name",name).first().get();
+    SettingStore setting= ObjectifyService.ofy().load().type(SettingStore.class).filter("name",name).first().now();
     if(setting == null)
     {
       setting= new SettingStore();
@@ -30,13 +30,13 @@ public class SettingStore
   
   public static boolean has(String name)
   {
-    SettingStore setting= ObjectifyService.ofy().load().type(SettingStore.class).filter("name",name).first().get();
+    SettingStore setting= ObjectifyService.ofy().load().type(SettingStore.class).filter("name",name).first().now();
     return setting != null;
   }  
   
   public static void put(String name, String value)
   {
-    SettingStore setting= ObjectifyService.ofy().load().type(SettingStore.class).filter("name",name).first().get();
+    SettingStore setting= ObjectifyService.ofy().load().type(SettingStore.class).filter("name",name).first().now();
     if(setting == null)
     {
       setting= new SettingStore();

@@ -57,7 +57,7 @@ public class EMailTemplateSend extends Composite
   private DialogCallback                   mCallback;
   private RemoteDataServiceAsync           remoteService;
   private List<String>                     reportIds;
-  private AppPackage                 appPackage;
+  //private AppPackage                 appPackage;
   private LoginInfo                        loginInfo;
 
   interface EMailTemplateSendUiBinder extends UiBinder<Widget, EMailTemplateSend>
@@ -70,7 +70,7 @@ public class EMailTemplateSend extends Composite
     this.reportIds = reportIds;
     this.remoteService = remoteService;
     this.loginInfo = loginInfo;
-    this.appPackage = appPackage;
+   // this.appPackage = appPackage;
 
     initWidget(uiBinder.createAndBindUi(this));
 
@@ -106,7 +106,7 @@ public class EMailTemplateSend extends Composite
     this.reportIds = new ArrayList<String>();
     this.reportIds.add(acraLog.REPORT_ID);
     this.loginInfo = loginInfo;
-    this.appPackage = appPackage;
+  //  this.appPackage = appPackage;
 
     initWidget(uiBinder.createAndBindUi(this));
 

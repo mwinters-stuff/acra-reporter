@@ -71,7 +71,7 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
       if (userService.isUserLoggedIn())
       { // && userService.isUserAdmin()
         loginInfo.setUserAdmin(userService.isUserAdmin());
-        AppUser appUser = ObjectifyService.ofy().load().type(AppUser.class).filter("EMailAddress", user.getEmail()).first().get();
+        AppUser appUser = ObjectifyService.ofy().load().type(AppUser.class).filter("EMailAddress", user.getEmail()).first().now();
         loginInfo.setAppUserShared(appUser == null ? null : appUser);
         decodeAuthString(appUser);
 
@@ -81,7 +81,7 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
           {
             if (appUser == null)
             {
-              appUser = ObjectifyService.ofy().load().type(AppUser.class).first().get();
+              appUser = ObjectifyService.ofy().load().type(AppUser.class).first().now();
               if (appUser != null)
               {
                 decodeAuthString(appUser);

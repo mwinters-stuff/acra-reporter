@@ -15,7 +15,6 @@ package nz.org.winters.appspot.acrareporter.client.ui;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.Messages;
 
 //  private UIConstants                   constants     = (UIConstants) GWT.create(UIConstants.class);

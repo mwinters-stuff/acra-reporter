@@ -12,12 +12,8 @@ import nz.org.winters.appspot.acrareporter.store.AppPackage;
 import nz.org.winters.appspot.acrareporter.store.AppUser;
 import nz.org.winters.appspot.acrareporter.store.BasicErrorInfo;
 import nz.org.winters.appspot.acrareporter.store.DailyCounts;
-import nz.org.winters.appspot.acrareporter.store.MappingFile;
-import nz.org.winters.appspot.acrareporter.store.MappingFileData;
 
-import com.google.appengine.api.datastore.QueryResultIterator;
 import com.googlecode.objectify.ObjectifyService;
-import com.googlecode.objectify.cmd.Query;
 
 public class RecalcTotals extends HttpServlet
 {
@@ -44,7 +40,7 @@ public class RecalcTotals extends HttpServlet
         return;
       }
 
-      AppUser user = ObjectifyService.ofy().load().type(AppUser.class).filter("EMailAddress", useremail).first().get();
+      AppUser user = ObjectifyService.ofy().load().type(AppUser.class).filter("EMailAddress", useremail).first().now();
       if (user == null)
       {
         resp.getWriter().println("ERROR: User invalid");

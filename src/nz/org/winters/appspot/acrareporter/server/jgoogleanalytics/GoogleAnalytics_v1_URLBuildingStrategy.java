@@ -7,7 +7,7 @@ import java.util.Random;
 
 public class GoogleAnalytics_v1_URLBuildingStrategy implements URLBuildingStrategy
 {
-  private FocusPoint          appFocusPoint;
+  //private FocusPoint          appFocusPoint;
   private String              googleAnalyticsTrackingCode;
   private String              refererURL          = "http://www.winters.org.nz";
 
@@ -30,13 +30,13 @@ public class GoogleAnalytics_v1_URLBuildingStrategy implements URLBuildingStrate
   public GoogleAnalytics_v1_URLBuildingStrategy(String appName, String googleAnalyticsTrackingCode)
   {
     this.googleAnalyticsTrackingCode = googleAnalyticsTrackingCode;
-    this.appFocusPoint = new FocusPoint(appName);
+   // this.appFocusPoint = new FocusPoint(appName);
   }
 
   public GoogleAnalytics_v1_URLBuildingStrategy(String appName, String appVersion, String googleAnalyticsTrackingCode)
   {
     this.googleAnalyticsTrackingCode = googleAnalyticsTrackingCode;
-    this.appFocusPoint = new FocusPoint(appVersion, new FocusPoint(appName));
+   // this.appFocusPoint = new FocusPoint(appVersion, new FocusPoint(appName));
   }
 
   public String buildURL(FocusPoint focusPoint)

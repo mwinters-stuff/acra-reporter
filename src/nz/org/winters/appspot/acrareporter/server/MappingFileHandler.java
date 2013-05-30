@@ -15,7 +15,6 @@ package nz.org.winters.appspot.acrareporter.server;
  * limitations under the License.
 */
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -38,7 +37,6 @@ import com.google.appengine.api.utils.SystemProperty;
 import com.google.apphosting.api.ApiProxy.OverQuotaException;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.ObjectifyService;
-import com.googlecode.objectify.Ref;
 
 public class MappingFileHandler extends HttpServlet
 {
@@ -112,7 +110,7 @@ public class MappingFileHandler extends HttpServlet
         return;
       }
 
-      AppPackage appPackage = ObjectifyService.ofy().load().type(AppPackage.class).filter("PACKAGE_NAME", apppackage).first().get();
+      AppPackage appPackage = ObjectifyService.ofy().load().type(AppPackage.class).filter("PACKAGE_NAME", apppackage).first().now();
       if (appPackage == null)
       {
         response.getWriter().println("FAIL PACKAGE UNKNOWN: " + apppackage);
@@ -121,7 +119,7 @@ public class MappingFileHandler extends HttpServlet
       }
 
       // get user for package.
-      AppUser appUser = ObjectifyService.ofy().load().type(AppUser.class).id(appPackage.Owner).get();
+      AppUser appUser = ObjectifyService.ofy().load().type(AppUser.class).id(appPackage.Owner).now();
 
       if (appUser == null)
       {
@@ -212,7 +210,7 @@ public class MappingFileHandler extends HttpServlet
     {
       for(MappingFileInfo map: allmaps)
       {
-        MappingFileData mfd = ObjectifyService.ofy().load().type(MappingFileData.class).filter("mappingFileInfoId",map.id).first().get();
+        MappingFileData mfd = ObjectifyService.ofy().load().type(MappingFileData.class).filter("mappingFileInfoId",map.id).first().now();
         if(mfd != null)
         {
           ObjectifyService.ofy().delete().entity(mfd);

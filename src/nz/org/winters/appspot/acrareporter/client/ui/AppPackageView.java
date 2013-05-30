@@ -36,7 +36,7 @@ public class AppPackageView extends Composite implements CallbackReloadPackageLi
   private ACRAReportView                mACRAReportView;
   protected BasicErrorInfo              mSelectedBasicErrorInfo;
 
-  private LoginInfo                     mLoginInfo;
+//  private LoginInfo                     mLoginInfo;
   private AppPackage                    mAppPackage;
 
   private UIConstants                   constants     = (UIConstants) GWT.create(UIConstants.class);
@@ -58,7 +58,7 @@ public class AppPackageView extends Composite implements CallbackReloadPackageLi
   {
     mCallbackClosePackageView = callbackClose;
     mAppPackage = appPackage;
-    mLoginInfo = loginInfo;
+   // mLoginInfo = loginInfo;
     initWidget(uiBinder.createAndBindUi(this));
 
     mACRAReportView = new ACRAReportView(this, loginInfo, appPackage);

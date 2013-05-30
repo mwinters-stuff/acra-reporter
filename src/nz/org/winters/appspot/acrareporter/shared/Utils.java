@@ -20,15 +20,15 @@ package nz.org.winters.appspot.acrareporter.shared;
 public class Utils
 {
  
-  private String escapeHtml(String html)
-  {
-    if (html == null)
-    {
-      return null;
-    }
-    return html.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
-  }
-  
+//  private String escapeHtml(String html)
+//  {
+//    if (html == null)
+//    {
+//      return null;
+//    }
+//    return html.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+//  }
+//  
   public static boolean isEmpty(String in)
   {
     return in == null || in.trim().isEmpty();

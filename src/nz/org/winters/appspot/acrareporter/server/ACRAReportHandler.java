@@ -18,13 +18,11 @@ package nz.org.winters.appspot.acrareporter.server;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Formatter;
-import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.logging.Logger;
 
 import javax.mail.Message;
-import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
@@ -51,7 +49,6 @@ import nz.org.winters.appspot.acrareporter.store.MappingFileInfo;
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.apphosting.api.ApiProxy.OverQuotaException;
 import com.googlecode.objectify.Objectify;
-import com.googlecode.objectify.ObjectifyFactory;
 import com.googlecode.objectify.ObjectifyService;
 
 public class ACRAReportHandler extends HttpServlet
@@ -104,14 +101,14 @@ public class ACRAReportHandler extends HttpServlet
 
       Objectify ofy = ObjectifyService.factory().begin();
       
-      BasicErrorInfo basicInfo = ofy.load().type(BasicErrorInfo.class).filter("REPORT_ID", request.getParameter("REPORT_ID")).first().get();
+      BasicErrorInfo basicInfo = ofy.load().type(BasicErrorInfo.class).filter("REPORT_ID", request.getParameter("REPORT_ID")).first().now();
       if (basicInfo == null)
       {
         String PACKAGE_NAME = request.getParameter("PACKAGE_NAME");
         // get package.
         log.warning("PACKAGE = " + PACKAGE_NAME);
         
-        AppPackage appPackage = ofy.load().type(AppPackage.class).filter("PACKAGE_NAME", PACKAGE_NAME).first().get();
+        AppPackage appPackage = ofy.load().type(AppPackage.class).filter("PACKAGE_NAME", PACKAGE_NAME).first().now();
         if (appPackage == null)
         {
           System.out.println("package unknown " + PACKAGE_NAME);
@@ -146,7 +143,7 @@ public class ACRAReportHandler extends HttpServlet
         }
 
         // get user for package.
-        AppUser appUser = ofy.load().type(AppUser.class).id(appPackage.Owner).get();
+        AppUser appUser = ofy.load().type(AppUser.class).id(appPackage.Owner).now();
 
         if (appUser == null)
         {
@@ -177,10 +174,10 @@ public class ACRAReportHandler extends HttpServlet
         basicInfo.Timestamp = acraLog.Timestamp;
 
         // find mapping.
-        MappingFileInfo mapping = ofy.load().type(MappingFileInfo.class).filter("PACKAGE_NAME", acraLog.PACKAGE_NAME).filter("version", acraLog.APP_VERSION_NAME).first().get();
+        MappingFileInfo mapping = ofy.load().type(MappingFileInfo.class).filter("PACKAGE_NAME", acraLog.PACKAGE_NAME).filter("version", acraLog.APP_VERSION_NAME).first().now();
         if (mapping != null)
         {
-          MappingFileInfo mostRecentMapping = ofy.load().type(MappingFileInfo.class).filter("PACKAGE_NAME", acraLog.PACKAGE_NAME).order("uploadDate").limit(1).first().get();
+          MappingFileInfo mostRecentMapping = ofy.load().type(MappingFileInfo.class).filter("PACKAGE_NAME", acraLog.PACKAGE_NAME).order("uploadDate").limit(1).first().now();
           if (mostRecentMapping != null)
           {
             if (mostRecentMapping.getId() != mapping.getId())
@@ -196,7 +193,7 @@ public class ACRAReportHandler extends HttpServlet
             }
           }
 
-          MappingFileData mfd = ofy.load().type(MappingFileData.class).filter("mappingFileInfoId",mapping.id).first().get();
+          MappingFileData mfd = ofy.load().type(MappingFileData.class).filter("mappingFileInfoId",mapping.id).first().now();
 
           acraLog.MAPPED_STACK_TRACE = StringReTrace.doReTrace(mfd.mapping, acraLog.STACK_TRACE);
         }else 

@@ -50,7 +50,6 @@ import nz.org.winters.appspot.acrareporter.store.MappingFileInfo;
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.googlecode.objectify.ObjectifyService;
-import com.googlecode.objectify.util.ResultProxy;
 
 /**
  * The server side implementation of the RPC service.
@@ -91,7 +90,7 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
   @Override
   public String retrace(Long mappingId, String error) throws IllegalArgumentException
   {
-    MappingFileData file = ObjectifyService.ofy().load().type(MappingFileData.class).id(mappingId).get();
+    MappingFileData file = ObjectifyService.ofy().load().type(MappingFileData.class).id(mappingId).now();
     if (file != null)
     {
       return StringReTrace.doReTrace(file.mapping, error);
@@ -153,20 +152,20 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
   @Override
   public ACRALog getACRALog(String REPORT_ID) throws IllegalArgumentException
   {
-    ACRALog log = ObjectifyService.ofy().load().type(ACRALog.class).filter("REPORT_ID", REPORT_ID).first().get();
+    ACRALog log = ObjectifyService.ofy().load().type(ACRALog.class).filter("REPORT_ID", REPORT_ID).first().now();
     return log;
   }
 
   @Override
   public void deleteReport(String REPORT_ID) throws IllegalArgumentException
   {
-    ACRALog log = ObjectifyService.ofy().load().type(ACRALog.class).filter("REPORT_ID", REPORT_ID).first().get();
+    ACRALog log = ObjectifyService.ofy().load().type(ACRALog.class).filter("REPORT_ID", REPORT_ID).first().now();
     if (log != null)
     {
       ObjectifyService.ofy().delete().entity(log);
     }
 
-    BasicErrorInfo bei = ObjectifyService.ofy().load().type(BasicErrorInfo.class).filter("REPORT_ID", REPORT_ID).first().get();
+    BasicErrorInfo bei = ObjectifyService.ofy().load().type(BasicErrorInfo.class).filter("REPORT_ID", REPORT_ID).first().now();
     if (bei == null)
     {
       return;
@@ -196,7 +195,7 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
   @Override
   public void markReportLookedAt(String REPORT_ID, boolean state) throws IllegalArgumentException
   {
-    BasicErrorInfo bei = ObjectifyService.ofy().load().type(BasicErrorInfo.class).filter("REPORT_ID", REPORT_ID).first().get();
+    BasicErrorInfo bei = ObjectifyService.ofy().load().type(BasicErrorInfo.class).filter("REPORT_ID", REPORT_ID).first().now();
     if (bei != null)
     {
       if (bei.lookedAt != state)
@@ -233,7 +232,7 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
   @Override
   public void markReportFixed(String REPORT_ID, boolean state) throws IllegalArgumentException
   {
-    BasicErrorInfo bei = ObjectifyService.ofy().load().type(BasicErrorInfo.class).filter("REPORT_ID", REPORT_ID).first().get();
+    BasicErrorInfo bei = ObjectifyService.ofy().load().type(BasicErrorInfo.class).filter("REPORT_ID", REPORT_ID).first().now();
     if (bei != null)
     {
       if (bei.fixed != state)
@@ -281,15 +280,15 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
   @Override
   public void retraceReport(String REPORT_ID) throws IllegalArgumentException
   {
-    ACRALog acraLog = ObjectifyService.ofy().load().type(ACRALog.class).filter("REPORT_ID", REPORT_ID).first().get();
+    ACRALog acraLog = ObjectifyService.ofy().load().type(ACRALog.class).filter("REPORT_ID", REPORT_ID).first().now();
 
     if (acraLog != null)
     {
 
-      MappingFileInfo mapping = ObjectifyService.ofy().load().type(MappingFileInfo.class).filter("PACKAGE_NAME", acraLog.PACKAGE_NAME).filter("version", acraLog.APP_VERSION_NAME).first().get();
+      MappingFileInfo mapping = ObjectifyService.ofy().load().type(MappingFileInfo.class).filter("PACKAGE_NAME", acraLog.PACKAGE_NAME).filter("version", acraLog.APP_VERSION_NAME).first().now();
       if (mapping != null)
       {
-        MappingFileData mfd = ObjectifyService.ofy().load().type(MappingFileData.class).filter("mappingFileInfoId",mapping.id).first().get();
+        MappingFileData mfd = ObjectifyService.ofy().load().type(MappingFileData.class).filter("mappingFileInfoId",mapping.id).first().now();
         acraLog.MAPPED_STACK_TRACE = StringReTrace.doReTrace(mfd.mapping, acraLog.STACK_TRACE);
         ObjectifyService.ofy().save().entity(acraLog);
       } else
@@ -306,7 +305,7 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
   @Override
   public void markReportEMailed(String REPORT_ID, boolean state) throws IllegalArgumentException
   {
-    BasicErrorInfo bei = ObjectifyService.ofy().load().type(BasicErrorInfo.class).filter("REPORT_ID", REPORT_ID).first().get();
+    BasicErrorInfo bei = ObjectifyService.ofy().load().type(BasicErrorInfo.class).filter("REPORT_ID", REPORT_ID).first().now();
     if (bei != null)
     {
       bei.emailed = state;
@@ -319,7 +318,7 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
   @Override
   public AppPackage getPackage(String PACKAGE_NAME) throws IllegalArgumentException
   {
-    AppPackage app = ObjectifyService.ofy().load().type(AppPackage.class).filter("PACKAGE_NAME", PACKAGE_NAME).first().get();
+    AppPackage app = ObjectifyService.ofy().load().type(AppPackage.class).filter("PACKAGE_NAME", PACKAGE_NAME).first().now();
     if (app != null)
     {
       String[] auths = ServerOnlyUtils.decodeAuthString(app.AuthString);
@@ -367,7 +366,7 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
   @Override
   public void writeAppPackage(AppPackage appPackage) throws IllegalArgumentException
   {
-    AppPackage app = ObjectifyService.ofy().load().type(AppPackage.class).id(appPackage.id).get();
+    AppPackage app = ObjectifyService.ofy().load().type(AppPackage.class).id(appPackage.id).now();
     if (app != null)
     {
       appPackage.AuthString = ServerOnlyUtils.encodeAuthString(appPackage.AuthUsername,appPackage.AuthPassword);
@@ -379,7 +378,7 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
   @Override
   public void addAppPackage(LoginInfo loginInfo, AppPackage appPackage) throws IllegalArgumentException
   {
-    AppPackage app = ObjectifyService.ofy().load().type(AppPackage.class).filter("PACKAGE_NAME", appPackage.PACKAGE_NAME).first().get();
+    AppPackage app = ObjectifyService.ofy().load().type(AppPackage.class).filter("PACKAGE_NAME", appPackage.PACKAGE_NAME).first().now();
     if (app != null)
     {
       throw new IllegalArgumentException("Package already exists");
@@ -392,19 +391,19 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
 
   AppUser getAppUser(LoginInfo loginInfo)
   {
-    return ObjectifyService.ofy().load().type(AppUser.class).id(loginInfo.getAppUserShared().id).get();
+    return ObjectifyService.ofy().load().type(AppUser.class).id(loginInfo.getAppUserShared().id).now();
   }
 
   @Override
   public void writeAppUser(AppUser appUserIn) throws IllegalArgumentException
   {
-    AppUser appUser = ObjectifyService.ofy().load().type(AppUser.class).id(appUserIn.id).get();
+    AppUser appUser = ObjectifyService.ofy().load().type(AppUser.class).id(appUserIn.id).now();
     if (appUser != null)
     {
 
       if (!Utils.isEmpty(appUserIn.AndroidKey))
       {
-        AppUser other = ObjectifyService.ofy().load().type(AppUser.class).filter("AndroidKey", appUserIn.AndroidKey).first().get();
+        AppUser other = ObjectifyService.ofy().load().type(AppUser.class).filter("AndroidKey", appUserIn.AndroidKey).first().now();
         if (other != null)
         {
           if (other.id != appUser.id)
@@ -423,7 +422,7 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
   @Override
   public void addAppUser(LoginInfo user, AppUser appUserIn) throws IllegalArgumentException
   {
-    AppUser appUser = ObjectifyService.ofy().load().type(AppUser.class).filter("EMailAddress", user.getEmailAddress()).first().get();
+    AppUser appUser = ObjectifyService.ofy().load().type(AppUser.class).filter("EMailAddress", user.getEmailAddress()).first().now();
     if (appUser != null)
     {
       throw new IllegalArgumentException(user.getEmailAddress() + " is already a user!");
@@ -485,7 +484,7 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
   @Override
   public void editMappingVersion(Long id, String version) throws IllegalArgumentException
   {
-    MappingFileInfo mf = ObjectifyService.ofy().load().type(MappingFileInfo.class).id(id).get();
+    MappingFileInfo mf = ObjectifyService.ofy().load().type(MappingFileInfo.class).id(id).now();
     mf.setVersion(version);
     ObjectifyService.ofy().save().entity(mf);
 
@@ -502,8 +501,8 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
 
     for (String report_id : reportIds)
     {
-      BasicErrorInfo beo = ObjectifyService.ofy().load().type(BasicErrorInfo.class).filter("REPORT_ID", report_id).first().get();
-      ACRALog acra = ObjectifyService.ofy().load().type(ACRALog.class).filter("REPORT_ID", report_id).first().get();
+      BasicErrorInfo beo = ObjectifyService.ofy().load().type(BasicErrorInfo.class).filter("REPORT_ID", report_id).first().now();
+      ACRALog acra = ObjectifyService.ofy().load().type(ACRALog.class).filter("REPORT_ID", report_id).first().now();
       owner = beo.Owner;
       packageName = beo.PACKAGE_NAME;
 
@@ -547,12 +546,12 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
 
   public AppPackage getAppPackage(String packageName)
   {
-    return ObjectifyService.ofy().load().type(AppPackage.class).filter("PACKAGE_NAME", packageName).first().get();
+    return ObjectifyService.ofy().load().type(AppPackage.class).filter("PACKAGE_NAME", packageName).first().now();
   }
 
   public AppUser getAppUser(Long id)
   {
-    return ObjectifyService.ofy().load().type(AppUser.class).id(id).get();
+    return ObjectifyService.ofy().load().type(AppUser.class).id(id).now();
   }
 
   @Override
@@ -612,7 +611,7 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
   @Override
   public void addAppUser(AppUser appUserIn) throws IllegalArgumentException
   {
-    AppUser appUser = ObjectifyService.ofy().load().type(AppUser.class).filter("EMailAddress", appUserIn.EMailAddress).first().get();
+    AppUser appUser = ObjectifyService.ofy().load().type(AppUser.class).filter("EMailAddress", appUserIn.EMailAddress).first().now();
     if (appUser != null)
     {
       throw new IllegalArgumentException(appUser.EMailAddress + " is already a user!");
@@ -738,7 +737,7 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
     for (BasicErrorInfo beo: beoList)
     {
       
-      ACRALog acra = ObjectifyService.ofy().load().type(ACRALog.class).filter("REPORT_ID", beo.REPORT_ID).first().get();
+      ACRALog acra = ObjectifyService.ofy().load().type(ACRALog.class).filter("REPORT_ID", beo.REPORT_ID).first().now();
       
       owner = beo.Owner;
 

@@ -310,7 +310,7 @@ public class ACRAReportView extends Composite
 
   private String memToMB(String mem)
   {
-    long value = Long.parseLong(mem);
+    double value = Double.parseDouble(mem);
     double valued = (double)value / 1024.0 / 1024.0;
     
     NumberFormat df = NumberFormat.getFormat("#0.00 mb");

@@ -79,7 +79,7 @@ public class AndroidInterface extends HttpServlet
         return;
       }
 
-      AppUser appUser = ObjectifyService.ofy().load().type(AppUser.class).filter("AndroidKey", apiKey).first().get();
+      AppUser appUser = ObjectifyService.ofy().load().type(AppUser.class).filter("AndroidKey", apiKey).first().now();
       if (appUser == null)
       {
         response.getWriter().println("FAIL UNKNOWN API KEY: " + apiKey);
@@ -234,7 +234,7 @@ public class AndroidInterface extends HttpServlet
   private void getError(HttpServletResponse response, String reportId) throws Exception
   {
   //  response.getWriter().println("PACKAGES");
-    ACRALog error = ObjectifyService.ofy().load().type(ACRALog.class).filter("REPORT_ID", reportId).first().get();
+    ACRALog error = ObjectifyService.ofy().load().type(ACRALog.class).filter("REPORT_ID", reportId).first().now();
 
     Gson gson = new GsonBuilder().setVersion(GSON_VERSION).create();
     response.getWriter().println(gson.toJson(error));
