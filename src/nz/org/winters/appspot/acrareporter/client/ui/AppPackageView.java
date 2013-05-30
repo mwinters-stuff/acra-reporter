@@ -112,7 +112,7 @@ public class AppPackageView extends Composite implements CallbackReloadPackageLi
   @UiHandler("buttonMapFiles")
   void onButtonMapFilesClick(ClickEvent event)
   {
-    MappingList.doDialog(mAppPackage.PACKAGE_NAME, new MappingList.DialogCallback()
+    MappingList.doDialog(mACRAReportView.getLoginInfo(), mAppPackage.PACKAGE_NAME, new MappingList.DialogCallback()
     {
 
       @Override

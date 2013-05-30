@@ -5,7 +5,7 @@
 
 	</ui:style>
 	<g:FormPanel ui:field="form" action="/mappingupload">
-		<g:VerticalPanel>
+		<g:VerticalPanel ui:field="vertPanel">
 			<g:Cell width="100%">
 				<g:Grid cellSpacing="4">
 					<g:row>

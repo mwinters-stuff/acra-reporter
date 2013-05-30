@@ -104,6 +104,7 @@ public class MappingUploadHandler extends HttpServlet
       InputStream fileinput = null;
       String apppackage = null;
       String version = null;
+      String idStr = null;
 
       Iterator<FileItem> iter = items.iterator();
       while (iter.hasNext())
@@ -121,11 +122,22 @@ public class MappingUploadHandler extends HttpServlet
           } else if (name.equals("version"))
           {
             version = value;
+          } else if (name.equals("id"))
+          {
+            idStr = value;
+          
           }
         } else
         {
           fileinput = item.getInputStream();
         }
+      }
+
+      if (idStr == null || idStr.isEmpty())
+      {
+        response.getWriter().println("FAIL NOT USER IDENTIFICATION");
+        log.severe("no id");
+        return;
       }
 
       if (apppackage == null || apppackage.isEmpty())
@@ -158,7 +170,7 @@ public class MappingUploadHandler extends HttpServlet
       }
 
       // get user for package.
-      AppUser appUser = ObjectifyService.ofy().load().type(AppUser.class).id(appPackage.Owner).now();
+      AppUser appUser = ObjectifyService.ofy().load().type(AppUser.class).id(Long.parseLong(idStr)).now();
 
       if (appUser == null)
       {
@@ -166,6 +178,13 @@ public class MappingUploadHandler extends HttpServlet
         log.severe("User not found " + apppackage);
         return;
 
+      }
+      
+      if(appPackage.Owner.compareTo(appUser.id) != 0)
+      {
+        response.getWriter().println("FAIL USER DOESN\'T MATCH PACKAGE OWNER");
+        log.severe("User not match package owner" + apppackage + "," + idStr);
+        return;
       }
 
       if (!appUser.isSubscriptionPaid)

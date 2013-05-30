@@ -1,4 +1,5 @@
 package nz.org.winters.appspot.acrareporter.client.ui;
+
 /*
  * Copyright 2013 Mathew Winters
 
@@ -6,14 +7,14 @@ package nz.org.winters.appspot.acrareporter.client.ui;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+ http://www.apache.org/licenses/LICENSE-2.0
 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -22,6 +23,7 @@ import java.util.Set;
 
 import nz.org.winters.appspot.acrareporter.client.RemoteDataService;
 import nz.org.winters.appspot.acrareporter.client.RemoteDataServiceAsync;
+import nz.org.winters.appspot.acrareporter.shared.LoginInfo;
 import nz.org.winters.appspot.acrareporter.store.MappingFileInfo;
 
 import com.google.gwt.cell.client.CheckboxCell;
@@ -52,15 +54,15 @@ import com.google.gwt.view.client.SelectionModel;
 
 public class MappingList extends Composite
 {
-  private static UIConstants                   constants     = (UIConstants) GWT.create(UIConstants.class);
+  private static UIConstants                       constants    = (UIConstants) GWT.create(UIConstants.class);
   public static final ProvidesKey<MappingFileInfo> KEY_PROVIDER = new ProvidesKey<MappingFileInfo>()
+                                                                {
+                                                                  @Override
+                                                                  public Object getKey(MappingFileInfo item)
                                                                   {
-                                                                    @Override
-                                                                    public Object getKey(MappingFileInfo item)
-                                                                    {
-                                                                      return item == null ? null : item.id;
-                                                                    }
-                                                                  };
+                                                                    return item == null ? null : item.id;
+                                                                  }
+                                                                };
 
   private final class getMappingsCallback implements AsyncCallback<List<MappingFileInfo>>
   {
@@ -89,28 +91,30 @@ public class MappingList extends Composite
   private ListHandler<MappingFileInfo>         sortHandler;
   private ListDataProvider<MappingFileInfo>    dataProvider  = new ListDataProvider<MappingFileInfo>();
 
-  private static MappingListUiBinder             uiBinder      = GWT.create(MappingListUiBinder.class);
+  private static MappingListUiBinder           uiBinder      = GWT.create(MappingListUiBinder.class);
   @UiField
-  MenuItem                                       itemDelete;
+  MenuItem                                     itemDelete;
   @UiField
-  MenuItem                                       itemEdit;
+  MenuItem                                     itemEdit;
   @UiField
-  MenuItem                                       itemUpload;
+  MenuItem                                     itemUpload;
   @UiField
-  Button                                         buttonClose;
+  Button                                       buttonClose;
   @UiField(provided = true)
   DataGrid<MappingFileInfo>                    dataGrid      = new DataGrid<MappingFileInfo>(KEY_PROVIDER);
-  private DialogCallback                         callback;
-  private String                                 packageName;
-  private final RemoteDataServiceAsync           remoteService = GWT.create(RemoteDataService.class);
+  private DialogCallback                       callback;
+  private String                               packageName;
+  private final RemoteDataServiceAsync         remoteService = GWT.create(RemoteDataService.class);
   private MultiSelectionModel<MappingFileInfo> selectionModel;
+  private LoginInfo                            loginInfo;
 
   interface MappingListUiBinder extends UiBinder<Widget, MappingList>
   {
   }
 
-  public MappingList(String packageName, DialogCallback callback)
+  public MappingList(LoginInfo loginInfo, String packageName, DialogCallback callback)
   {
+    this.loginInfo = loginInfo;
     this.packageName = packageName;
     this.callback = callback;
     initWidget(uiBinder.createAndBindUi(this));
@@ -123,12 +127,12 @@ public class MappingList extends Composite
 
     dataProvider.setList(new ArrayList<MappingFileInfo>());
     sortHandler.setList(dataProvider.getList());
-   // remoteService.getMappingFiles(packageName, new getMappingsCallback());
+    // remoteService.getMappingFiles(packageName, new getMappingsCallback());
 
     dataProvider.addDataDisplay(dataGrid);
 
     setupMenus();
-    
+
     AppLoadingView.getInstance().start();
 
     remoteService.getMappingFiles(packageName, new getMappingsCallback());
@@ -177,7 +181,7 @@ public class MappingList extends Composite
           return 0;
       }
     });
-    dataGrid.addColumn(uploadDateColumn,constants.mappingListGridDate());
+    dataGrid.addColumn(uploadDateColumn, constants.mappingListGridDate());
     dataGrid.setColumnWidth(uploadDateColumn, 200, Unit.PX);
 
     Column<MappingFileInfo, String> versionColumn = new Column<MappingFileInfo, String>(new TextCell())
@@ -208,13 +212,13 @@ public class MappingList extends Composite
     callback.closed();
   }
 
-  public static void doDialog(final String packageName, final DialogCallback callback)
+  public static void doDialog(final LoginInfo loginInfo, final String packageName, final DialogCallback callback)
   {
 
     final DialogBox dialogBox = new DialogBox();
     dialogBox.setText(constants.mappingListLabelTitle(packageName));
 
-    MappingList mappinglist = new MappingList(packageName, new DialogCallback()
+    MappingList mappinglist = new MappingList(loginInfo, packageName, new DialogCallback()
     {
 
       @Override
@@ -241,7 +245,7 @@ public class MappingList extends Composite
       @Override
       public void execute()
       {
-        if(selectionModel.getSelectedSet().isEmpty())
+        if (selectionModel.getSelectedSet().isEmpty())
           return;
         if (!Window.confirm(constants.mappingListConformDelete()))
           return;
@@ -282,7 +286,7 @@ public class MappingList extends Composite
       @Override
       public void execute()
       {
-        MappingUpload.doEditDialog(packageName, new MappingUpload.DialogCallback()
+        MappingUpload.doEditDialog(loginInfo, packageName, new MappingUpload.DialogCallback()
         {
 
           @Override
@@ -303,46 +307,45 @@ public class MappingList extends Composite
       @Override
       public void execute()
       {
-        if(selectionModel.getSelectedSet().isEmpty())
+        if (selectionModel.getSelectedSet().isEmpty())
           return;
-       final MappingFileInfo mfs = selectionModel.getSelectedSet().iterator().next();
-        
+        final MappingFileInfo mfs = selectionModel.getSelectedSet().iterator().next();
+
         InputDialog.doInput(constants.mappingListLabelEditMapping(), constants.mappingListGridVersion(), mfs.version, new InputDialog.DialogCallback()
         {
-          
+
           @Override
           public void result(boolean ok, String inputValue)
           {
-            if(ok)
+            if (ok)
             {
               AppLoadingView.getInstance().start();
 
               remoteService.editMappingVersion(mfs.id, inputValue, new AsyncCallback<Void>()
               {
-                
+
                 @Override
                 public void onSuccess(Void result)
                 {
                   remoteService.getMappingFiles(packageName, new getMappingsCallback());
                 }
-                
+
                 @Override
                 public void onFailure(Throwable caught)
                 {
                   AppLoadingView.getInstance().stop();
 
                   Window.alert(caught.toString());
-                  
+
                 }
               });
             }
-            
+
           }
         });
-       }
+      }
     });
-    
-    
+
   }
 
 }

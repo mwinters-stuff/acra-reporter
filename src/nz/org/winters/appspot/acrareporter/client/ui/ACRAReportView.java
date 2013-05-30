@@ -171,7 +171,7 @@ public class ACRAReportView extends Composite
 
   public ACRAReportView(CallbackReloadPackageList callback, LoginInfo loginInfo, AppPackage appPackage)
   {
-    mLoginInfo = loginInfo;
+    setLoginInfo(loginInfo);
 
     mCallbackReloadPackageList = callback;
     mAppPackage = appPackage;
@@ -558,7 +558,7 @@ public class ACRAReportView extends Composite
   @UiHandler("buttonReportEmail")
   void onButtonReportEmailClick(ClickEvent event)
   {
-    EMailTemplateSend.doDialog(mLoginInfo, mAppPackage, mACRALog, remoteService, new EMailTemplateSend.DialogCallback()
+    EMailTemplateSend.doDialog(getLoginInfo(), mAppPackage, mACRALog, remoteService, new EMailTemplateSend.DialogCallback()
     {
 
       @Override
@@ -592,6 +592,20 @@ public class ACRAReportView extends Composite
   public void stopLoading()
   {
     AppLoadingView.getInstance().stop();
+  }
+
+
+
+  public LoginInfo getLoginInfo()
+  {
+    return mLoginInfo;
+  }
+
+
+
+  public void setLoginInfo(LoginInfo mLoginInfo)
+  {
+    this.mLoginInfo = mLoginInfo;
   }
 
 }

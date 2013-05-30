@@ -729,7 +729,7 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
     ArrayList<Long> idsBasic = new ArrayList<Long>();
     ArrayList<Long> idsACRA = new ArrayList<Long>();
     Long owner = 0L;
-    String packageName = "";
+   
     int lookedAt = 0;
 
     List<BasicErrorInfo> beoList = ObjectifyService.ofy().load().type(BasicErrorInfo.class).filter("PACKAGE_NAME", PACKAGE_NAME).list();
@@ -764,7 +764,7 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
 
     if (owner != 0L)
     {
-      AppPackage appPackage = getAppPackage(packageName);
+      AppPackage appPackage = getAppPackage(PACKAGE_NAME);
       AppUser appUser = getAppUser(owner);
 
       appPackage.Totals.Deleted = appPackage.Totals.Deleted + beoList.size();
@@ -777,7 +777,7 @@ public class RemoteDataServiceImpl extends RemoteServiceServlet implements Remot
 
     }
     
-    ObjectifyService.ofy().delete().entities(beoList).now();
+  //  ObjectifyService.ofy().delete().entities(beoList).now();
   }
 
 }
