@@ -93,7 +93,7 @@ public class ACRAReportHandler extends HttpServlet
     {
       if (!request.getParameterNames().hasMoreElements())
       {
-        System.out.println("NO DATA");
+     //   System.out.println("NO DATA");
         log.severe("NO DATA");
         response.getWriter().println("FAIL NO DATA\n" + request.toString());
         return;
@@ -111,7 +111,7 @@ public class ACRAReportHandler extends HttpServlet
         AppPackage appPackage = ofy.load().type(AppPackage.class).filter("PACKAGE_NAME", PACKAGE_NAME).first().now();
         if (appPackage == null)
         {
-          System.out.println("package unknown " + PACKAGE_NAME);
+        //  System.out.println("package unknown " + PACKAGE_NAME);
           log.severe("package unknown " + PACKAGE_NAME);
           response.sendError(HttpServletResponse.SC_FORBIDDEN);
 //          response.getWriter().println("FAIL PACKAGE UNKNOWN");
@@ -120,7 +120,7 @@ public class ACRAReportHandler extends HttpServlet
         
         if(!appPackage.enabled)
         {
-          System.out.println("package disabled " + PACKAGE_NAME);
+       //   System.out.println("package disabled " + PACKAGE_NAME);
           log.severe("package disabled " + PACKAGE_NAME);
           response.sendError(HttpServletResponse.SC_FORBIDDEN);
           return;
@@ -177,7 +177,7 @@ public class ACRAReportHandler extends HttpServlet
         MappingFileInfo mapping = ofy.load().type(MappingFileInfo.class).filter("PACKAGE_NAME", acraLog.PACKAGE_NAME).filter("version", acraLog.APP_VERSION_NAME).first().now();
         if (mapping != null)
         {
-          MappingFileInfo mostRecentMapping = ofy.load().type(MappingFileInfo.class).filter("PACKAGE_NAME", acraLog.PACKAGE_NAME).order("uploadDate").limit(1).first().now();
+          MappingFileInfo mostRecentMapping = ofy.load().type(MappingFileInfo.class).filter("PACKAGE_NAME", acraLog.PACKAGE_NAME).order("-uploadDate").limit(1).first().now();
           if (mostRecentMapping != null)
           {
             if (mostRecentMapping.getId() != mapping.getId())
@@ -186,7 +186,7 @@ public class ACRAReportHandler extends HttpServlet
               response.getWriter().println("OLD VERSION");
               if (appPackage.DiscardOldVersionReports)
               {
-                System.out.println("Discarded Old version " + PACKAGE_NAME + "," + mostRecentMapping.version + "," + mapping.version);
+              //  System.out.println("Discarded Old version " + PACKAGE_NAME + "," + mostRecentMapping.version + "," + mapping.version);
                 log.warning("Discarded Old version " + PACKAGE_NAME + "," + mostRecentMapping.version + "," + mapping.version);
                 return;
               }
@@ -201,8 +201,8 @@ public class ACRAReportHandler extends HttpServlet
           response.getWriter().println("OLD VERSION");
           if (appPackage.DiscardOldVersionReports)
           {
-            System.out.println("Discarded Old version " + PACKAGE_NAME + " NO MAPPING");
-            log.warning("Discarded Old version " + PACKAGE_NAME + " NO MAPPING");
+         //   System.out.println("Discarded Old version " + PACKAGE_NAME + " NO MAPPING");
+        //    log.warning("Discarded Old version " + PACKAGE_NAME + " NO MAPPING");
             return;
           }
         }
@@ -210,7 +210,7 @@ public class ACRAReportHandler extends HttpServlet
         DailyCounts today = DailyCountsGetters.getToday(acraLog.PACKAGE_NAME);
         if(today.Reports > 200)
         {
-          System.out.println("200 Reports in day " + PACKAGE_NAME + " DISCARDING NEW");
+         // System.out.println("200 Reports in day " + PACKAGE_NAME + " DISCARDING NEW");
           log.severe("200 Reports in day " + PACKAGE_NAME + " DISCARDING NEW");
           appPackage.enabled = false;
           ofy.save().entity(appPackage).now();
@@ -262,14 +262,14 @@ public class ACRAReportHandler extends HttpServlet
         }
         
 
-        System.out.println("OK " + acraLog.REPORT_ID);
+      //  System.out.println("OK " + acraLog.REPORT_ID);
         log.warning("OK " + acraLog.REPORT_ID);
         response.getWriter().println("OK");
         
         
       } else
       {
-        System.out.println("OK SKIPPED REPORT_ID MATCH");
+     //   System.out.println("OK SKIPPED REPORT_ID MATCH");
         log.warning("OK SKIPPED REPORT_ID MATCH");
         response.getWriter().println("OK SKIPPED REPORT_ID MATCH");
       }
@@ -278,12 +278,12 @@ public class ACRAReportHandler extends HttpServlet
     {
 //      response.getWriter().println("FAIL resource over quota, try again in a few hours.");
       log.severe(e.getMessage());
-      System.out.println("OVER QUOTA");
+     // System.out.println("OVER QUOTA");
       response.sendError(HttpServletResponse.SC_FORBIDDEN);
     } catch (Exception e)
     {
       response.getWriter().println("FAIL ERROR " + e.getMessage());
-      System.out.println("Exception " + e.getMessage());
+  //    System.out.println("Exception " + e.getMessage());
       log.severe(e.getMessage());
     }
   
